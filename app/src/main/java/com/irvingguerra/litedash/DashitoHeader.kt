@@ -1,0 +1,78 @@
+package com.irvingguerra.litedash
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import com.irvingguerra.litedash.core.ui.Icon
+import com.irvingguerra.litedash.core.ui.Icons
+import com.irvingguerra.litedash.core.ui.Label
+import com.irvingguerra.litedash.core.ui.LocalColors
+import com.irvingguerra.litedash.core.ui.Typography
+import com.irvingguerra.litedash.feature.dashboard.DashboardState
+
+/** Un puntito y «SIN OBD» / «OBD»: si el adaptador está conectado. */
+@Composable
+fun ObdPill(on: Boolean) {
+    val c = LocalColors.current
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Icon(Icons.bluetooth, c.textMuted, 20.dp)
+        Box(Modifier.size(10.dp).clip(CircleShape).background(if (on) c.good else c.textMuted.copy(alpha = 0.6f)))
+        Label(stringResource(if (on) R.string.dashito_obd_on else R.string.dashito_obd_off), Typography.label, c.textMuted, 1)
+    }
+}
+
+private val TabIcons = listOf<ImageVector>(Icons.home, Icons.speed, Icons.location, Icons.fuel, Icons.partlyCloudy, Icons.engine)
+private val TabNames = listOf(
+    R.string.dashito_tab_home, R.string.dashito_tab_dash, R.string.dashito_tab_trip,
+    R.string.dashito_tab_fuel, R.string.dashito_tab_weather, R.string.dashito_tab_diag,
+)
+
+/**
+ * Las pestañas de las páginas (Inicio, Tablero, Viaje, Autonomía, Clima, Diagnóstico; las páginas de más se llaman por
+ * su número) y al final Ajustes. La de la página que se ve va marcada; tocar una cambia de página.
+ */
+@Composable
+fun PageTabs(pages: DashboardState, onSettings: () -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.fillMaxHeight(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+        for (i in 0 until pages.pageCount) {
+            val name = TabNames.getOrNull(i)?.let { stringResource(it) } ?: stringResource(R.string.page_n, i + 1)
+            Tab(TabIcons.getOrElse(i) { Icons.dashboard }, name, pages.page == i) { pages.goTo(i) }
+        }
+        Tab(Icons.settings, stringResource(R.string.dashito_tab_settings), false, onSettings)
+    }
+}
+
+@Composable
+private fun Tab(icon: ImageVector, name: String, selected: Boolean, onClick: () -> Unit) {
+    val c = LocalColors.current
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        Modifier
+            .widthIn(min = 72.dp)
+            .clip(shape)
+            .then(if (selected) Modifier.background(c.surfaceHigh).border(1.dp, c.accent.copy(alpha = 0.5f), shape) else Modifier)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(icon, if (selected) c.accent else c.textMuted, 24.dp)
+        Label(name.uppercase(currentLocale()), Typography.label, if (selected) c.accent else c.textMuted, 1)
+    }
+}

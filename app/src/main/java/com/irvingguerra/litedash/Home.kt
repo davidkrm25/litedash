@@ -113,6 +113,10 @@ import com.irvingguerra.litedash.feature.music.RadioTile
 import com.irvingguerra.litedash.feature.music.SoundPiece
 import com.irvingguerra.litedash.feature.navigation.NavigationRepository
 import com.irvingguerra.litedash.feature.obd.ObdRepository
+import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.dashboard.FACTORY_PAGES
+import com.irvingguerra.litedash.feature.dashboard.FACTORY_VERSION
+import com.irvingguerra.litedash.feature.dashboard.factoryPages
 import com.irvingguerra.litedash.feature.tpms.TpmsRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -235,6 +239,16 @@ class Dependencies(
         // Las piezas de un módulo apagado no se ven ni apartan su lugar (ni las ponen las plantillas).
         dashboard.hidden = { type -> moduleOff(this, type) != null }
         dashboard.limits = ::limitsOf
+        // El diseño de fábrica (seis páginas como Dashito) se pone una vez por versión; donde nada se ha acomodado, lo mismo.
+        dashboard.factory = { g, p ->
+            if (dashboard.factoryVersion >= FACTORY_VERSION) factoryPages(g, ::limitsOf) { moduleOff(this, it) != null }.getOrNull(p) else null
+        }
+        if (dashboard.factoryVersion < FACTORY_VERSION) {
+            dashboard.factoryVersion = FACTORY_VERSION
+            dashboard.applyFactory(FACTORY_PAGES)
+            // La barra de LiteDash, a la izquierda (como Dashito deja libre el lado derecho).
+            prefs.barPosition = BarPosition.SIDE
+        }
         // Un widget Mapa nuevo arranca con el aspecto de Ajustes → Apps → Navegación.
         dashboard.initialData = { type -> if (type == TileTypes.MAP) prefs.mapLook.orEmpty() else "" }
     }
@@ -346,6 +360,9 @@ fun TileContent(d: Dependencies, p: Tile, apps: List<App>, car: CarPackage?, rev
         TileTypes.WORKSHOP -> HealthTile(d, showCar = p.flag(WidgetFlags.CAR)) { actions.onPanel(Panel.Workshop) }
         TileTypes.PROJECTION -> ProjectionTile(d, apps, appKeyOf(p.data)) { actions.onPanel(Panel.Drawer) }
         TileTypes.FUEL -> FuelTile(d) { actions.onPanel(Panel.Fuel) }
+        TileTypes.TRIP_STAT -> TripStatTile(d, p.data)
+        TileTypes.FUEL_PART -> FuelPartTile(d, p.data) { actions.onPanel(Panel.Fuel) }
+        TileTypes.DIAG -> DiagTile(d, p.data) { actions.onPanel(Panel.Workshop) }
         TileTypes.TIRES -> TiresTile(d, showCar = p.flag(WidgetFlags.CAR), onOpen = actions.onTires, onSettings = { actions.onPanel(Panel.TiresSettings) })
         TileTypes.MAP -> Box(Modifier.expandable(p, actions)) {
             // Con «Usar app de mapas externa», el toque y Casa/Trabajo abren esa app; apagado, todo es el mapa de LiteDash.
@@ -761,6 +778,8 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                                 onWallpaper = { panel = Panel.Wallpaper },
                                 onFinish = { editing = false },
                                 pages = d.dashboard,
+                                obdOn = d.obdIfCreated()?.state == ObdState.ON,
+                                onSettings = { panel = Panel.Settings },
                             )
                             // Sin barra abajo (va al costado o está oculta) el tablero lleva su propio aire inferior
                             // (en pantallas sin barra de gestos las piezas quedaban pegadas al borde).
@@ -804,7 +823,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                                             }
                                         },
                                         // Todos tienen opciones; el auto 3D, solo con Llantas prendido (las de las llantas).
-                                        hasSettings = { it.type != TileTypes.CAR || d.hasTpmsSource },
+                                        hasSettings = { (it.type != TileTypes.CAR || d.hasTpmsSource) && it.type !in DASHITO_TYPES },
                                         onTapEmpty = { if (!barShown) barPeek++ },
                                     ) { p -> TileContent(d, p, apps, car, revision, actions) }
                                 }
@@ -1086,6 +1105,8 @@ private fun TopBar(
     onWallpaper: () -> Unit,
     onFinish: () -> Unit,
     pages: DashboardState,
+    obdOn: Boolean = false,
+    onSettings: () -> Unit = {},
 ) {
     val c = LocalColors.current
     // Sin nada que mostrar (la hora ya está en una pieza), la barra no aparta espacio: el tablero sube.
@@ -1128,6 +1149,16 @@ private fun TopBar(
             Button(stringResource(R.string.templates), onTemplates)
             Button(stringResource(R.string.add), onAdd)
             Button(stringResource(R.string.done), onFinish, primary = true)
+        } else if (pages.pageCount > 1) {
+            // Con varias páginas: el encabezado con las pestañas (OBD a la izquierda, hora y fecha a la derecha).
+            val clock = rememberClock()
+            ObdPill(obdOn)
+            PageTabs(pages, onSettings, Modifier.weight(1f))
+            StatusIcons()
+            Column(horizontalAlignment = Alignment.End) {
+                Label(clock.full, Typography.title, maxLines = 1)
+                Label(clock.date.uppercase(currentLocale()), Typography.label, c.textMuted, maxLines = 1)
+            }
         } else {
             val clock = rememberClock()
             // Con nombre: el saludo primero y la fecha después, más tenue.

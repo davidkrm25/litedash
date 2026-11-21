@@ -76,7 +76,7 @@ import java.util.Locale
 /** Pantalla ancha (de auto, 7" o más): tres columnas; más angosta, una sola que se desliza. */
 private val WIDE = 720.dp
 
-private enum class FuelDialog { FULL, ADD, TANK }
+internal enum class FuelDialog { FULL, ADD, TANK }
 
 /**
  * La pantalla Autonomía: el medidor de cuánto te queda, los botones para anotar una carga, las gasolineras cerca con su
@@ -136,7 +136,7 @@ fun FuelPanel(d: Dependencies, close: () -> Unit, onOwnMap: () -> Unit) {
 // ───────────────────────────── medidor y botones ─────────────────────────────
 
 @Composable
-private fun GaugeColumn(reading: FuelReading?, modifier: Modifier, onFull: () -> Unit, onAdd: () -> Unit) {
+internal fun GaugeColumn(reading: FuelReading?, modifier: Modifier, onFull: () -> Unit, onAdd: () -> Unit) {
     val c = LocalColors.current
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -208,7 +208,7 @@ private fun RangeGauge(reading: FuelReading?) {
 // ───────────────────────────── tarjetas de datos ─────────────────────────────
 
 @Composable
-private fun StatsColumn(reading: FuelReading?, locale: Locale, modifier: Modifier, onTank: () -> Unit) {
+internal fun StatsColumn(reading: FuelReading?, locale: Locale, modifier: Modifier, onTank: () -> Unit) {
     val dash = "--"
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         StatCard(
@@ -281,7 +281,7 @@ private fun StatCard(
 // ───────────────────────────── gasolineras ─────────────────────────────
 
 @Composable
-private fun StationsCard(d: Dependencies, gpsGranted: Boolean, askGps: () -> Unit, modifier: Modifier, onPick: (Station) -> Unit) {
+internal fun StationsCard(d: Dependencies, gpsGranted: Boolean, askGps: () -> Unit, modifier: Modifier, onPick: (Station) -> Unit) {
     val c = LocalColors.current
     val fuel = d.fuel
     val locale = currentLocale()
@@ -432,7 +432,7 @@ internal fun goToStation(context: Context, app: App?, s: Station) {
 // ───────────────────────────── cuadros para anotar ─────────────────────────────
 
 @Composable
-private fun FuelDialogs(d: Dependencies, which: FuelDialog, onClose: () -> Unit) {
+internal fun FuelDialogs(d: Dependencies, which: FuelDialog, onClose: () -> Unit) {
     val fuel = d.fuel
     var liters by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }

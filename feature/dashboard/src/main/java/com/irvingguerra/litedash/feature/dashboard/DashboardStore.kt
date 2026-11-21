@@ -92,6 +92,20 @@ class DashboardStore(context: Context) {
         edit.putInt(PAGES, count - 1).apply()
     }
 
+    /** Si ya se puso el diseño de seis páginas (versión [version]); al subir la versión se vuelve a poner una vez. */
+    var presetVersion: Int
+        get() = prefs.getInt(PRESET_VERSION, 0)
+        set(v) = prefs.edit().putInt(PRESET_VERSION, v).apply()
+
+    /** Quita los acomodos guardados de todas las páginas y cuadrículas (los fondos se quedan); lo usa el diseño de fábrica. */
+    fun clearLayouts() {
+        val edit = prefs.edit()
+        for (key in prefs.all.keys) {
+            if (key.startsWith(LAYOUT_KEY_PREFIX) || key.startsWith(SAVED_AT_PREFIX) || key.startsWith(PAGE_LAYOUT_PREFIX) || key.startsWith(PAGE_SAVED_AT_PREFIX)) edit.remove(key)
+        }
+        edit.apply()
+    }
+
     /** La pieza grande de las plantillas (tipo y datos): el auto 3D si nunca se eligió otra. */
     fun hero(): Pair<String, String> =
         (prefs.getString(HERO_TYPE, null) ?: TileTypes.CAR) to (prefs.getString(HERO_DATA, null) ?: "")
@@ -103,6 +117,8 @@ class DashboardStore(context: Context) {
 }
 
 /** Las llaves de cada página: la 0 usa las de siempre (los acomodos de antes de las páginas son la página 1). */
+private const val PRESET_VERSION = "dashito_preset_version"
+
 private fun layoutPrefix(page: Int) = if (page == 0) LAYOUT_KEY_PREFIX else "$PAGE_LAYOUT_PREFIX${page}_"
 private fun savedAtPrefix(page: Int) = if (page == 0) SAVED_AT_PREFIX else "$PAGE_SAVED_AT_PREFIX${page}_"
 private fun layoutKey(page: Int, c: Grid) = layoutPrefix(page) + c.key

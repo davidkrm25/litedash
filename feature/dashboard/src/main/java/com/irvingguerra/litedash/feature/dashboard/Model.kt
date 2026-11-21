@@ -216,6 +216,12 @@ object TileTypes {
     const val TIRES = "tires"
     /** Cuánto te queda en el tanque y gasolineras cerca con su precio. */
     const val FUEL = "fuel"
+    /** Un dato del viaje en tarjeta propia; [Tile.data] dice cuál (distancia, tiempo, promedio, máxima, consumo, gasolina, reiniciar). */
+    const val TRIP_STAT = "tripstat"
+    /** Una parte de Autonomía: el medidor, las gasolineras o las tarjetas; [Tile.data] dice cuál. */
+    const val FUEL_PART = "fuelpart"
+    /** Una parte de Diagnóstico: adaptador, datos que reporta, check engine, lista o conectar; [Tile.data] dice cuál. */
+    const val DIAG = "diag"
     const val APP = "app"
 }
 

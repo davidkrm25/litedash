@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tile_trip_stat">Dato del viaje</string>
+    <string name="tile_trip_stat_help">Una tarjeta con un dato del viaje: distancia, tiempo, velocidad promedio o máxima, consumo o gasolina usada</string>
+    <string name="tile_fuel_part">Autonomía (parte)</string>
+    <string name="tile_fuel_part_help">El medidor de autonomía, las gasolineras o las tarjetas del tanque, por separado</string>
+    <string name="tile_diag">Diagnóstico</string>
+    <string name="tile_diag_help">Adaptador OBD, datos que reporta el auto, check engine y lista de datos o códigos</string>
+    <string name="dashito_trip_note">Viaje nuevo tras 3 h sin avanzar.</string>
+    <string name="trip_reset_long">Reiniciar viaje</string>
+    <string name="dashito_distance">Distancia</string>
+    <string name="dashito_drive_time">Tiempo de manejo</string>
+    <string name="dashito_avg_speed">Vel. promedio</string>
+    <string name="dashito_max_speed">Vel. máxima</string>
+    <string name="dashito_avg_consumption">Consumo promedio</string>
+    <string name="dashito_fuel_used">Gasolina usada</string>
+    <string name="dashito_adapter">Adaptador</string>
+    <string name="dashito_connected">Conectado</string>
+    <string name="dashito_no_connection">Sin conexión</string>
+    <string name="dashito_pids_title">Datos que reporta</string>
+    <string name="dashito_pids_read">Datos que entrega tu auto</string>
+    <string name="dashito_pids_wait">Se leen al conectar el OBD</string>
+    <string name="dashito_check_engine">Check engine</string>
+    <string name="dashito_codes_unread">Códigos sin leer</string>
+    <string name="dashito_codes_found">Códigos de falla guardados</string>
+    <string name="dashito_connect_adapter">Conectar adaptador</string>
+    <string name="dashito_engine_values">Valores en vivo del motor</string>
+    <string name="dashito_fault_codes">Códigos de falla del auto</string>
+    <string name="dashito_connect_to_see">Conecta el OBD para ver valores.</string>
+    <string name="dashito_tab_engine">Datos del motor</string>
+    <string name="dashito_tab_codes">Códigos de falla</string>
+    <string name="dashito_diag_empty">Cuando conectes el adaptador OBD2 aquí aparecerá la lista de datos que entrega tu carro (temperaturas, MAF, gasolina…).</string>
+    <string name="dashito_tab_home">Inicio</string>
+    <string name="dashito_tab_dash">Tablero</string>
+    <string name="dashito_tab_trip">Viaje</string>
+    <string name="dashito_tab_fuel">Autonomía</string>
+    <string name="dashito_tab_weather">Clima</string>
+    <string name="dashito_tab_diag">Diagnóstico</string>
+    <string name="dashito_tab_settings">Ajustes</string>
+    <string name="dashito_obd_off">SIN OBD</string>
+    <string name="dashito_obd_on">OBD</string>
+</resources>

@@ -123,8 +123,32 @@ class DashboardState(private val store: DashboardStore) {
      */
     private fun load(c: Grid, p: Int): List<Tile> =
         savedLayoutFor(c, store.grids(p), { store.read(it, p) }, { store.savedAt(it, p) })?.fittedTo(c)
-            // Una página nueva empieza vacía; solo la primera trae la plantilla recomendada.
+            // Con el diseño de fábrica de seis páginas, el de esa página; si no, una página nueva empieza vacía y
+            // solo la primera trae la plantilla recomendada.
+            ?: factory?.invoke(c, p)?.fittedTo(c)
             ?: if (p == 0) suggested(c) else emptyList()
+
+    /** El diseño de fábrica por página (lo pone la app): lo que se ve donde nada se ha acomodado todavía. */
+    var factory: ((Grid, Int) -> List<Tile>?)? = null
+
+    /**
+     * Pone el diseño de fábrica de [pages] páginas: se olvidan los acomodos guardados (las páginas se rehacen) y se
+     * empieza por la primera. Los fondos no cambian.
+     */
+    fun applyFactory(pages: Int) {
+        store.clearLayouts()
+        store.pages = pages
+        pageCount = store.pages
+        backgrounds = List(pageCount) { store.background(it) }
+        pageTiles.clear()
+        page = 0
+        tiles = grid?.let { load(it, 0) }.orEmpty()
+    }
+
+    /** La versión del diseño de fábrica ya puesto (0 = ninguno). */
+    var factoryVersion: Int
+        get() = store.presetVersion
+        set(v) { store.presetVersion = v }
 
     /** [adaptTo] con las que se ven primero: las de un módulo apagado no le quitan lugar a ninguna. */
     private fun List<Tile>.fittedTo(c: Grid): List<Tile> {

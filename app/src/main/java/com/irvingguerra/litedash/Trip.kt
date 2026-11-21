@@ -116,6 +116,9 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
     /** La última posición (la lee el mapa); se queda aunque el GPS se apague. */
     var position by mutableStateOf<Location?>(null)
         private set
+    /** La velocidad más alta (km/h) del viaje en curso; vuelve a cero con [reset]. */
+    var maxKmh by mutableStateOf(0f)
+        private set
     /** Quien quiera contar la distancia recorrida (la pantalla Autonomía): recibe cada tramo en metros, en el hilo principal. */
     var onStep: ((Double) -> Unit)? = null
 
@@ -221,6 +224,7 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
 
     fun reset() {
         leg = TripLeg()
+        maxKmh = 0f
         last = null
     }
 
@@ -267,6 +271,7 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
         if (l.accuracy <= 30f && (speedKmh ?: 0f) > 3f) {
             val step = last?.distanceTo(l)?.toDouble() ?: 0.0
             leg = leg.moved(now, step)
+            speedKmh?.let { if (it > maxKmh && it < MAX_PLAUSIBLE_KMH) maxKmh = it }
             onStep?.invoke(step)
             last = l
         }
@@ -423,6 +428,9 @@ private fun TripStat(name: String, value: String) {
         Label(value, Typography.subtitle, maxLines = 1)
     }
 }
+
+/** Una lectura mayor que esto (km/h) es un error del GPS: no cuenta como velocidad máxima. */
+private const val MAX_PLAUSIBLE_KMH = 400f
 
 /** Avance mínimo para calcular el rumbo con dos lecturas (menos, el error del GPS lo voltea). */
 private const val COURSE_METERS = 8f

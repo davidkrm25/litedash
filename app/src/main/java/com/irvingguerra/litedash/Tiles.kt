@@ -98,6 +98,9 @@ val TileSpecs = listOf(
     TileSpec(TileTypes.PROJECTION, R.string.tile_projection, SizeLimits(4, 2), 6 to 2, R.string.tile_projection_help),
     TileSpec(TileTypes.TIRES, R.string.tile_tires, SizeLimits(2, 2), 4 to 4, R.string.tile_tires_help),
     TileSpec(TileTypes.FUEL, R.string.tile_fuel, SizeLimits(4, 2), 6 to 4, R.string.tile_fuel_help),
+    TileSpec(TileTypes.TRIP_STAT, R.string.tile_trip_stat, SizeLimits(3, 2), 5 to 3, R.string.tile_trip_stat_help),
+    TileSpec(TileTypes.FUEL_PART, R.string.tile_fuel_part, SizeLimits(4, 4), 6 to 8, R.string.tile_fuel_part_help),
+    TileSpec(TileTypes.DIAG, R.string.tile_diag, SizeLimits(3, 2), 6 to 3, R.string.tile_diag_help),
     TileSpec(TileTypes.APP, R.string.tile_app, SizeLimits(2, 2), 2 to 2, R.string.tile_app_help),
 )
 
