@@ -828,11 +828,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                                         onTapEmpty = { if (!barShown) barPeek++ },
                                     ) { p -> TileContent(d, p, apps, car, revision, actions) }
                                 }
-                                // Con varias páginas: los puntitos abajo; al acomodar, la barra de páginas.
-                                if (d.dashboard.pageCount > 1 && !editing && !expandedCovers) {
-                                    // En el margen de abajo (sin barra abajo hay 10 dp libres); con la barra abajo, pegados a ella.
-                                    PageDots(d.dashboard, Modifier.align(Alignment.BottomCenter).offset(y = if (barBelow) 2.dp else 9.dp))
-                                }
+                                // Las pestañas de arriba ya dicen en qué página estás: sin puntitos abajo (más alto para los widgets).
                                 // La pantalla Música o el mapa en grande: llenan el tablero (la barra se queda para cambiar entre ellos).
                                 val shownBig = expandedShown
                                 if (shownBig != null) ExpandedLayer(expandedFrom?.let { tileBounds[it.id] }, { expandProgress.value }) {

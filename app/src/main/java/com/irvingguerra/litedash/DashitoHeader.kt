@@ -55,7 +55,7 @@ fun PageTabs(pages: DashboardState, onSettings: () -> Unit, modifier: Modifier =
             val name = TabNames.getOrNull(i)?.let { stringResource(it) } ?: stringResource(R.string.page_n, i + 1)
             Tab(TabIcons.getOrElse(i) { Icons.dashboard }, name, pages.page == i) { pages.goTo(i) }
         }
-        Tab(Icons.settings, stringResource(R.string.dashito_tab_settings), false, onSettings)
+        Tab(Icons.gear, stringResource(R.string.dashito_tab_settings), false, onSettings)
     }
 }
 
@@ -70,7 +70,7 @@ private fun Tab(icon: ImageVector, name: String, selected: Boolean, onClick: () 
         Modifier
             .widthIn(min = 56.dp)
             .clip(shape)
-            .then(if (selected) Modifier.background(c.surfaceHigh).border(1.dp, c.accent.copy(alpha = 0.5f), shape) else Modifier)
+            .then(if (selected) Modifier.background(c.accent.copy(alpha = 0.16f)).border(1.dp, c.accent.copy(alpha = 0.6f), shape) else Modifier)
             .clickable(onClick = onClick)
             .padding(horizontal = if (short) 8.dp else 8.dp, vertical = if (short) 3.dp else 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

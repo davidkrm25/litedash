@@ -874,7 +874,7 @@
     <string name="templates_dashito_help">Las 6 páginas de fábrica (Inicio, Tablero, Viaje, Autonomía, Clima y Diagnóstico). Reemplaza tus páginas actuales; puedes cambiar a otra plantilla y volver aquí.</string>
     <string name="map_provider">Proveedor del mapa</string>
     <string name="map_provider_own">Mapa de LiteDash</string>
-    <string name="weather_mostly_clear">Mayormente despejado</string>
+    <string name="weather_mostly_clear">Mayormente soleado</string>
     <string name="weather_place_unknown">Ubicación desconocida</string>
     <string name="weather_percent_spaced">%1$d %%</string>
     <string name="weather_clouds_value">Nubes %1$d %%</string>

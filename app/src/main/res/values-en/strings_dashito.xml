@@ -43,4 +43,8 @@
     <string name="dashito_title">Kal El</string>
     <string name="dashito_instant">Instant consumption</string>
     <string name="dashito_speed_legend">Speed</string>
+    <string name="dashito_coolant">Engine temp.</string>
+    <string name="dashito_voltage">Battery voltage</string>
+    <string name="dashito_avg">Avg. consumption</string>
+    <string name="projection_open">Open %1$s</string>
 </resources>

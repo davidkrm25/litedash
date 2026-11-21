@@ -398,6 +398,8 @@ fun GaugeCard(
     title: String = "",
     /** En una fila: arco a la derecha (velocímetro) en vez de anillo a la izquierda (medidores). */
     arc: Boolean = false,
+    /** Ancho de lo del frente respecto a la esfera (0.62 de siempre; el Inicio de Dashito lo agranda). */
+    frontScale: Float = 0.62f,
 ) {
     val shown = remember { Animatable(0f) }
     LaunchedEffect(fraction) { shown.animateTo(fraction.coerceIn(0f, 1f), tween(250)) }
@@ -405,7 +407,7 @@ fun GaugeCard(
         BoxWithConstraints(Modifier.fillMaxSize().padding(TilePadding), contentAlignment = Alignment.Center) {
             val compact = maxHeight < 130.dp
             // Lo del frente ocupa ~62 % del ancho de la esfera, con la proporción del auto.
-            val frontWidth = minOf(maxWidth, maxHeight * 1.15f) * 0.62f
+            val frontWidth = minOf(maxWidth, maxHeight * 1.15f) * frontScale
             val frontSpace = if (front != null && !compact) frontWidth / CAR_ASPECT else 0.dp
             val parts = GaugeParts(look, carColor, warning, ticks.coerceAtLeast(1), labels, redFrom.coerceIn(0f, 1f), { shown.value }, frontSpace)
             // Digital y Barra se acomodan en lo que queda arriba de lo del frente.

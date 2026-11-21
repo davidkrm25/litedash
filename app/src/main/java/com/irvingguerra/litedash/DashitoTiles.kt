@@ -129,10 +129,10 @@ internal fun StatBox(
 ) {
     val c = LocalColors.current
     Card(Modifier.fillMaxSize(), onClick = onClick) {
-        BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp)) {
-            val size = fitFont(sizeFrom ?: value, maxWidth * 0.5f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
-            Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Box(Modifier.size(52.dp).clip(RoundedCornerShape(Radius.inner)).background(c.surfaceHigh), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 28.dp) }
+        BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
+            val size = fitFont(sizeFrom ?: value, maxWidth * 0.55f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
+            Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 28.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                     Label(name.uppercase(currentLocale()), Typography.label, c.textMuted, 1)
                     Row(verticalAlignment = Alignment.Bottom) {
@@ -153,7 +153,7 @@ internal fun StatBox(
                         }
                     }
                 }
-                if (onClick != null) Icon(Icons.chevron, c.textMuted, 24.dp)
+                if (onClick != null) Icon(Icons.chevron, c.textMuted, 18.dp)
             }
         }
     }

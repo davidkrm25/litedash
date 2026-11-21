@@ -1,6 +1,21 @@
 package com.irvingguerra.litedash
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -51,16 +66,69 @@ fun SpeedometerTile(d: Dependencies, look: GaugeLook, dashito: Boolean = false, 
     if (!dashito) return SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, front)
     val c = LocalColors.current
     val rpm = d.bus.watch(Signal.RPM)
-    Box(Modifier.fillMaxSize()) {
-        SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, front)
-        Label(stringResource(R.string.dashito_title), Typography.label.copy(letterSpacing = 6.sp), c.text.copy(alpha = 0.8f), 1, Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
+    val floorFront: (@Composable (Modifier) -> Unit)? = front?.let { car -> { m -> MovingFloor(kmh ?: 0f, c.accent, m, car) } }
+    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(Modifier.weight(1f).fillMaxWidth()) {
+            SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, floorFront, frontScale = 0.9f)
+            Label(
+                stringResource(R.string.dashito_title).uppercase(), Typography.subtitle.copy(letterSpacing = 9.sp), c.text.copy(alpha = 0.85f), 1,
+                Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
+            )
+        }
         Row(
-            Modifier.align(Alignment.BottomCenter).clip(CircleShape).border(0.75.dp, c.accent.copy(alpha = 0.55f), CircleShape).padding(horizontal = 18.dp, vertical = 6.dp),
+            Modifier.padding(bottom = 6.dp).clip(CircleShape).border(0.75.dp, c.accent.copy(alpha = 0.55f), CircleShape).padding(horizontal = 18.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Label("RPM", Typography.small, c.textMuted, 1)
             Label((rpm ?: 0f).toInt().toString(), Typography.subtitle, c.accent, 1)
         }
+    }
+}
+
+/**
+ * El piso bajo el auto: líneas en perspectiva que corren hacia el frente mientras el auto avanza
+ * (más rápido, más veloz), con una elipse de luz bajo las ruedas. [car] es el auto, encima.
+ */
+@Composable
+private fun MovingFloor(kmh: Float, color: Color, modifier: Modifier, car: @Composable (Modifier) -> Unit) {
+    val speed = rememberUpdatedState(kmh)
+    var phase by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        var last = 0L
+        while (true) {
+            withFrameNanos { t ->
+                if (last != 0L) phase = (phase + (t - last) / 1e9f * (speed.value / 60f).coerceIn(0f, 3f)) % 1f
+                last = t
+            }
+        }
+    }
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        val w = maxWidth
+        val h = maxHeight
+        Canvas(Modifier.wrapContentSize(unbounded = true).requiredSize(w * 1.9f, h * 1.6f)) {
+            val cx = size.width / 2
+            val top = size.height * 0.36f
+            val base = size.height * 0.80f
+            // Elipse de luz bajo las ruedas.
+            drawOval(
+                Brush.radialGradient(listOf(color.copy(alpha = 0.40f), Color.Transparent), Offset(cx, base - size.height * 0.07f), size.width * 0.22f),
+                Offset(cx - size.width * 0.24f, base - size.height * 0.16f), Size(size.width * 0.48f, size.height * 0.18f),
+            )
+            val fade = listOf(Color.Transparent, color.copy(alpha = 0.45f))
+            // Rayos que salen del punto de fuga.
+            for (i in -4..4) {
+                val x1 = cx + i * size.width * 0.075f
+                val x2 = cx + i * size.width * 0.16f
+                drawLine(Brush.verticalGradient(fade, top, size.height), Offset(x1, top), Offset(x2, size.height), 1.2f)
+            }
+            // Líneas que avanzan: más juntas lejos, más separadas cerca.
+            for (k in 0..5) {
+                val f = (k + phase) / 6f
+                val y = top + (size.height - top) * f * f
+                drawLine(color.copy(alpha = 0.40f * f), Offset(cx - size.width * (0.1f + 0.4f * f), y), Offset(cx + size.width * (0.1f + 0.4f * f), y), 1.2f)
+            }
+        }
+        car(Modifier.fillMaxSize())
     }
 }
 
@@ -92,7 +160,7 @@ fun speedTag(d: Dependencies) = d.bus.source(Signal.SPEED)?.name.orEmpty()
  * usan la pieza y la vista previa de Personalizar medidor. [front]: ver [rememberSpeedFront].
  */
 @Composable
-fun SpeedGaugeCard(speed: Float, miles: Boolean, tag: String, look: GaugeLook, carColor: Color, front: (@Composable (Modifier) -> Unit)? = null) {
+fun SpeedGaugeCard(speed: Float, miles: Boolean, tag: String, look: GaugeLook, carColor: Color, front: (@Composable (Modifier) -> Unit)? = null, frontScale: Float = 0.62f) {
     val max = look.speedMax(miles).toFloat()
     // Marcas cada 20 km/h (10 mph); con 240 o más, cada 40 (20 mph) para que no se amontonen.
     val ticks = ticksFor(max, miles)
@@ -111,6 +179,7 @@ fun SpeedGaugeCard(speed: Float, miles: Boolean, tag: String, look: GaugeLook, c
         front = front,
         title = stringResource(R.string.speed_title),
         arc = true,
+        frontScale = frontScale,
     )
 }
 
@@ -224,11 +293,24 @@ fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = 
         val locale = currentLocale()
         val live = obd?.state == ObdState.ON && obd.canRead(spec.signal)
         val value = if (live) d.bus.watch(spec.signal) else null
+        // Rango de la barra como en Dashito: 40–120 °C y 11–15 V.
+        val barRange = when (spec.signal) {
+            com.irvingguerra.litedash.core.vehicle.Signal.COOLANT -> 40f to 120f
+            com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE -> 11f to 15f
+            else -> spec.min to spec.max
+        }
+        val cardName = when {
+            !arrow -> null
+            spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.COOLANT -> R.string.dashito_coolant
+            spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE -> R.string.dashito_voltage
+            spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION -> R.string.dashito_avg
+            else -> null
+        }
         val withBar = spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.COOLANT || spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE
         StatBox(
-            spec.icon, stringResource(if (!arrow && spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) R.string.dashito_instant else spec.name), value?.let { gaugeText(spec, it, units, locale) } ?: "--", stringResource(spec.unit(units)),
-            bar = if (withBar) (value?.let(spec::fraction) ?: 0f) else null,
-            range = if (withBar) String.format(locale, "%.0f", spec.shown(spec.min, units)) to String.format(locale, "%.0f", spec.shown(spec.max, units)) else null,
+            spec.icon, stringResource(cardName ?: if (!arrow && spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) R.string.dashito_instant else spec.name), value?.let { gaugeText(spec, it, units, locale) } ?: "--", stringResource(spec.unit(units)),
+            bar = if (withBar) (value?.let { ((it - barRange.first) / (barRange.second - barRange.first)).coerceIn(0f, 1f) } ?: 0f) else null,
+            range = if (withBar) String.format(locale, "%.0f", spec.shown(barRange.first, units)) to String.format(locale, "%.0f", spec.shown(barRange.second, units)) else null,
             onClick = if (!arrow) null else { { d.dashboard.goTo(if (spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) 3 else 5) } },
         )
         return

@@ -184,7 +184,7 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
     val today = w.today
     val big = w.temperature?.let { stringResource(R.string.weather_degrees, it) }
         ?: stringResource(R.string.weather_range, today!!.max, today.min)
-    val skyText = stringResource(textOf(sky))
+    val skyText = stringResource(textOfCode(w.code))
     // La máxima y la mínima van abajo solo si arriba va la temperatura de ahora (si no, ya están en grande).
     val detail = if (range && today != null && w.temperature != null) {
         stringResource(R.string.two_parts, skyText, stringResource(R.string.weather_range, today.max, today.min))
@@ -237,7 +237,9 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
                     }
                     Icon(iconOf(sky, w.day), c.accent, (height * 0.22f).coerceIn(32.dp, 56.dp))
                 }
-                Label(detail, Typography.small, c.textMuted, maxLines = 1)
+                // La leyenda del cielo ("Mayormente soleado") siempre a la vista, en su propia línea.
+                Label(skyText, Typography.body, c.text, maxLines = 1)
+                if (detail != skyText) Label(detail.removePrefix(skyText).trimStart(' ', '·', '-', '•'), Typography.small, c.textMuted, maxLines = 1)
                 // Lo de hoy junto arriba; los próximos días, abajo.
                 Spacer(Modifier.weight(1f))
                 // Los próximos días en renglón, si hay lugar (a lo ancho cabe uno por cada ~80 dp).

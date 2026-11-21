@@ -37,4 +37,5 @@
     <string name="recipe_open_bluetooth">Abre la app de Bluetooth y regresa</string>
     <string name="recipe_open_radio">Abre la app de radio y regresa</string>
     <string name="recipe_failed">No se encontró cómo</string>
+    <string name="music_enable_control">Activar control de música</string>
 </resources>

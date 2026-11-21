@@ -1,6 +1,12 @@
 package com.irvingguerra.litedash
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -55,11 +61,17 @@ fun projectionApp(apps: List<App>): App? =
 fun ProjectionTile(d: Dependencies, apps: List<App>, chosen: String?, onMissing: () -> Unit) {
     val context = LocalContext.current
     val app = chosen?.let { d.apps.find(apps, it) } ?: projectionApp(apps)
+    val c = com.irvingguerra.litedash.core.ui.LocalColors.current
+    // Como en Dashito: un auto en cuadro de acento y "Android Auto / Abrir <app>".
     ShortcutTile(
-        Icons.phoneCar, stringResource(R.string.tile_projection), app?.name ?: stringResource(R.string.projection_missing),
+        Icons.phoneCar, stringResource(R.string.tile_projection), app?.let { stringResource(R.string.projection_open, it.name) } ?: stringResource(R.string.projection_missing),
         onClick = { if (app != null) d.apps.open(context, app) else onMissing() },
-        // Con app, su ícono real y una flecha: se ve que ahí se abre.
-        image = app?.let { a -> { side: Dp -> AppIcon(d.apps, a, side) } },
+        image = { side: Dp ->
+            androidx.compose.foundation.layout.Box(
+                Modifier.size(side).clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).background(c.accent.copy(alpha = 0.16f)).border(1.dp, c.accent.copy(alpha = 0.6f), androidx.compose.foundation.shape.RoundedCornerShape(16.dp)),
+                contentAlignment = androidx.compose.ui.Alignment.Center,
+            ) { com.irvingguerra.litedash.core.ui.Icon(Icons.car, c.accent, side * 0.55f) }
+        },
         chevron = app != null,
     )
 }

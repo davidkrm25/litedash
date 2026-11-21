@@ -3,6 +3,7 @@ package com.irvingguerra.litedash.feature.music
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -377,17 +378,38 @@ private fun averageColor(bmp: Bitmap): Color {
 @Composable
 private fun NoPermission(repo: MusicRepository, icon: ImageVector, title: String, explain: String) {
     val c = LocalColors.current
-    Row(
-        Modifier.fillMaxSize().padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Icon(icon, c.accent, 32.dp)
-        Column(Modifier.weight(1f)) {
-            Label(title, Typography.subtitle, maxLines = 1)
-            Label(explain, Typography.small, c.textMuted, maxLines = 2)
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxHeight < 150.dp) {
+            Row(
+                Modifier.fillMaxSize().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Icon(icon, c.accent, 32.dp)
+                Column(Modifier.weight(1f)) {
+                    Label(title, Typography.subtitle, maxLines = 1)
+                    Label(explain, Typography.small, c.textMuted, maxLines = 2)
+                }
+                Button(stringResource(R.string.enable), { repo.requestPermission() }, primary = true)
+            }
+        } else {
+            // Como en Dashito: el icono, el aviso completo y un botón grande con degradado.
+            Column(
+                Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+            ) {
+                Icon(icon, c.accent, 36.dp)
+                Label(title, Typography.subtitle, maxLines = 1)
+                Label(explain, Typography.small, c.textMuted, maxLines = 4, modifier = Modifier.padding(horizontal = 4.dp))
+                Box(
+                    Modifier.fillMaxWidth().height(48.dp).clip(RoundedCornerShape(24.dp))
+                        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent)))
+                        .clickable { repo.requestPermission() },
+                    contentAlignment = Alignment.Center,
+                ) { Label(stringResource(R.string.music_enable_control), Typography.subtitle, Color.White, maxLines = 1) }
+            }
         }
-        Button(stringResource(R.string.enable), { repo.requestPermission() }, primary = true)
     }
 }
 
