@@ -923,7 +923,10 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                         onTires = { panel = null; tiresLayer.open = true },
                     )
                     Panel.Fuel -> FuelPanel(d, close = { panel = null }, onOwnMap = { panel = null })
-                    Panel.Templates -> TemplatesPanel(d.dashboard, close = { panel = null })
+                    Panel.Templates -> TemplatesPanel(d.dashboard, close = { panel = null }, onDashito = {
+                        d.dashboard.applyFactory(FACTORY_PAGES)
+                        d.prefs.barPosition = BarPosition.SIDE
+                    })
                     Panel.BarSettings -> BarSettingsPanel(d, apps, close = { panel = null })
                     Panel.Wallpaper -> PanelScaffold(
                         if (d.dashboard.pageCount > 1) stringResource(R.string.page_background_title, d.dashboard.page + 1) else stringResource(R.string.wallpaper_title),

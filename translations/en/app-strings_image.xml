@@ -18,4 +18,6 @@
     <string name="car_photo">Your car photo</string>
     <string name="car_photo_help">Upload a photo of your car and the app removes its background. It shows on the Home speedometer.</string>
     <string name="car_photo_empty">No car photo yet.</string>
+    <string name="image_cut_run">Remove background</string>
+    <string name="image_cut_working">Removing the background… this may take a few seconds</string>
 </resources>

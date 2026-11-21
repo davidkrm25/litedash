@@ -116,6 +116,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Cómo se ve una imagen guardada en pantalla: de eso depende a qué tamaño se lee. */
 internal enum class ImageFit {
@@ -896,10 +897,17 @@ fun ImageEditor(
     var saved by remember(key) { mutableIntStateOf(-1) }
     var applyFailed by remember(key) { mutableStateOf(false) }
     val chosen = if (removing) level else -1
+    // El recorte se hace al pulsar "Quitar fondo" (y otra vez si cambia la foto o la intensidad).
+    var started by remember(key, source, level, removing) { mutableStateOf(false) }
     // Se queda la vista previa anterior mientras se calcula la nueva (sin parpadeo).
-    val preview by produceState<CutPreview?>(null, source, removing, level) {
+    val preview by produceState<CutPreview?>(null, source, removing, level, started) {
         val photo = source
-        if (removing && photo != null && (value?.source !== photo || value?.level != level)) value = cutPreview(context.applicationContext, photo, level)
+        if (started && removing && photo != null && (value?.source !== photo || value?.level != level)) {
+            val app = context.applicationContext
+            // Si la IA tarda de más (equipos lentos), se usa el recorte simple en vez de quedarse esperando.
+            value = withTimeoutOrNull(60_000L) { cutPreview(app, photo, level) }
+                ?: CutPreview(photo, level, cutPreview(app, photo, (CUT_LEVELS - 1).coerceAtMost(level)).bitmap)
+        }
     }
     val ready = preview?.takeIf { removing && it.source === source && it.level == level }
     val sourceImage = remember(source) { source?.asImageBitmap() }
@@ -929,6 +937,8 @@ fun ImageEditor(
             Label(stringResource(R.string.image_strength), Typography.label, c.textMuted)
             Segmented(List(CUT_LEVELS + 1) { it to stringResource(CUT_STRENGTHS[it]) }, level, { level = it })
             if (ready != null && ready.bitmap == null) Label(stringResource(R.string.image_cut_failed), Typography.small, c.danger)
+            if (!started) Button(stringResource(R.string.image_cut_run), { started = true }, primary = true)
+            else if (ready == null) Label(stringResource(R.string.image_cut_working), Typography.small, c.textMuted)
         }
         val cut = ready?.bitmap
         if (chosen != saved && (chosen < 0 || cut != null)) {

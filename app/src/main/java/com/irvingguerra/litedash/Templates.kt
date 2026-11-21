@@ -1,6 +1,7 @@
 // Plantillas del inicio: nombres, pestañas por estilo y sus miniaturas.
 package com.irvingguerra.litedash
 
+import com.irvingguerra.litedash.feature.dashboard.factoryPages
 import com.irvingguerra.litedash.core.ui.Radius
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -83,6 +84,7 @@ private enum class TemplateTab(val title: Int, val templates: List<Template>, va
     ROAD(R.string.templates_tab_road, listOf(Template.MAP_CAR, Template.CARDS, Template.CENTER, Template.CAR_SPEED, Template.SPORT, Template.VERTICAL), TileTypes.ROAD),
     SPEED(R.string.templates_tab_speed, listOf(Template.SPEED, Template.SPEED_WIDGETS)),
     WALLPAPER(R.string.templates_tab_wallpaper, listOf(Template.WALL_CARDS, Template.WALL_SIDE, Template.MINIMAL)),
+    DASHITO(R.string.templates_tab_dashito, emptyList()),
 }
 
 /**
@@ -91,7 +93,7 @@ private enum class TemplateTab(val title: Int, val templates: List<Template>, va
  * En el de la tuya no se repiten las que en esta pantalla quedan igual que otra.
  */
 @Composable
-fun TemplatesPanel(dashboard: DashboardState, close: () -> Unit) {
+fun TemplatesPanel(dashboard: DashboardState, close: () -> Unit, onDashito: () -> Unit = {}) {
     val grid = dashboard.grid ?: return
     val c = LocalColors.current
     val suggested = grid.coarse.suggestedTemplate()
@@ -112,6 +114,17 @@ fun TemplatesPanel(dashboard: DashboardState, close: () -> Unit) {
                     WallpaperSettings()
                 }
                 TemplateTab.CAR -> Unit
+                TemplateTab.DASHITO -> {
+                    Label(stringResource(R.string.templates_dashito_help), Typography.small, c.textMuted)
+                    val first = remember(grid) { factoryPages(grid, skip = dashboard.hidden).firstOrNull().orEmpty() }
+                    Card(Modifier.width(260.dp), onClick = { onDashito(); close() }) {
+                        Column(Modifier.padding(16.dp)) {
+                            TemplateThumbnail(first, grid, tab.hero)
+                            Spacer(Modifier.height(12.dp))
+                            Label(stringResource(R.string.templates_tab_dashito), Typography.subtitle, maxLines = 1)
+                        }
+                    }
+                }
             }
             // Cada plantilla armada una vez por pestaña (para no repetir y para su miniatura).
             val layouts = remember(tab, grid) { tab.templates.associateWith { it.tiles(grid, tab.hero, dashboard.hidden) } }

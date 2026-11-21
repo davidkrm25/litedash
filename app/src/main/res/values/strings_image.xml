@@ -17,4 +17,6 @@
     <string name="car_photo">Foto de tu auto</string>
     <string name="car_photo_help">Sube una foto de tu auto y la app le quita el fondo. Se ve en el velocímetro del inicio.</string>
     <string name="car_photo_empty">Aún no hay foto de tu auto.</string>
+    <string name="image_cut_run">Quitar fondo</string>
+    <string name="image_cut_working">Quitando el fondo… puede tardar unos segundos</string>
 </resources>

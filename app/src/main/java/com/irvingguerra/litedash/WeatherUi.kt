@@ -189,6 +189,11 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
             val height = maxHeight
             val tall = height > 120.dp
             val nextDays = if (days) w.next else emptyList()
+            val more = w.more
+            if (more != null && height > 300.dp && width > 280.dp) {
+                RichWeather(w, more, big, detail, repo.miles, ::dayName)
+                return@BoxWithConstraints
+            }
             if (!tall) {
                 // Una fila: ícono, temperatura y cómo está; si es ancha, los próximos días.
                 Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -249,3 +254,71 @@ private fun skyTint(sky: Sky, day: Boolean, c: Colors): Color {
 }
 
 private val SkyBlue = Color(0xFF5B8CFF)
+
+
+private val Compass = listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO")
+
+/** La vista completa (como la página Clima de Dashito): ahora, datos, próximas horas y próximos días; lo de abajo solo si cabe. */
+@Composable
+private fun RichWeather(w: Weather, m: WeatherMore, big: String, detail: String, miles: Boolean, dayName: (String) -> String) {
+    val c = LocalColors.current
+    val locale = currentLocale()
+    val today = w.today
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        val h = maxHeight
+        val roomy = h > 420.dp
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                Icon(iconOf(skyOf(w.code), w.day), c.accent, 56.dp)
+                Column(Modifier.weight(1f)) {
+                    Label(big, Typography.clock.copy(fontSize = 52.sp), maxLines = 1)
+                    Label(detail, Typography.small, c.textMuted, maxLines = 1)
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    m.feels?.let { Label(stringResource(R.string.weather_feels, it), Typography.small, maxLines = 1) }
+                    m.place?.let { Label(it, Typography.small, c.textMuted, maxLines = 1) }
+                    Label(stringResource(R.string.weather_updated, android.text.format.DateFormat.getTimeFormat(androidx.compose.ui.platform.LocalContext.current).format(m.fetchedAt)), Typography.label, c.textMuted, maxLines = 1)
+                }
+            }
+            val wind = m.windKmh?.let {
+                val v = Math.round(if (miles) it * 0.621371 else it).toInt()
+                val dir = m.windDeg?.let { d -> " " + Compass[((d + 22) / 45) % 8] }.orEmpty()
+                stringResource(if (miles) R.string.weather_mph else R.string.weather_kmh, v) + dir
+            }
+            val chips = listOfNotNull(
+                m.humidity?.let { stringResource(R.string.weather_humidity) to stringResource(R.string.weather_percent, it) },
+                wind?.let { stringResource(R.string.weather_wind) to it },
+                m.cloud?.let { stringResource(R.string.weather_clouds) to stringResource(R.string.weather_percent, it) },
+                today?.uv?.let { stringResource(R.string.weather_uv) to it.toString() },
+                today?.sunrise?.let { stringResource(R.string.weather_sunrise) to it },
+                today?.sunset?.let { stringResource(R.string.weather_sunset) to it },
+            )
+            for (row in chips.chunked(3)) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                for ((k, v) in row) Column(Modifier.weight(1f).background(c.text.copy(alpha = 0.06f), androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).padding(10.dp)) {
+                    Label(k, Typography.label, c.textMuted, maxLines = 1)
+                    Label(v, Typography.subtitle, maxLines = 1)
+                }
+                repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+            }
+            if (m.hours.isNotEmpty() && h > 360.dp) {
+                Label(stringResource(R.string.weather_next_hours), Typography.label, c.textMuted, maxLines = 1)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    for (x in m.hours.take(5)) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Label(x.time, Typography.label, c.textMuted, maxLines = 1)
+                        Icon(iconOf(skyOf(x.code), x.day), c.text, 22.dp)
+                        Label(stringResource(R.string.weather_degrees, x.temp), Typography.small, maxLines = 1)
+                    }
+                }
+            }
+            if (roomy && w.next.isNotEmpty()) {
+                Label(stringResource(R.string.weather_next_days), Typography.label, c.textMuted, maxLines = 1)
+                for (d in w.next.take(3)) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Label(dayName(d.date), Typography.small, c.textMuted, maxLines = 1, modifier = Modifier.weight(1f))
+                    Icon(iconOf(skyOf(d.code), true), c.text, 20.dp)
+                    Label(d.rain?.let { stringResource(R.string.weather_percent, it) }.orEmpty(), Typography.small, c.textMuted, maxLines = 1, modifier = Modifier.weight(1f))
+                    Label(stringResource(R.string.weather_range, d.max, d.min), Typography.small, maxLines = 1)
+                }
+            }
+        }
+    }
+}
