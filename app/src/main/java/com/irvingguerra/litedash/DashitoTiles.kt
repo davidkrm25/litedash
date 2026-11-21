@@ -222,7 +222,7 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
         )
         DiagParts.PIDS -> {
             val count = if (on) obd?.supported?.size else null
-            InfoCard(Icons.engine, R.string.dashito_pids_title, count?.toString() ?: "-- --", "PIDs", stringResource(if (on) R.string.dashito_pids_read else R.string.dashito_pids_wait), onWorkshop, chevron = true)
+            InfoCard(Icons.chip, R.string.dashito_pids_title, count?.toString() ?: "-- --", "PIDs", stringResource(if (on) R.string.dashito_pids_read else R.string.dashito_pids_wait), onWorkshop, chevron = true)
         }
         DiagParts.CHECK -> InfoCard(
             Icons.warning, R.string.dashito_check_engine,
@@ -230,11 +230,19 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
             stringResource(if (codes == null) R.string.dashito_codes_unread else if (codes.isEmpty()) R.string.obd_no_codes else R.string.dashito_codes_found),
             onWorkshop, chevron = true,
         )
+        DiagParts.SPACE -> Unit
         DiagParts.CONNECT -> {
-            Box(Modifier.fillMaxSize().clip(CircleShape).background(c.primary).clickable(onClick = onWorkshop), contentAlignment = Alignment.Center) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Icon(Icons.bluetooth, c.onPrimary, 22.dp)
-                    Label(stringResource(R.string.dashito_connect_adapter), Typography.body.copy(fontWeight = FontWeight.SemiBold), c.onPrimary, 1)
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                Box(
+                    Modifier.fillMaxWidth().height(52.dp).clip(CircleShape)
+                        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent)))
+                        .clickable(onClick = onWorkshop),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Icon(Icons.bluetooth, androidx.compose.ui.graphics.Color.White, 22.dp)
+                        Label(stringResource(R.string.dashito_connect_adapter), Typography.body.copy(fontWeight = FontWeight.SemiBold), androidx.compose.ui.graphics.Color.White, 1)
+                    }
                 }
             }
         }
@@ -251,7 +259,7 @@ private fun InfoCard(icon: ImageVector, name: Int, value: String, unit: String, 
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Label(stringResource(name).uppercase(currentLocale()), Typography.label, c.textMuted, 1)
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Label(value, Typography.clock.copy(fontSize = 34.sp), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                    Label(value, Typography.clock.copy(fontSize = 28.sp), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
                     if (unit.isNotEmpty()) Label(unit, Typography.subtitle, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 4.dp))
                 }
                 if (detail.isNotEmpty()) Label(detail, Typography.small, c.textMuted, 2)
@@ -273,21 +281,21 @@ private fun DiagList(d: Dependencies, connected: Boolean, codes: List<String>?) 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Label(
                     stringResource(if (connected) (if (tab == 0) R.string.dashito_engine_values else R.string.dashito_fault_codes) else R.string.dashito_connect_to_see),
-                    Typography.body, c.textMuted, 1, Modifier.weight(1f),
+                    Typography.small, c.textMuted, 1, Modifier.weight(1f),
                 )
-                Row(Modifier.clip(CircleShape).border(1.dp, c.line, CircleShape)) {
+                Row(Modifier.clip(CircleShape).border(1.dp, c.accent.copy(alpha = 0.5f), CircleShape)) {
                     for ((i, name) in listOf(R.string.dashito_tab_engine, R.string.dashito_tab_codes).withIndex()) {
                         Box(
-                            Modifier.background(if (tab == i) c.surfaceHigh else androidx.compose.ui.graphics.Color.Transparent).clickable { tab = i }.padding(horizontal = 18.dp, vertical = 10.dp),
+                            Modifier.background(if (tab == i) c.accent.copy(alpha = 0.14f) else androidx.compose.ui.graphics.Color.Transparent).clickable { tab = i }.padding(horizontal = 18.dp, vertical = 10.dp),
                             contentAlignment = Alignment.Center,
-                        ) { Label(stringResource(name), Typography.body, if (tab == i) c.text else c.textMuted, 1) }
+                        ) { Label(stringResource(name), Typography.body, if (tab == i) c.accent else c.textMuted, 1) }
                     }
                 }
             }
             Spacer(Modifier.height(8.dp))
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 when {
-                    !connected -> Label(stringResource(R.string.dashito_diag_empty), Typography.subtitle, c.textMuted, 4, Modifier.padding(horizontal = 40.dp))
+                    !connected -> Label(stringResource(R.string.dashito_diag_empty), Typography.body, c.textMuted, 4, Modifier.padding(horizontal = 56.dp))
                     tab == 1 -> if (codes.isNullOrEmpty()) Label(stringResource(R.string.obd_no_codes), Typography.subtitle, c.textMuted)
                         else LazyColumn(Modifier.fillMaxSize()) {
                             items(codes) { code ->
@@ -298,7 +306,7 @@ private fun DiagList(d: Dependencies, connected: Boolean, codes: List<String>?) 
                                 Divider()
                             }
                         }
-                    else -> if (specs.isEmpty()) Label(stringResource(R.string.dashito_diag_empty), Typography.subtitle, c.textMuted, 4, Modifier.padding(horizontal = 40.dp))
+                    else -> if (specs.isEmpty()) Label(stringResource(R.string.dashito_diag_empty), Typography.body, c.textMuted, 4, Modifier.padding(horizontal = 56.dp))
                         else LazyColumn(Modifier.fillMaxSize()) {
                             items(specs) { spec -> LiveValueRow(d, spec); Divider() }
                         }

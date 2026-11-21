@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 7
+const val FACTORY_VERSION = 8
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -40,6 +40,8 @@ object DiagParts {
     const val CHECK = "check"
     const val LIST = "list"
     const val CONNECT = "connect"
+    /** Un hueco sin nada: deja aire entre las tarjetas y el botón de conectar. */
+    const val SPACE = "space"
 }
 
 /** Las señales del OBD que usa el diseño (las mismas de `Signal`, que vive en otro módulo). */
@@ -249,16 +251,17 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
             bands(
                 listOf(
                     Band(
-                        0.34,
+                        0.30,
                         listOf(
                             Item(TileTypes.DIAG, data = DiagParts.ADAPTER, minH = 2, keep = 1),
-                            Item(TileTypes.DIAG, weight = 1.3, data = DiagParts.PIDS, minH = 2, keep = 2),
+                            Item(TileTypes.DIAG, data = DiagParts.PIDS, minH = 2, keep = 2),
                             Item(TileTypes.DIAG, data = DiagParts.CHECK, minH = 2, keep = 3),
-                            Item(TileTypes.DIAG, weight = 0.6, data = DiagParts.CONNECT, plain = true, minH = 1, keep = 0),
+                            Item(TileTypes.DIAG, weight = 0.9, data = DiagParts.SPACE, plain = true, minH = 1, keep = 5),
+                            Item(TileTypes.DIAG, weight = 0.45, data = DiagParts.CONNECT, plain = true, minH = 1, keep = 0),
                         ),
                         keep = 1,
                     ),
-                    Band(0.66, listOf(Item(TileTypes.DIAG, data = DiagParts.LIST)), keep = 0),
+                    Band(0.70, listOf(Item(TileTypes.DIAG, data = DiagParts.LIST)), keep = 0),
                 ),
             )
         },

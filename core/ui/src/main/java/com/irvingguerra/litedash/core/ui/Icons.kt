@@ -74,6 +74,7 @@ object Icons {
     val target = icon("M12 12a1 1 0 1 0 0.01 0 M12 7a5 5 0 1 0 0.01 0 M12 3a9 9 0 1 0 0.01 0")
     val wind = icon("M3 8h10a2.5 2.5 0 1 0 -2.5 -2.5 M3 12h15a3 3 0 1 1 -3 3 M3 16h6")
     val sunrise = icon("M3 18h18 M5.5 18a6.5 6.5 0 0 1 13 0 M12 6v3 M5.3 10.3l1.5 1.5 M18.7 10.3l-1.5 1.5")
+    val chip = icon("M7 7h10v10h-10z M10 10h4v4h-4z M9 3v4 M15 3v4 M9 17v4 M15 17v4 M3 9h4 M3 15h4 M17 9h4 M17 15h4")
     val drop = icon("M12 3.5s6 6.5 6 11a6 6 0 0 1 -12 0c0 -4.5 6 -11 6 -11z")
     /** Pedal del acelerador: la placa inclinada y su base. */
     val pedal = icon("M10 3.5l4 1l-3 13.5l-4 -1z M9.8 8l2.8 .7 M5 20.5h14 M9 17.5l1 3")
