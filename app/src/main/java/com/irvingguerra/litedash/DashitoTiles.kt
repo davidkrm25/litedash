@@ -72,15 +72,20 @@ fun TripStatTile(d: Dependencies, kind: String) {
     if (!granted) return ShortcutTile(Icons.location, stringResource(R.string.tile_trip), stringResource(R.string.tap_to_enable), ask)
     KeepTripRunning(trip)
     val stats = rememberTripStats(trip, miles)
+    if (kind == TripStatKinds.NOTE) {
+        Box(Modifier.fillMaxSize().padding(horizontal = 6.dp), contentAlignment = Alignment.CenterStart) {
+            Label(stringResource(R.string.dashito_trip_note), Typography.small, c.textMuted, 3)
+        }
+        return
+    }
     if (kind == TripStatKinds.RESET) {
-        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Label(stringResource(R.string.dashito_trip_note), Typography.small, c.textMuted, 2, Modifier.weight(1f))
+        Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
             Box(
-                Modifier.height(48.dp).clip(CircleShape).border(1.dp, c.text.copy(alpha = 0.6f), CircleShape).clickable { trip.reset() }.padding(horizontal = 20.dp),
+                Modifier.height(48.dp).fillMaxWidth().clip(CircleShape).border(1.dp, c.text.copy(alpha = 0.6f), CircleShape).clickable { trip.reset() }.padding(horizontal = 20.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.recenter, c.text, 20.dp)
+                    Icon(Icons.refresh, c.text, 20.dp)
                     Label(stringResource(R.string.trip_reset_long), Typography.body, c.text, 1)
                 }
             }
@@ -97,14 +102,15 @@ fun TripStatTile(d: Dependencies, kind: String) {
     val leg = trip.current()
     val dash = "--"
     val (icon, name, value, unit) = when (kind) {
-        TripStatKinds.DISTANCE -> Quad(Icons.road, R.string.dashito_distance, stats.distance, stats.unit)
-        TripStatKinds.TIME -> Quad(Icons.clock, R.string.dashito_drive_time, hms(leg.movingMs), "")
+        TripStatKinds.DISTANCE -> Quad(Icons.route, R.string.dashito_distance, stats.distance, stats.unit)
+        TripStatKinds.TIME -> Quad(Icons.stopwatch, R.string.dashito_drive_time, hms(leg.movingMs), "")
         TripStatKinds.AVERAGE -> Quad(Icons.speed, R.string.dashito_avg_speed, leg.averageKmh()?.let { speedText(it.toFloat(), miles) } ?: dash, stringResource(if (miles) R.string.unit_mph else R.string.unit_kmh))
-        TripStatKinds.MAX -> Quad(Icons.navigate, R.string.dashito_max_speed, speedText(trip.maxKmh, miles), stringResource(if (miles) R.string.unit_mph else R.string.unit_kmh))
+        TripStatKinds.MAX -> Quad(Icons.trend, R.string.dashito_max_speed, speedText(trip.maxKmh, miles), stringResource(if (miles) R.string.unit_mph else R.string.unit_kmh))
         TripStatKinds.CONSUMPTION -> Quad(Icons.fuel, R.string.dashito_avg_consumption, if (leg.meters >= 500.0) String.format(currentLocale(), "%.1f", kmPerL) else dash, stringResource(R.string.fuel_unit_kml))
-        else -> Quad(Icons.drop, R.string.dashito_fuel_used, if (leg.meters >= 500.0 && kmPerL > 0.0) String.format(currentLocale(), "%.1f", leg.meters / 1000.0 / kmPerL) else dash, "L")
+        else -> Quad(Icons.drops, R.string.dashito_fuel_used, if (leg.meters >= 500.0 && kmPerL > 0.0) String.format(currentLocale(), "%.1f", leg.meters / 1000.0 / kmPerL) else dash, "L")
     }
-    StatBox(icon, stringResource(name), value, unit)
+    // Todos los números del mismo tamaño (el de 00:00:00), como en Dashito.
+    StatBox(icon, stringResource(name), value, unit, sizeFrom = "00:00:00")
 }
 
 private data class Quad(val icon: ImageVector, val name: Int, val value: String, val unit: String)
@@ -119,11 +125,12 @@ private fun hms(ms: Long): String {
 internal fun StatBox(
     icon: ImageVector, name: String, value: String, unit: String,
     sub: String? = null, bar: Float? = null, range: Pair<String, String>? = null, onClick: (() -> Unit)? = null,
+    sizeFrom: String? = null,
 ) {
     val c = LocalColors.current
     Card(Modifier.fillMaxSize(), onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp)) {
-            val size = fitFont(value, maxWidth * 0.5f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
+            val size = fitFont(sizeFrom ?: value, maxWidth * 0.5f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 Box(Modifier.size(52.dp).clip(RoundedCornerShape(Radius.inner)).background(c.surfaceHigh), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 28.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {

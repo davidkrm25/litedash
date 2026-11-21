@@ -66,6 +66,11 @@ object Icons {
     val thermometer = icon("M10 13.5v-8.5a2 2 0 0 1 4 0v8.5a4 4 0 1 1 -4 0z M12 9v7")
     val fuel = icon("M4 20v-14a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v14 M3 20h12 M4 11h10 M14 9h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0v-8l-3 -3")
     val battery = icon("M4 8h16v11h-16z M7 8v-2h3v2 M14 8v-2h3v2 M7 13h3 M14 13h3 M15.5 11.5v3")
+    val route = icon("M6 19a2 2 0 1 0 0.01 0 M18 5a2 2 0 1 0 0.01 0 M8 19h8.5a3.5 3.5 0 0 0 0 -7h-9a3.5 3.5 0 0 1 0 -7h8.5")
+    val stopwatch = icon("M5 14a7 7 0 1 0 14 0a7 7 0 0 0 -14 0 M12 14l2.5 -3 M10 3h4 M17.5 6.5l1 -1")
+    val trend = icon("M3 17l6 -6l4 4l8 -8 M15 7h6v6")
+    val refresh = icon("M20 11a8 8 0 0 0 -15 -3 M4.5 4v4h4 M4 13a8 8 0 0 0 15 3 M19.5 20v-4h-4")
+    val drops = icon("M8 20a4 4 0 0 1 -4 -4c0 -2.5 4 -8 4 -8s4 5.5 4 8a4 4 0 0 1 -4 4z M15 14.5c.3 -1.7 1.5 -3.8 2.5 -5.5c1.5 2 2.5 4 2.5 5.5a3 3 0 0 1 -5 2")
     val drop = icon("M12 3.5s6 6.5 6 11a6 6 0 0 1 -12 0c0 -4.5 6 -11 6 -11z")
     /** Pedal del acelerador: la placa inclinada y su base. */
     val pedal = icon("M10 3.5l4 1l-3 13.5l-4 -1z M9.8 8l2.8 .7 M5 20.5h14 M9 17.5l1 3")

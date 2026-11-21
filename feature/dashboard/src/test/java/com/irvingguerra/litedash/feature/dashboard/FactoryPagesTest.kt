@@ -44,7 +44,7 @@ class FactoryPagesTest {
         for ((i, tiles) in pages.withIndex()) assertTrue("página $i vacía", tiles.isNotEmpty())
         val inicio = pages[0].map { it.type }
         assertTrue(TileTypes.MUSIC in inicio && TileTypes.SPEEDOMETER in inicio && TileTypes.WEATHER in inicio)
-        assertEquals(6, pages[2].count { it.type == TileTypes.TRIP_STAT && it.data != TripStatKinds.RESET })
+        assertEquals(6, pages[2].count { it.type == TileTypes.TRIP_STAT && it.data != TripStatKinds.RESET && it.data != TripStatKinds.NOTE })
         assertTrue(pages[2].any { it.data == TripStatKinds.RESET })
         assertEquals(3, pages[1].count { it.type == TileTypes.GAUGE && !it.data.startsWith("rpm") })
         assertTrue(pages[5].any { it.data == DiagParts.ADAPTER } && pages[5].any { it.data == DiagParts.CONNECT })

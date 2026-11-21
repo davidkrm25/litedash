@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 6
+const val FACTORY_VERSION = 7
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -15,6 +15,8 @@ object TripStatKinds {
     const val CONSUMPTION = "consumption"
     const val FUEL_USED = "fuel_used"
     const val RESET = "reset"
+    /** La nota de cuándo empieza un viaje nuevo (va junto al botón de reiniciar). */
+    const val NOTE = "note"
     /** El viaje de ahora (distancia y tiempo) en una tarjeta; al tocarla va a Viaje. */
     const val NOW = "now"
 }
@@ -202,16 +204,17 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
         page(2) {
             val stat = { kind: String, keep: Int -> Item(TileTypes.TRIP_STAT, data = kind, keep = keep, minH = 2) }
             val reset = Item(TileTypes.TRIP_STAT, weight = 0.5, data = TripStatKinds.RESET, plain = true, keep = 5, minH = 1)
+            val note = Item(TileTypes.TRIP_STAT, weight = 0.5, data = TripStatKinds.NOTE, plain = true, keep = 5, minH = 1)
             bands(
                 listOf(
                     Band(
                         0.26,
-                        listOf(stat(TripStatKinds.DISTANCE, 0), stat(TripStatKinds.AVERAGE, 2), stat(TripStatKinds.CONSUMPTION, 4), reset),
+                        listOf(stat(TripStatKinds.DISTANCE, 0), stat(TripStatKinds.AVERAGE, 2), stat(TripStatKinds.CONSUMPTION, 4), note),
                         keep = 1,
                     ),
                     Band(
                         0.26,
-                        listOf(stat(TripStatKinds.TIME, 1), stat(TripStatKinds.MAX, 3), stat(TripStatKinds.FUEL_USED, 5)),
+                        listOf(stat(TripStatKinds.TIME, 1), stat(TripStatKinds.MAX, 3), stat(TripStatKinds.FUEL_USED, 5), reset),
                         keep = 1,
                     ),
                     Band(0.48, listOf(Item(TileTypes.MAP)), keep = 0),
