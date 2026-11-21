@@ -69,7 +69,7 @@ private fun editButtonStart(i: Int) = EDIT_MARGIN + (EDIT_BUTTON + EDIT_MARGIN) 
  * Deslizar con un dedo a lo ancho para cambiar de página: en un hueco o sobre un widget que no usa el arrastre (los que
  * sí, como el auto que gira o el mapa, se lo quedan). [onDrag] con lo que avanzó el dedo y [onEnd] al soltar.
  */
-class PageSwipe(val onDrag: (Float) -> Unit, val onEnd: () -> Unit)
+class PageSwipe(val onDrag: (Float) -> Unit, val onEnd: (Float) -> Unit)
 
 /** Arrastre en curso: mover la pieza o cambiarle el tamaño (cuánto, va aparte en un estado propio). */
 private data class Drag(val id: String, val resizing: Boolean)
@@ -104,7 +104,25 @@ fun Dashboard(
     val currentOnChange by rememberUpdatedState(onChange)
     val currentLimits by rememberUpdatedState(limits)
     val currentOnTapEmpty by rememberUpdatedState(onTapEmpty)
-    BoxWithConstraints(modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier
+            .fillMaxSize()
+            .then(
+                // El deslizar vive en todo el tablero (no solo en el fondo): los widgets que no usan el arrastre lo dejan pasar.
+                if (swipe != null && !editing) Modifier.pointerInput(swipe) {
+                    val tracker = androidx.compose.ui.input.pointer.util.VelocityTracker()
+                    detectHorizontalDragGestures(
+                        onDragStart = { tracker.resetTracking() },
+                        onDragEnd = { swipe.onEnd(tracker.calculateVelocity().x) },
+                        onDragCancel = { swipe.onEnd(0f) },
+                    ) { change, dx ->
+                        tracker.addPosition(change.uptimeMillis, change.position)
+                        change.consume()
+                        swipe.onDrag(dx)
+                    }
+                } else Modifier,
+            ),
+    ) {
         val cellWidth = maxWidth / grid.columns
         val cellHeight = maxHeight / grid.rows
         val density = LocalDensity.current
@@ -127,14 +145,6 @@ fun Dashboard(
                     if (!editing) detectTapGestures(onLongPress = { currentOnEdit() }, onTap = { currentOnTapEmpty?.invoke() })
                     else detectTapGestures(onTap = { selected = null })
                 }
-                .then(
-                    if (swipe != null && !editing) Modifier.pointerInput(swipe) {
-                        detectHorizontalDragGestures(onDragEnd = swipe.onEnd, onDragCancel = swipe.onEnd) { change, dx ->
-                            change.consume()
-                            swipe.onDrag(dx)
-                        }
-                    } else Modifier,
-                )
                 .then(
                     if (editing) Modifier.drawBehind {
                         val r = 1.5.dp.toPx()

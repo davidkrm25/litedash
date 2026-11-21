@@ -65,12 +65,12 @@ internal fun rememberPageSwipe(pages: DashboardState, shift: Animatable<Float, *
                 val step = if (more) dx else dx / 3
                 scope.launch { shift.snapTo((shift.value + step).coerceIn(-w, w)) }
             },
-            onEnd = {
+            onEnd = { velocity ->
                 scope.launch {
                     val moved = shift.value
                     val target = when {
-                        moved < -w * SWIPE_FRACTION && pages.page < pages.pageCount - 1 -> pages.page + 1
-                        moved > w * SWIPE_FRACTION && pages.page > 0 -> pages.page - 1
+                        (moved < -w * SWIPE_FRACTION || velocity < -FLING_SPEED && moved < 0f) && pages.page < pages.pageCount - 1 -> pages.page + 1
+                        (moved > w * SWIPE_FRACTION || velocity > FLING_SPEED && moved > 0f) && pages.page > 0 -> pages.page - 1
                         else -> pages.page
                     }
                     if (target != pages.page) {
@@ -218,4 +218,5 @@ internal fun PageBackgroundSettings(d: Dependencies) {
 private const val PAGE_MS = 260
 
 /** Cuánto del ancho hay que deslizar para pasar de página. */
-private const val SWIPE_FRACTION = 0.18f
+private const val SWIPE_FRACTION = 0.12f
+private const val FLING_SPEED = 600f

@@ -155,13 +155,13 @@ internal fun contrast(a: Color, b: Color): Float {
 // borde sobre un fondo apenas distinto, texto secundario gris y el color de realce solo en lo importante.
 val DarkColors = Colors(
     dark = true,
-    background = Ink,
-    surface = Color(0xFF1A1D22),
-    surfaceHigh = Color(0xFF262A31),
-    line = Color(0xFF2A2F37),
+    background = Color(0xFF0B0E13),
+    surface = Color(0xFF111A1F),
+    surfaceHigh = Color(0xFF1B272D),
+    line = Color(0xFF24373C),
     text = Brand.LightWhite,
     textMuted = Color(0xFF8B939E),
-    accent = Brand.Amber,
+    accent = Color(0xFF80D8C3),
     danger = Color(0xFFFF6B5E),
     warning = Brand.Amber,
     good = Good,

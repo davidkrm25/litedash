@@ -98,15 +98,19 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
      */
     suspend fun refreshStations() {
         val stale = withContext(Dispatchers.IO) {
-            snapshot = cre.cached()
-            cre.stale()
+            snapshot = try { cre.cached() } catch (e: Throwable) { null }
+            try { cre.stale() } catch (e: Throwable) { false }
         }
         if (!stale) return
         loading = true
         try {
-            val ok = withContext(Dispatchers.IO) { cre.refresh() }
-            offline = !ok
-            if (ok) snapshot = withContext(Dispatchers.IO) { cre.cached() }
+            val ok = withContext(Dispatchers.IO) { try { cre.refresh() } catch (e: Throwable) { false } }
+            if (ok) snapshot = withContext(Dispatchers.IO) { try { cre.cached() } catch (e: Throwable) { null } }
+            offline = !ok || snapshot == null
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            offline = true
         } finally {
             loading = false
         }

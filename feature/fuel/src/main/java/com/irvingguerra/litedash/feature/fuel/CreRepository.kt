@@ -25,12 +25,19 @@ class CreRepository(context: Context) {
     @Volatile private var failedAt = 0L
 
     /** Lo guardado en el equipo (null = nunca se ha bajado). Lo ya leído se reutiliza mientras los archivos no cambien. */
-    fun cached(): StationSnapshot? {
+    fun cached(): StationSnapshot? = try {
+        load()
+    } catch (e: Throwable) {
+        placesFile.delete(); pricesFile.delete(); memory = null
+        null
+    }
+
+    private fun load(): StationSnapshot? {
         if (!placesFile.isFile || !pricesFile.isFile) return null
         val key = "${placesFile.lastModified()}/${pricesFile.lastModified()}"
         memory?.let { if (key == memoryKey) return it }
-        val places = CreFeed.parsePlaces(placesFile.readText())
-        val prices = CreFeed.parsePrices(pricesFile.readText())
+        val places = placesFile.reader(Charsets.UTF_8).use { CreFeed.parsePlaces(it) }
+        val prices = pricesFile.reader(Charsets.UTF_8).use { CreFeed.parsePrices(it) }
         val snapshot = StationSnapshot(CreFeed.merge(places, prices), pricesFile.lastModified())
         if (snapshot.stations.isEmpty()) return null
         memory = snapshot
@@ -52,23 +59,34 @@ class CreRepository(context: Context) {
         dir.mkdirs()
         return try {
             if (!placesFile.isFile || now - placesFile.lastModified() > PLACES_MAX_AGE_MS) {
-                download(PLACES_URL, placesFile) { CreFeed.parsePlaces(it).size >= MIN_ROWS }
+                download(PLACES_URL, placesFile) { f -> f.reader(Charsets.UTF_8).use { CreFeed.parsePlaces(it).size >= MIN_ROWS } }
             }
-            download(PRICES_URL, pricesFile) { CreFeed.parsePrices(it).size >= MIN_ROWS }
+            download(PRICES_URL, pricesFile) { f -> f.reader(Charsets.UTF_8).use { CreFeed.parsePrices(it).size >= MIN_ROWS } }
             true
-        } catch (e: IOException) {
+        } catch (e: Throwable) {
             failedAt = now
             false
         }
     }
 
-    private fun download(url: String, target: File, valid: (String) -> Boolean) {
+    private fun download(url: String, target: File, valid: (File) -> Boolean) {
         val tmp = File(dir, target.name + ".tmp")
         val connection = Https.get(app, url, "application/xml")
         try {
-            val text = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }.removePrefix("﻿")
-            if (!valid(text)) throw IOException("archivo de la CRE no entendido: ${target.name}")
-            tmp.writeText(text)
+            connection.inputStream.use { input ->
+                tmp.outputStream().use { out ->
+                    val buf = ByteArray(16 * 1024)
+                    var total = 0L
+                    while (true) {
+                        val n = input.read(buf)
+                        if (n < 0) break
+                        total += n
+                        if (total > MAX_BYTES) throw IOException("archivo de la CRE demasiado grande")
+                        out.write(buf, 0, n)
+                    }
+                }
+            }
+            if (!valid(tmp)) throw IOException("archivo de la CRE no entendido: ${target.name}")
             if (!tmp.renameTo(target)) {
                 target.delete()
                 if (!tmp.renameTo(target)) throw IOException("no se pudo guardar ${target.name}")
@@ -87,5 +105,6 @@ class CreRepository(context: Context) {
         const val RETRY_MS = 10 * 60_000L
         /** Menos filas que esto es un archivo roto o una página de error, no la lista del país (son más de 10 000). */
         private const val MIN_ROWS = 500
+        private const val MAX_BYTES = 60L * 1024 * 1024
     }
 }

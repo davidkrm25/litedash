@@ -51,25 +51,54 @@ object CreFeed {
     private val ATTR_ID = Regex("""place_id\s*=\s*["']([^"']*)["']""")
     private val PRICE = Regex("""<gas_price\b[^>]*?type\s*=\s*["']([^"']*)["'][^>]*>\s*([^<\s]*)\s*</gas_price>""")
 
-    fun parsePlaces(xml: String): List<Place> {
+    fun parsePlaces(xml: String): List<Place> = parsePlaces(java.io.StringReader(xml))
+
+    fun parsePrices(xml: String): Map<String, Map<FuelGrade, Double>> = parsePrices(java.io.StringReader(xml))
+
+    /** Recorre [reader] por pedazos (un `<place>` a la vez) para no cargar el archivo entero en memoria. */
+    fun parsePlaces(reader: java.io.Reader): List<Place> {
         val out = ArrayList<Place>()
-        for (block in blocks(xml)) {
-            val lon = tag(block.body, "x")?.toDoubleOrNull() ?: continue
-            val lat = tag(block.body, "y")?.toDoubleOrNull() ?: continue
-            if (!validPoint(lat, lon)) continue
-            val name = tag(block.body, "name")?.let(::decode)?.trim().orEmpty().ifEmpty { "Gasolinera" }
-            out += Place(block.id, name, lat, lon)
+        eachBlock(reader) { id, body ->
+            val lon = tag(body, "x")?.toDoubleOrNull()
+            val lat = tag(body, "y")?.toDoubleOrNull()
+            if (lon != null && lat != null && validPoint(lat, lon)) {
+                val name = tag(body, "name")?.let(::decode)?.trim().orEmpty().ifEmpty { "Gasolinera" }
+                out += Place(id, name, lat, lon)
+            }
         }
         return out
     }
 
-    fun parsePrices(xml: String): Map<String, Map<FuelGrade, Double>> {
+    fun parsePrices(reader: java.io.Reader): Map<String, Map<FuelGrade, Double>> {
         val out = HashMap<String, Map<FuelGrade, Double>>()
-        for (block in blocks(xml)) {
-            val prices = gradesIn(block.body)
-            if (prices.isNotEmpty()) out[block.id] = prices
+        eachBlock(reader) { id, body ->
+            val prices = gradesIn(body)
+            if (prices.isNotEmpty()) out[id] = prices
         }
         return out
+    }
+
+    private inline fun eachBlock(reader: java.io.Reader, onBlock: (String, String) -> Unit) {
+        val buf = CharArray(16 * 1024)
+        val pending = StringBuilder()
+        while (true) {
+            val n = reader.read(buf)
+            if (n < 0) break
+            pending.append(buf, 0, n)
+            var consumed = 0
+            while (true) {
+                val close = pending.indexOf("</place>", consumed)
+                if (close < 0) break
+                val chunk = pending.substring(consumed, close)
+                consumed = close + 8
+                val open = PLACE_START.find(chunk) ?: continue
+                val id = ATTR_ID.find(open.groupValues[1])?.groupValues?.get(1) ?: continue
+                onBlock(id, chunk.substring(open.range.last + 1))
+            }
+            if (consumed > 0) pending.delete(0, consumed)
+            // Un pedazo sin cierre que crece sin parar no es un archivo válido: se descarta.
+            if (pending.length > 1_000_000) pending.setLength(0)
+        }
     }
 
     /** Lugares con al menos un precio publicado. */
@@ -85,19 +114,6 @@ object CreFeed {
             if (price in MIN_PRICE..MAX_PRICE) m[grade] = price
         }
         return m
-    }
-
-    private class Block(val id: String, val body: String)
-
-    private fun blocks(xml: String): List<Block> {
-        val out = ArrayList<Block>()
-        val starts = PLACE_START.findAll(xml).toList()
-        for ((i, s) in starts.withIndex()) {
-            val id = ATTR_ID.find(s.groupValues[1])?.groupValues?.get(1) ?: continue
-            val end = if (i + 1 < starts.size) starts[i + 1].range.first else xml.length
-            out += Block(id, xml.substring(s.range.last + 1, end))
-        }
-        return out
     }
 
     private fun tag(body: String, name: String): String? {
