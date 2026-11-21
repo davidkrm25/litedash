@@ -250,7 +250,7 @@ class WeatherRepository(private val context: Context, private val prefs: Prefere
         val url = "https://api.open-meteo.com/v1/forecast?latitude=%.2f&longitude=%.2f".format(Locale.US, lat, lon) +
             "&current=temperature_2m,weather_code,is_day,apparent_temperature,relative_humidity_2m,wind_speed_10m,wind_direction_10m,cloud_cover" +
             "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset" +
-            "&hourly=temperature_2m,weather_code,is_day&forecast_hours=6&timezone=auto&forecast_days=4"
+            "&hourly=temperature_2m,weather_code,is_day&forecast_hours=7&timezone=auto&forecast_days=4"
         // Https.get revisa el código (un 5xx se reintenta solo) y aquí se cierra la conexión al terminar.
         val connection = Https.get(context, url)
         val json = try {
@@ -285,7 +285,8 @@ class WeatherRepository(private val context: Context, private val prefs: Prefere
             windKmh = current.optDouble("wind_speed_10m").takeIf { !it.isNaN() },
             windDeg = current.optInt("wind_direction_10m", -1).takeIf { it >= 0 },
             cloud = current.optInt("cloud_cover", -1).takeIf { it >= 0 },
-            hours = if (hourly == null || hourTimes == null) emptyList() else (0 until hourTimes.length()).map { i ->
+            hours = if (hourly == null || hourTimes == null) emptyList() else // La primera es la hora en curso: las próximas horas empiezan en la siguiente (como Dashito).
+            (1 until hourTimes.length()).map { i ->
                 ForecastHour(
                     hourTimes.getString(i),
                     hourly.getJSONArray("weather_code").getInt(i),
