@@ -722,6 +722,11 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
             val f = p.fraction()
             val color = c.gauge(p.look.color, p.car, f, p.warning)
             drawCircle(sphere.of(color), d.radius, d.center)
+            // Con el auto al frente (Inicio de Dashito): un aro finito por fuera del arco.
+            if (p.frontSpace > 0.dp && p.look.rim == GaugeRim.SMOOTH) {
+                val ring = d.radius + base * 0.9f
+                if (ring <= size.minDimension / 2f) drawCircle(c.text.copy(alpha = 0.22f), ring, d.center, style = Stroke(1.dp.toPx()))
+            }
             when (p.look.rim) {
                 GaugeRim.SMOOTH -> {
                     track.draw(this, c, p)

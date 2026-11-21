@@ -13,7 +13,7 @@ class FactoryPagesTest {
         TileTypes.DIAG to SizeLimits(3, 1),
     )
     private val limits = { type: String -> mins[type] ?: SizeLimits(1, 1) }
-    private val grids = listOf(Grid(19, 10), Grid(26, 14), Grid(20, 8), Grid(17, 7), Grid(12, 20), Grid(40, 22))
+    private val grids = listOf(Grid(19, 10), Grid(26, 14), Grid(26, 16), Grid(20, 12), Grid(13, 8), Grid(20, 8), Grid(17, 7), Grid(12, 20), Grid(40, 22))
 
     @Test
     fun hasSixPagesAndNothingOverlapsOrLeavesTheGrid() {
