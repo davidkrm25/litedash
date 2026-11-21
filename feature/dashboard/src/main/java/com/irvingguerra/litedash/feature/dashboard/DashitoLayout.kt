@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 5
+const val FACTORY_VERSION = 6
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -160,10 +160,10 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
                     Band(
                         0.22,
                         listOf(
-                            Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1", keep = 1),
+                            Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1;arrow=1", keep = 1),
                             Item(TileTypes.TRIP_STAT, data = TripStatKinds.NOW, keep = 0),
-                            Item(TileTypes.GAUGE, data = "${Gauge.VOLTAGE};card=1", keep = 3),
-                            Item(TileTypes.GAUGE, data = "${Gauge.CONSUMPTION};card=1", keep = 2),
+                            Item(TileTypes.GAUGE, data = "${Gauge.VOLTAGE};card=1;arrow=1", keep = 3),
+                            Item(TileTypes.GAUGE, data = "${Gauge.CONSUMPTION};card=1;arrow=1", keep = 2),
                         ),
                         keep = 1,
                     ),
@@ -184,14 +184,14 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
         page(1) {
             bands(
                 listOf(
-                    Band(0.4, listOf(Item(TileTypes.SPEEDOMETER, data = "numbers=1", plain = true)), keep = 0),
-                    Band(0.4, listOf(Item(TileTypes.GAUGE, data = "${Gauge.RPM};numbers=1", plain = true)), keep = 1),
+                    Band(0.4, listOf(Item(TileTypes.SPEEDOMETER, data = "numbers=1;legend=1", plain = true)), keep = 0),
+                    Band(0.4, listOf(Item(TileTypes.GAUGE, data = "${Gauge.RPM};numbers=1;legend=1", plain = true)), keep = 1),
                     Band(
                         0.2,
                         listOf(
-                            Item(TileTypes.GAUGE, data = Gauge.COOLANT, keep = 0),
-                            Item(TileTypes.GAUGE, data = Gauge.VOLTAGE, keep = 2),
-                            Item(TileTypes.GAUGE, data = Gauge.CONSUMPTION, keep = 1),
+                            Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1", keep = 0),
+                            Item(TileTypes.GAUGE, data = "${Gauge.VOLTAGE};card=1", keep = 2),
+                            Item(TileTypes.GAUGE, data = "${Gauge.CONSUMPTION};card=1", keep = 1),
                         ),
                         keep = 2,
                     ),

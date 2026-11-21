@@ -68,11 +68,11 @@ private fun Tab(icon: ImageVector, name: String, selected: Boolean, onClick: () 
     val idle = c.text.copy(alpha = 0.85f)
     Column(
         Modifier
-            .widthIn(min = if (short) 56.dp else 72.dp)
+            .widthIn(min = 56.dp)
             .clip(shape)
             .then(if (selected) Modifier.background(c.surfaceHigh).border(1.dp, c.accent.copy(alpha = 0.5f), shape) else Modifier)
             .clickable(onClick = onClick)
-            .padding(horizontal = if (short) 10.dp else 14.dp, vertical = if (short) 3.dp else 6.dp),
+            .padding(horizontal = if (short) 8.dp else 8.dp, vertical = if (short) 3.dp else 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, if (selected) c.accent else idle, if (short) 22.dp else 24.dp)

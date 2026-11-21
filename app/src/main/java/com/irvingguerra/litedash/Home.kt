@@ -352,9 +352,9 @@ fun TileContent(d: Dependencies, p: Tile, apps: List<App>, car: CarPackage?, rev
         TileTypes.CLOCK -> ClockTile(d.prefs.driverName.takeIf { p.flag(WidgetFlags.GREETING) }, clockWeather(d, p.data), date = p.flag(WidgetFlags.DATE))
         TileTypes.WEATHER -> WeatherTile(d.weather, days = p.flag(WidgetFlags.DAYS), range = p.flag(WidgetFlags.RANGE))
         TileTypes.TRIP -> TripTile(d, time = p.flag(WidgetFlags.TIME), average = p.flag(WidgetFlags.AVERAGE), heading = p.flag(WidgetFlags.HEADING))
-        TileTypes.SPEEDOMETER -> SpeedometerTile(d, remember(p.data) { GaugeLook.parse(p.data) }, dashito = "title=1" in p.data)
+        TileTypes.SPEEDOMETER -> SpeedometerTile(d, remember(p.data) { GaugeLook.parse(p.data) }, dashito = "title=1" in p.data, legend = "legend=1" in p.data)
         TileTypes.GAUGE -> GaugeTile(
-            d, signalOf(p.data), remember(p.data) { GaugeLook.parse(p.data) }, card = "card=1" in p.data,
+            d, signalOf(p.data), remember(p.data) { GaugeLook.parse(p.data) }, card = "card=1" in p.data, arrow = "arrow=1" in p.data, legend = "legend=1" in p.data,
             onPick = { actions.onPanel(Panel.PickGauge(p.id)) },
             onWorkshop = { actions.onPanel(Panel.Workshop) },
         )

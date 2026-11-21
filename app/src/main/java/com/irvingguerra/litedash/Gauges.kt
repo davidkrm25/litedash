@@ -35,7 +35,7 @@ import java.util.Locale
  * auto (OBD) si hay adaptador conectado; si no, del GPS (pide permiso la primera vez).
  */
 @Composable
-fun SpeedometerTile(d: Dependencies, look: GaugeLook, dashito: Boolean = false) {
+fun SpeedometerTile(d: Dependencies, look: GaugeLook, dashito: Boolean = false, legend: Boolean = false) {
     // Con un adaptador ya guardado, se reconecta solo (sin abrir el Taller).
     val obdOn = rememberObd(d)?.state == ObdState.ON
     val (gps, ask) = rememberGpsPermission(d)
@@ -47,11 +47,12 @@ fun SpeedometerTile(d: Dependencies, look: GaugeLook, dashito: Boolean = false) 
     val kmh = d.bus.watch(Signal.SPEED)
     val miles = d.prefs.units.miles
     val front = rememberSpeedFront(d, look)
-    if (!dashito) return SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, speedTag(d), look, d.prefs.carColor, front)
+    val tag = if (legend) stringResource(R.string.dashito_speed_legend) else speedTag(d)
+    if (!dashito) return SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, front)
     val c = LocalColors.current
     val rpm = d.bus.watch(Signal.RPM)
     Box(Modifier.fillMaxSize()) {
-        SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, speedTag(d), look, d.prefs.carColor, front)
+        SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, front)
         Label(stringResource(R.string.dashito_title), Typography.label.copy(letterSpacing = 6.sp), c.text.copy(alpha = 0.8f), 1, Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
         Row(
             Modifier.align(Alignment.BottomCenter).clip(CircleShape).border(0.75.dp, c.accent.copy(alpha = 0.55f), CircleShape).padding(horizontal = 18.dp, vertical = 6.dp),
@@ -212,7 +213,7 @@ fun gaugeOf(signal: String) = GaugeSpecs.firstOrNull { it.signal == signal }
  * elegir; sin adaptador lleva al Taller; si el auto no da ese dato, lo dice.
  */
 @Composable
-fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = false, onPick: () -> Unit, onWorkshop: () -> Unit) {
+fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = false, arrow: Boolean = false, legend: Boolean = false, onPick: () -> Unit, onWorkshop: () -> Unit) {
     val spec = gaugeOf(signal)
         ?: return ShortcutTile(Icons.plus, stringResource(R.string.tile_gauge), stringResource(R.string.gauge_pick), onPick)
     // Con un adaptador ya guardado, se reconecta solo (sin abrir el Taller).
@@ -225,16 +226,16 @@ fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = 
         val value = if (live) d.bus.watch(spec.signal) else null
         val withBar = spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.COOLANT || spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE
         StatBox(
-            spec.icon, stringResource(spec.name), value?.let { gaugeText(spec, it, units, locale) } ?: "--", stringResource(spec.unit(units)),
+            spec.icon, stringResource(if (!arrow && spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) R.string.dashito_instant else spec.name), value?.let { gaugeText(spec, it, units, locale) } ?: "--", stringResource(spec.unit(units)),
             bar = if (withBar) (value?.let(spec::fraction) ?: 0f) else null,
             range = if (withBar) String.format(locale, "%.0f", spec.shown(spec.min, units)) to String.format(locale, "%.0f", spec.shown(spec.max, units)) else null,
-            onClick = { d.dashboard.goTo(if (spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) 3 else 5) },
+            onClick = if (!arrow) null else { { d.dashboard.goTo(if (spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) 3 else 5) } },
         )
         return
     }
     // Sin adaptador (o sin ese dato) se ve igual, vacío y con "—", y una nota corta: no un texto largo.
     if (obd?.state != ObdState.ON) {
-        val note = stringResource(if (obd?.state == ObdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)
+        val note = if (legend) stringResource(R.string.gauge_rpm) else stringResource(if (obd?.state == ObdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)
         return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onWorkshop, note = note)
     }
     if (!obd.canRead(spec.signal)) return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onPick, note = stringResource(R.string.gauge_no_data))

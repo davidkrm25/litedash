@@ -41,4 +41,6 @@
     <string name="dashito_obd_on">OBD</string>
     <string name="dashito_trip_now">Viaje actual</string>
     <string name="dashito_title">Kal El</string>
+    <string name="dashito_instant">Consumo instantáneo</string>
+    <string name="dashito_speed_legend">Velocidad</string>
 </resources>
