@@ -15,6 +15,7 @@ import com.irvingguerra.litedash.feature.fuel.FuelTank
 import com.irvingguerra.litedash.feature.fuel.StationSnapshot
 import com.irvingguerra.litedash.feature.fuel.StationSort
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
@@ -96,7 +97,17 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
      * Pone al día las gasolineras: primero lo guardado (sale al instante) y, si ya venció, baja los precios de la CRE.
      * Se llama solo cuando la pantalla se ve; sin red se queda con lo que haya.
      */
-    suspend fun refreshStations() {
+    fun refreshStations() {
+        // En su propio alcance: al pasar a otra página la pieza se va de la pantalla y su corrutina se cancelaría a medias
+        // (la descarga de la CRE tarda y nunca llegaba a terminar).
+        if (refreshJob?.isActive == true) return
+        refreshJob = refreshScope.launch { updateStations() }
+    }
+
+    private var refreshJob: kotlinx.coroutines.Job? = null
+    private val refreshScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + Dispatchers.Default)
+
+    private suspend fun updateStations() {
         val stale = withContext(Dispatchers.IO) {
             snapshot = try { cre.cached() } catch (e: Throwable) { null }
             try { cre.stale() } catch (e: Throwable) { false }

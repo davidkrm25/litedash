@@ -1089,9 +1089,9 @@ fun dockFavorites(d: Dependencies, apps: List<App>): List<App> {
     )
 }
 
-/** Alto de la barra de arriba, y el espacio que deja cuando no muestra nada. */
+/** Alto de la barra de arriba; con las pestañas de las páginas (ícono y nombre) es más alta, también en pantallas bajas. */
 @Composable
-private fun topBarHeight() = if (isShortScreen()) 44.dp else 64.dp
+private fun topBarHeight(tabbed: Boolean = false) = if (isShortScreen()) (if (tabbed) 58.dp else 44.dp) else (if (tabbed) 72.dp else 64.dp)
 private val TOP_BAR_HIDDEN = 12.dp
 
 @Composable
@@ -1112,7 +1112,7 @@ private fun TopBar(
     // Sin nada que mostrar (la hora ya está en una pieza), la barra no aparta espacio: el tablero sube.
     if (!editing && !showTime) return Spacer(Modifier.height(TOP_BAR_HIDDEN))
     Row(
-        Modifier.fillMaxWidth().height(topBarHeight()).padding(horizontal = 24.dp),
+        Modifier.fillMaxWidth().height(topBarHeight(tabbed = !editing && pages.pageCount > 1)).padding(horizontal = 24.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {

@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.irvingguerra.litedash.feature.dashboard.FuelParts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -209,35 +210,45 @@ private fun RangeGauge(reading: FuelReading?) {
 
 @Composable
 internal fun StatsColumn(reading: FuelReading?, locale: Locale, modifier: Modifier, onTank: () -> Unit) {
-    val dash = "--"
     Column(modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatCard(
+        for (part in listOf(FuelParts.TANK, FuelParts.AVERAGE, FuelParts.SINCE, FuelParts.ACCURACY)) {
+            FuelStat(part, reading, locale, Modifier.weight(1f), onTank)
+        }
+    }
+}
+
+/** Una de las tarjetas de datos de Autonomía: lo que hay en el tanque, el consumo, lo andado desde que llenaste o la precisión. */
+@Composable
+internal fun FuelStat(part: String, reading: FuelReading?, locale: Locale, modifier: Modifier, onTank: () -> Unit) {
+    val dash = "--"
+    when (part) {
+        FuelParts.TANK -> StatCard(
             Icons.fuel, stringResource(R.string.fuel_in_tank),
             reading?.let { String.format(locale, "%.1f", it.levelL) } ?: dash,
             reading?.let { stringResource(R.string.fuel_of_capacity, String.format(locale, "%.0f", it.capacityL)) }.orEmpty(),
             detail = reading?.takeIf { it.levelL >= it.capacityL - 0.05 }?.let { stringResource(R.string.fuel_full) },
             progress = reading?.let { (it.levelL / it.capacityL).toFloat() },
-            onClick = onTank, modifier = Modifier.weight(1f),
+            onClick = onTank, modifier = modifier,
         )
-        StatCard(
+        FuelParts.AVERAGE -> StatCard(
             Icons.speed, stringResource(R.string.fuel_consumption),
             reading?.let { String.format(locale, "%.1f", it.kmPerL) } ?: dash, stringResource(R.string.fuel_unit_kml),
             detail = reading?.let { stringResource(if (it.calibrated) R.string.fuel_consumption_measured else R.string.fuel_consumption_assumed) },
-            modifier = Modifier.weight(1f),
+            modifier = modifier,
         )
-        StatCard(
+        FuelParts.SINCE -> StatCard(
             Icons.road, stringResource(R.string.fuel_since),
             reading?.kmSinceFill?.let { String.format(locale, "%.0f", it) } ?: "0", stringResource(R.string.unit_km),
             detail = reading?.let { r ->
                 r.litersUsed?.let { stringResource(R.string.fuel_since_detail, dateText(r.lastFillAtMs, locale), String.format(locale, "%.1f", it)) }
             } ?: stringResource(R.string.fuel_since_none),
-            modifier = Modifier.weight(1f),
+            modifier = modifier,
         )
-        StatCard(
+        else -> StatCard(
             Icons.location, stringResource(R.string.fuel_accuracy),
             stringResource(if (reading?.calibrated == true) R.string.fuel_calibrated else R.string.fuel_uncalibrated), "",
             detail = if (reading?.calibrated == true) stringResource(R.string.fuel_calibrated_help, reading.burns) else stringResource(R.string.fuel_uncalibrated_help),
-            modifier = Modifier.weight(1f),
+            modifier = modifier,
         )
     }
 }
@@ -257,7 +268,7 @@ private fun StatCard(
     onClick: (() -> Unit)? = null,
 ) {
     val c = LocalColors.current
-    Card(modifier.fillMaxWidth().heightIn(min = 84.dp), onClick = onClick) {
+    Card(modifier.fillMaxWidth(), onClick = onClick) {
         Row(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Box(Modifier.size(44.dp).clip(RoundedCornerShape(Radius.inner)).background(c.surfaceHigh), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 24.dp) }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {

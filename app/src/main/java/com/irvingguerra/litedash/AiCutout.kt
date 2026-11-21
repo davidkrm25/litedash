@@ -63,6 +63,21 @@ internal fun applyMask(pixels: IntArray, w: Int, h: Int, mask: FloatArray): IntA
     return out
 }
 
+/** El rectángulo (izq, arr, der, abajo; der y abajo exclusivos) donde hay algo visible, con [margin] px de aire; null si no hay nada. Función pura. */
+internal fun contentBounds(pixels: IntArray, w: Int, h: Int, margin: Int = 4): IntArray? {
+    var left = w; var top = h; var right = -1; var bottom = -1
+    for (y in 0 until h) for (x in 0 until w) {
+        if ((pixels[y * w + x] ushr 24) > 24) {
+            if (x < left) left = x
+            if (x > right) right = x
+            if (y < top) top = y
+            if (y > bottom) bottom = y
+        }
+    }
+    if (right < 0) return null
+    return intArrayOf(maxOf(0, left - margin), maxOf(0, top - margin), minOf(w, right + 1 + margin), minOf(h, bottom + 1 + margin))
+}
+
 /** Quita el fondo con IA, sin conexión (modelo en assets). Devuelve null si no se pudo (sin memoria, modelo ausente). */
 internal object AiCutout {
     private var session: OrtSession? = null
@@ -87,7 +102,9 @@ internal object AiCutout {
                 val raw = (result[0].value as Array<Array<Array<FloatArray>>>)[0][0]
                 val mask = FloatArray(AI_SIZE * AI_SIZE).also { m -> raw.forEachIndexed { y, row -> row.copyInto(m, y * AI_SIZE) } }
                 val out = applyMask(pixels, w, h, mask)
-                Bitmap.createBitmap(out, w, h, Bitmap.Config.ARGB_8888)
+                val full = Bitmap.createBitmap(out, w, h, Bitmap.Config.ARGB_8888)
+                // Sin los bordes vacíos, el auto llena su lugar en vez de quedar chiquito en medio de la foto.
+                contentBounds(out, w, h)?.let { b -> Bitmap.createBitmap(full, b[0], b[1], b[2] - b[0], b[3] - b[1]) } ?: full
             }
         }
     } catch (_: Throwable) {

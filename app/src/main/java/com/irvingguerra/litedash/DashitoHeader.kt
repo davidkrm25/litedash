@@ -32,9 +32,9 @@ import com.irvingguerra.litedash.feature.dashboard.DashboardState
 fun ObdPill(on: Boolean) {
     val c = LocalColors.current
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(Icons.bluetooth, c.textMuted, 20.dp)
-        Box(Modifier.size(10.dp).clip(CircleShape).background(if (on) c.good else c.textMuted.copy(alpha = 0.6f)))
-        Label(stringResource(if (on) R.string.dashito_obd_on else R.string.dashito_obd_off), Typography.label, c.textMuted, 1)
+        Icon(Icons.bluetooth, c.text.copy(alpha = 0.8f), 20.dp)
+        Box(Modifier.size(10.dp).clip(CircleShape).background(if (on) c.good else c.text.copy(alpha = 0.45f)))
+        Label(stringResource(if (on) R.string.dashito_obd_on else R.string.dashito_obd_off), Typography.label, c.text.copy(alpha = 0.8f), 1)
     }
 }
 
@@ -63,18 +63,19 @@ fun PageTabs(pages: DashboardState, onSettings: () -> Unit, modifier: Modifier =
 private fun Tab(icon: ImageVector, name: String, selected: Boolean, onClick: () -> Unit) {
     val c = LocalColors.current
     val shape = RoundedCornerShape(16.dp)
-    // En pantallas bajas (celular de lado) solo el ícono: la barra mide 44 dp y el nombre se cortaba.
     val short = isShortScreen()
+    // Sin marcar, el ícono y el nombre se leen sobre cualquier fondo (con el gris tenue se perdían sobre una foto).
+    val idle = c.text.copy(alpha = 0.85f)
     Column(
         Modifier
-            .widthIn(min = if (short) 48.dp else 72.dp)
+            .widthIn(min = if (short) 56.dp else 72.dp)
             .clip(shape)
             .then(if (selected) Modifier.background(c.surfaceHigh).border(1.dp, c.accent.copy(alpha = 0.5f), shape) else Modifier)
             .clickable(onClick = onClick)
-            .padding(horizontal = if (short) 10.dp else 14.dp, vertical = if (short) 4.dp else 6.dp),
+            .padding(horizontal = if (short) 10.dp else 14.dp, vertical = if (short) 3.dp else 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(icon, if (selected) c.accent else c.textMuted, 24.dp)
-        if (!short) Label(name.uppercase(currentLocale()), Typography.label, if (selected) c.accent else c.textMuted, 1)
+        Icon(icon, if (selected) c.accent else idle, if (short) 22.dp else 24.dp)
+        Label(name.uppercase(currentLocale()), Typography.label, if (selected) c.accent else idle, 1)
     }
 }

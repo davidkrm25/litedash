@@ -18,4 +18,11 @@ class AiCutoutTest {
         assertEquals(0, out[w - 2] ushr 24)
         assertTrue(out[5] and 0xFFFFFF == 0x336699)
     }
+
+    @Test fun boundsTrimEmptyBorders() {
+        val w = 20; val h = 10
+        val px = IntArray(w * h).also { for (y in 3..5) for (x in 6..12) it[y * w + x] = 0xFF112233.toInt() }
+        assertEquals(listOf(2, 0, 17, 10), contentBounds(px, w, h)!!.toList())
+        assertEquals(null, contentBounds(IntArray(w * h), w, h))
+    }
 }

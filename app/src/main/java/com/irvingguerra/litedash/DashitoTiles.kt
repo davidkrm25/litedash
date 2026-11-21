@@ -154,7 +154,8 @@ fun FuelPartTile(d: Dependencies, part: String, onOwnMap: () -> Unit) {
                 onOwnMap()
             }
         }
-        else -> StatsColumn(reading, currentLocale(), Modifier.fillMaxSize(), onTank = { dialog = FuelDialog.TANK })
+        FuelParts.STATS -> StatsColumn(reading, currentLocale(), Modifier.fillMaxSize(), onTank = { dialog = FuelDialog.TANK })
+        else -> FuelStat(part, reading, currentLocale(), Modifier.fillMaxSize(), onTank = { dialog = FuelDialog.TANK })
     }
     dialog?.let { which -> FuelDialogs(d, which, onClose = { dialog = null }) }
 }
