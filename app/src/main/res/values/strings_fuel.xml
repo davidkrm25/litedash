@@ -11,7 +11,7 @@
     <string name="fuel_of_capacity">de %1$s L</string>
     <string name="fuel_full">Tanque lleno</string>
     <string name="fuel_consumption">Consumo promedio</string>
-    <string name="fuel_consumption_assumed">Supuesto · se mide al llenar con litros</string>
+    <string name="fuel_consumption_assumed">Supuesto · anota litros al llenar</string>
     <string name="fuel_consumption_measured">Medido con tus cargas</string>
     <string name="fuel_since">Desde que llenaste</string>
     <string name="fuel_since_none">Sin cargas registradas</string>
@@ -19,7 +19,7 @@
     <string name="fuel_accuracy">Precisión</string>
     <string name="fuel_uncalibrated">Sin calibrar</string>
     <string name="fuel_calibrated">Calibrado</string>
-    <string name="fuel_uncalibrated_help">Escribe los litros al llenar</string>
+    <string name="fuel_uncalibrated_help">Anota los litros al llenar</string>
     <string name="fuel_calibrated_help">%1$d tanques medidos</string>
     <string name="fuel_source_sensor">Nivel del sensor del auto (OBD).</string>
     <string name="fuel_source_estimate">Estimado con tus cargas y el GPS.</string>
@@ -58,4 +58,5 @@
     <string name="fuel_assumed_kml">Consumo supuesto (km/L)</string>
     <string name="fuel_save">Guardar</string>
     <string name="fuel_open">Ver Autonomía</string>
+    <string name="fuel_consumption_engine">Medido con el motor</string>
 </resources>

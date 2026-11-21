@@ -64,6 +64,9 @@ private val LightInk = Color(0xFF16181C)
 private val LightPaper = Color(0xFFE9ECF0)
 private val LightAmber = Color(0xFFE59500)
 
+/** De dónde arrancan los degradados del acento (el final es el acento rojo): un azul claro. */
+val AccentStart = Color(0xFF4DA3FF)
+
 @Immutable
 data class Colors(
     val dark: Boolean,

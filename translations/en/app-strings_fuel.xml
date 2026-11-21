@@ -12,7 +12,7 @@
     <string name="fuel_of_capacity">of %1$s L</string>
     <string name="fuel_full">Tank full</string>
     <string name="fuel_consumption">Average consumption</string>
-    <string name="fuel_consumption_assumed">Assumed · measured when you fill up with liters</string>
+    <string name="fuel_consumption_assumed">Assumed · enter liters when filling</string>
     <string name="fuel_consumption_measured">Measured from your fill-ups</string>
     <string name="fuel_since">Since you filled up</string>
     <string name="fuel_since_none">No fill-ups recorded</string>
@@ -20,7 +20,7 @@
     <string name="fuel_accuracy">Accuracy</string>
     <string name="fuel_uncalibrated">Not calibrated</string>
     <string name="fuel_calibrated">Calibrated</string>
-    <string name="fuel_uncalibrated_help">Enter the liters when you fill up</string>
+    <string name="fuel_uncalibrated_help">Enter liters when filling</string>
     <string name="fuel_calibrated_help">%1$d tanks measured</string>
     <string name="fuel_source_sensor">Level from the car\'s sensor (OBD).</string>
     <string name="fuel_source_estimate">Estimated from your fill-ups and GPS.</string>
@@ -59,4 +59,5 @@
     <string name="fuel_assumed_kml">Assumed consumption (km/L)</string>
     <string name="fuel_save">Save</string>
     <string name="fuel_open">Open Range</string>
+    <string name="fuel_consumption_engine">Measured from the engine</string>
 </resources>

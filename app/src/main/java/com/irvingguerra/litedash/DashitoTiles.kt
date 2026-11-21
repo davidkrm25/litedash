@@ -145,7 +145,7 @@ internal fun StatBox(
                     }
                     if (bar != null) {
                         Box(Modifier.fillMaxWidth().padding(top = 4.dp).height(4.dp).clip(CircleShape).background(c.text.copy(alpha = 0.1f))) {
-                            Box(Modifier.fillMaxWidth(bar.coerceIn(0f, 1f)).fillMaxHeight().background(c.accent))
+                            Box(Modifier.fillMaxWidth(bar.coerceIn(0f, 1f)).fillMaxHeight().background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent))))
                         }
                         if (range != null) Row(Modifier.fillMaxWidth()) {
                             Label(range.first, Typography.label, c.textMuted, 1, Modifier.weight(1f))
@@ -170,6 +170,11 @@ fun FuelPartTile(d: Dependencies, part: String, onOwnMap: () -> Unit) {
     val (granted, askGps) = rememberGpsPermission(d)
     if (granted) KeepTripRunning(d.trip)
     d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.FUEL)
+    // Para medir el consumo con el motor (gasto de gasolina, o MAF y correcciones de mezcla).
+    d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.FUEL_RATE)
+    d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.MAF)
+    d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.FUEL_TRIM_SHORT)
+    d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.FUEL_TRIM_LONG)
     LaunchedEffect(Unit) { fuel.refreshStations() }
     var dialog by remember { mutableStateOf<FuelDialog?>(null) }
     val reading = fuel.reading()

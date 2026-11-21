@@ -1,5 +1,6 @@
 package com.irvingguerra.litedash
 
+import com.irvingguerra.litedash.core.ui.AccentStart
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -316,7 +317,7 @@ data class RoadLook(
  * se note el avance. Es la única fuente del color de cada valor (ver [gauge]).
  */
 fun Colors.ramp(color: GaugeColor, car: Color): List<Color> = when (color) {
-    GaugeColor.ACCENT -> listOf(accent)
+    GaugeColor.ACCENT -> listOf(AccentStart, accent)
     GaugeColor.CAR -> listOf(if (car.isSpecified) car else accent)
     GaugeColor.GREEN -> listOf(Green)
     GaugeColor.BLUE -> listOf(Blue)

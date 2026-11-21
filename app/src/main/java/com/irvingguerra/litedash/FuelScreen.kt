@@ -154,7 +154,7 @@ internal fun GaugeColumn(reading: FuelReading?, modifier: Modifier, onFull: () -
             Typography.small, c.textMuted, maxLines = 2,
         )
         Box(
-            Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(c.accent).clickable(onClick = onFull),
+            Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent))).clickable(onClick = onFull),
             contentAlignment = Alignment.Center,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -222,12 +222,13 @@ internal fun FuelStat(part: String, reading: FuelReading?, locale: Locale, modif
             reading?.let { stringResource(R.string.fuel_of_capacity, String.format(locale, "%.0f", it.capacityL)) }.orEmpty(),
             detail = reading?.takeIf { it.levelL >= it.capacityL - 0.05 }?.let { stringResource(R.string.fuel_full) },
             progress = reading?.let { (it.levelL / it.capacityL).toFloat() },
+            scale = reading?.let { String.format(locale, "%.0f", it.capacityL) },
             onClick = onTank, modifier = modifier,
         )
         FuelParts.AVERAGE -> StatCard(
             Icons.drop, stringResource(R.string.fuel_consumption),
             reading?.let { String.format(locale, "%.1f", it.kmPerL) } ?: dash, stringResource(R.string.fuel_unit_kml),
-            detail = reading?.let { stringResource(if (it.calibrated) R.string.fuel_consumption_measured else R.string.fuel_consumption_assumed) },
+            detail = reading?.let { stringResource(if (it.calibrated) R.string.fuel_consumption_measured else if (it.fromEngine) R.string.fuel_consumption_engine else R.string.fuel_consumption_assumed) },
             modifier = modifier,
         )
         FuelParts.SINCE -> StatCard(
@@ -259,6 +260,7 @@ private fun StatCard(
     modifier: Modifier = Modifier,
     detail: String? = null,
     progress: Float? = null,
+    scale: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val c = LocalColors.current
@@ -274,7 +276,11 @@ private fun StatCard(
                 if (detail != null) Label(detail, Typography.small, c.textMuted, 2)
                 if (progress != null) {
                     Box(Modifier.padding(top = 6.dp).fillMaxWidth().height(5.dp).clip(CircleShape).background(c.line)) {
-                        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(5.dp).clip(CircleShape).background(c.accent))
+                        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(5.dp).clip(CircleShape).background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent))))
+                    }
+                    if (scale != null) Row(Modifier.fillMaxWidth()) {
+                        Label("0", Typography.label, c.textMuted, 1, Modifier.weight(1f))
+                        Label(scale, Typography.label, c.textMuted, 1)
                     }
                 }
             }

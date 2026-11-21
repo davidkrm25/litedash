@@ -27,6 +27,8 @@ data class FuelReading(
     val kmSinceFill: Double?,
     val litersUsed: Double?,
     val lastFillAtMs: Long?,
+    /** true = [kmPerL] sale de lo que el motor ha gastado (MAF o gasto de gasolina), no del supuesto. */
+    val fromEngine: Boolean = false,
 )
 
 /**
@@ -58,6 +60,9 @@ data class FuelTank(
         }
 
     val kmPerL get() = measuredKmPerL ?: assumedKmPerL
+
+    /** El km/L con el que se cuenta: el de tus cargas, si no el medido por el motor ([engineKmPerL]) y, al final, el supuesto. */
+    fun kmPerL(engineKmPerL: Double? = null) = measuredKmPerL ?: engineKmPerL?.takeIf { it in MIN_KM_PER_L..MAX_KM_PER_L } ?: assumedKmPerL
 
     /** Litros que quedan en [odoMeters], sin pasar de lo que cabe ni bajar de cero. */
     fun levelAt(odoMeters: Double, kmPerL: Double = this.kmPerL): Double? {
@@ -112,8 +117,8 @@ data class FuelTank(
      * Lo que se muestra con el odómetro en [odoMeters]. [sensorPercent] es el nivel que da el auto por OBD (0–100), si lo
      * da: manda sobre la estimación. null si no hay de dónde sacar el nivel (nunca se anotó una carga y no hay sensor).
      */
-    fun reading(odoMeters: Double, sensorPercent: Float? = null): FuelReading? {
-        val perL = kmPerL
+    fun reading(odoMeters: Double, sensorPercent: Float? = null, engineKmPerL: Double? = null): FuelReading? {
+        val perL = kmPerL(engineKmPerL)
         val sensor = sensorPercent?.takeIf { it in 0f..100f }
         val level = if (sensor != null) capacityL * sensor / 100.0 else levelAt(odoMeters, perL) ?: return null
         val since = lastFullOdo?.let { ((odoMeters - it) / 1000.0).coerceAtLeast(0.0) }
@@ -128,6 +133,7 @@ data class FuelTank(
             kmSinceFill = since,
             litersUsed = since?.let { it / perL },
             lastFillAtMs = fills.lastOrNull { it.full }?.atMs,
+            fromEngine = measuredKmPerL == null && engineKmPerL?.let { it in MIN_KM_PER_L..MAX_KM_PER_L } == true,
         )
     }
 

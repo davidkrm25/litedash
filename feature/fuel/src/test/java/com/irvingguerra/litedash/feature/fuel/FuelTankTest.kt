@@ -129,4 +129,19 @@ class FuelTankTest {
         assertEquals(FuelTank(), FuelTank.fromJson(null))
         assertEquals(FuelTank(), FuelTank.fromJson(""))
     }
+
+    @Test
+    fun engineMeasurementReplacesAssumedButNotYourFillUps() {
+        val tank = FuelTank().filledUp(0.0, 0L)
+        val engine = tank.reading(50_000.0, null, engineKmPerL = 15.0)!!
+        assertEquals(15.0, engine.kmPerL, 1e-9)
+        assertTrue(engine.fromEngine)
+        // Un dato absurdo del motor se ignora y vuelve el supuesto.
+        assertEquals(FuelTank.DEFAULT_KM_PER_L, tank.reading(50_000.0, null, engineKmPerL = 90.0)!!.kmPerL, 1e-9)
+        // Con tanques llenos medidos, mandan tus cargas.
+        val measured = tank.copy(burns = listOf(Burn(400.0, 40.0)))
+        val r = measured.reading(0.0, null, engineKmPerL = 15.0)!!
+        assertEquals(10.0, r.kmPerL, 1e-9)
+        assertTrue(!r.fromEngine)
+    }
 }

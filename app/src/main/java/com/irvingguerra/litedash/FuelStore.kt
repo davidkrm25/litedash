@@ -55,15 +55,46 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
         trip.onStep = ::step
     }
 
+    /** Lo que el motor ha gastado: km recorridos y litros quemados, medidos con el gasto de gasolina o el MAF (se guardan). */
+    private var engineKm = prefs.getString(ENGINE_KM, null)?.toDoubleOrNull() ?: 0.0
+    private var engineLiters = prefs.getString(ENGINE_L, null)?.toDoubleOrNull() ?: 0.0
+    private var lastStepAt = 0L
+    private var savedEngineKm = engineKm
+
+    /** km/L medido por el motor; null mientras no haya al menos [MIN_ENGINE_KM] km con datos. */
+    val engineKmPerL: Double? get() = if (engineKm >= MIN_ENGINE_KM && engineLiters > 0.0) engineKm / engineLiters else null
+
+    /** Litros por hora ahora: el gasto que da el auto (PID 5E) o, si no, el MAF (g/s) con las correcciones de mezcla. */
+    private fun litersPerHour(): Double? {
+        bus.value(Signal.FUEL_RATE)?.takeIf { it > 0f }?.let { return it.toDouble() }
+        val maf = bus.value(Signal.MAF)?.takeIf { it > 0f } ?: return null
+        // Gasolina: mezcla ideal 14.7 g de aire por g de gasolina y 745 g por litro; las correcciones de mezcla del auto
+        // (a corto y largo plazo) dicen cuánto más o menos gasolina echa en realidad.
+        val trim = (bus.value(Signal.FUEL_TRIM_SHORT) ?: 0f) + (bus.value(Signal.FUEL_TRIM_LONG) ?: 0f)
+        return maf * 3600.0 / (14.7 * 745.0) * (1.0 + trim / 100.0).coerceIn(0.7, 1.4)
+    }
+
     private fun step(meters: Double) {
-        // Sin una carga anotada no hay qué medir: no se acumula nada (el widget apagado no cuesta).
+        val now = System.currentTimeMillis()
+        val dt = (now - lastStepAt) / 1000.0
+        lastStepAt = now
+        // El consumo medido por el motor se va sumando mientras haya datos (sin una carga anotada también).
+        if (meters > 0.0 && dt in 0.2..15.0) {
+            val lph = litersPerHour()
+            if (lph != null) {
+                engineKm += meters / 1000.0
+                engineLiters += lph * dt / 3600.0
+                if (engineKm - savedEngineKm >= 1.0) saveEngine()
+            }
+        }
+        // Sin una carga anotada no hay qué medir del tanque: no se acumula nada (el widget apagado no cuesta).
         if (meters <= 0.0 || tank.levelL == null) return
         odoMeters += meters
         if (odoMeters - savedOdo >= SAVE_EVERY_METERS) saveOdo()
     }
 
     /** Lo que se muestra ahora; el sensor del auto (OBD) manda si lo da. */
-    fun reading(): FuelReading? = tank.reading(odoMeters, bus.value(Signal.FUEL))
+    fun reading(): FuelReading? = tank.reading(odoMeters, bus.value(Signal.FUEL), engineKmPerL)
 
     fun fillUp(liters: Double?, price: Double?) {
         tank = tank.filledUp(odoMeters, System.currentTimeMillis(), liters, price)
@@ -129,6 +160,11 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
 
     private fun saveTank() = prefs.edit { putString(TANK, tank.toJson()) }
 
+    private fun saveEngine() {
+        savedEngineKm = engineKm
+        prefs.edit { putString(ENGINE_KM, engineKm.toString()); putString(ENGINE_L, engineLiters.toString()) }
+    }
+
     private fun saveOdo() {
         savedOdo = odoMeters
         prefs.edit { putString(ODO, odoMeters.toString()) }
@@ -140,6 +176,10 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
         const val ODO = "odo_meters"
         const val GRADE = "grade"
         const val SORT = "sort"
+        const val ENGINE_KM = "engine_km"
+        const val ENGINE_L = "engine_liters"
+        /** Con menos km que estos, lo medido por el motor aún no es confiable. */
+        const val MIN_ENGINE_KM = 5.0
         const val SORT_CHEAP = "cheap"
         const val SORT_NEAR = "near"
         /** Cada cuánto se guarda el odómetro (menos escrituras; lo más que se pierde si se corta la luz). */
