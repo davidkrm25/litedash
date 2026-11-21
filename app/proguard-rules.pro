@@ -10,3 +10,8 @@
     public static int e(...);
     public static boolean isLoggable(java.lang.String, int);
 }
+
+# ONNX Runtime (quitar fondo con IA): su código nativo busca estas clases y métodos por nombre; sin esto R8 los
+# renombra o quita y la app se cierra al usarlo.
+-keep class ai.onnxruntime.** { *; }
+-dontwarn ai.onnxruntime.**
