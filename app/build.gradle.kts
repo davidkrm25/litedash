@@ -55,7 +55,7 @@ android {
     defaultConfig {
         applicationId = "com.irvingguerra.litedash"
         minSdk = 23
-        ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a") }
+        ndk { abiFilters += setOf("arm64-v8a") }
         targetSdk = 37
         versionCode = versionCodeFrom(appVersionName)
         versionName = appVersionName
