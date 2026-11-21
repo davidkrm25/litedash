@@ -47,4 +47,5 @@
     <string name="dashito_voltage">Voltaje batería</string>
     <string name="dashito_avg">Consumo prom.</string>
     <string name="projection_open">Abrir %1$s</string>
+    <string name="map_no_live">Sin ubicación en vivo</string>
 </resources>

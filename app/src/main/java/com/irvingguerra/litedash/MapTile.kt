@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -138,7 +139,7 @@ fun MapTile(
         val turnWidth = maxWidth - if (external) 16.dp else 68.dp
         val withPlaces = maxHeight >= PLACES_HEIGHT
         Card(Modifier.fillMaxSize()) {
-            LiveMap(d, look, Modifier.fillMaxSize(), tileId, onTap = onTap)
+            LiveMap(d, look, Modifier.fillMaxSize(), tileId, onTap = onTap, dashito = "dashito=1" in data)
             // La vuelta no llega al botón de la app.
             NextTurn(d, Modifier.align(Alignment.TopStart).padding(8.dp).widthIn(max = turnWidth))
             if (withPlaces) {
@@ -343,6 +344,8 @@ private fun LiveMap(
     route: IntArray? = null,
     fixedZoom: Int? = null,
     focus: Rect? = null,
+    /** El Viaje de Dashito: inclinado aunque estés parado y con el aviso de "Sin ubicación en vivo". */
+    dashito: Boolean = false,
 ) {
     val c = LocalColors.current
     KeepTripRunning(d.trip)
@@ -363,8 +366,24 @@ private fun LiveMap(
         }
         MapCanvas(
             store, position.latitude, position.longitude, d.trip.bearing, kmh, look, Modifier.fillMaxSize(), camera, navigating,
-            active = active, onTap = onTap, pin = pin, onLongPress = onLongPress, route = route, fixedZoom = fixedZoom, focus = focus,
+            active = active, onTap = onTap, pin = pin, onLongPress = onLongPress, route = route, fixedZoom = fixedZoom, focus = focus, tilted = dashito,
         )
+        if (dashito) {
+            // Sin lectura reciente del GPS (más de 15 s), el aviso blanco de arriba a la izquierda.
+            val stale by produceState(false, position) {
+                while (true) {
+                    value = System.currentTimeMillis() - position.time > 15_000L
+                    kotlinx.coroutines.delay(3_000L)
+                }
+            }
+            if (stale) Row(
+                Modifier.align(Alignment.TopStart).padding(12.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.95f)).padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(Icons.location, c.warning, 20.dp)
+                Label(stringResource(R.string.map_no_live), Typography.body, Color(0xFF1B1B1F), maxLines = 1)
+            }
+        }
         // Con la tarjeta de un lugar abajo a la izquierda, lo de aquí estorba (al cerrarla vuelve a ti).
         if (!overlay) return@BoxWithConstraints
         // Abajo a la izquierda (a la derecha van los créditos): centrar si lo moviste, la calle y si es en línea o bajado.

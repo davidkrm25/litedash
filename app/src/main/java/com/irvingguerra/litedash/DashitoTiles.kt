@@ -81,12 +81,12 @@ fun TripStatTile(d: Dependencies, kind: String) {
     if (kind == TripStatKinds.RESET) {
         Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
             Box(
-                Modifier.height(48.dp).fillMaxWidth().clip(CircleShape).border(1.dp, c.text.copy(alpha = 0.6f), CircleShape).clickable { trip.reset() }.padding(horizontal = 20.dp),
+                Modifier.height(48.dp).fillMaxWidth().clip(CircleShape).border(1.dp, c.accent.copy(alpha = 0.7f), CircleShape).clickable { trip.reset() }.padding(horizontal = 20.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Icon(Icons.refresh, c.text, 20.dp)
-                    Label(stringResource(R.string.trip_reset_long), Typography.body, c.text, 1)
+                    Icon(Icons.refresh, c.accent, 20.dp)
+                    Label(stringResource(R.string.trip_reset_long), Typography.body, c.accent, 1)
                 }
             }
         }
@@ -136,8 +136,8 @@ internal fun StatBox(
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                     Label(name.uppercase(currentLocale()), Typography.label, c.textMuted, 1)
                     Row(verticalAlignment = Alignment.Bottom) {
-                        Label(value, Typography.clock.copy(fontSize = size.sp), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
-                        if (unit.isNotEmpty()) Label(unit, Typography.subtitle, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 4.dp))
+                        Label(value, Typography.clock.copy(fontSize = size.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                        if (unit.isNotEmpty()) Label(unit, Typography.body, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 4.dp))
                     }
                     if (sub != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         Icon(Icons.clock, c.textMuted, 16.dp)

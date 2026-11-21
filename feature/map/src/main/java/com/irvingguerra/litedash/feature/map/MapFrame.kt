@@ -468,10 +468,9 @@ internal class MapFrame : ScreenPoint {
                 return@translate
             }
             scale(1f, squash, Offset.Zero) {
-                drawCircle(accent.copy(alpha = 0.22f), 34 * unit, Offset.Zero)
+                drawCircle(accent.copy(alpha = 0.16f), 22 * unit, Offset.Zero)
                 rotate(arrowDegrees, Offset.Zero) {
                     drawPath(arrow, accent)
-                    drawPath(arrow, Color.White, style = arrowStroke)
                 }
             }
         }

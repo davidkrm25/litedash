@@ -408,6 +408,8 @@ fun MapCanvas(
     interactive: Boolean = true,
     /** Tu auto en vez de la flecha (null = la flecha). */
     marker: ImageBitmap? = null,
+    /** Inclinado (en 3D) aunque estés parado y el mapa mire al norte: el Viaje de Dashito. */
+    tilted: Boolean = false,
     /** Un lugar marcado con un pin (latitud, longitud), p. ej. el que buscaste; null = ninguno. */
     pin: Pair<Double, Double>? = null,
     /** Dejar presionado un punto del mapa: su latitud y longitud (null = nada). */
@@ -448,7 +450,7 @@ fun MapCanvas(
     val base = fixedZoom ?: look.zoom.level ?: driveZoom
     val zoom = fixedZoom ?: camera.zoom ?: base
     // Solo el automático se inclina: del todo en lo más cerca y nada un nivel más lejos (lo calcula el dibujo).
-    val tilts = fixedZoom == null && look.zoom == MapZoom.AUTO && (look.orientation != MapOrientation.NORTH_UP || marker != null)
+    val tilts = fixedZoom == null && look.zoom == MapZoom.AUTO && (look.orientation != MapOrientation.NORTH_UP || marker != null || tilted)
     val scope = rememberCoroutineScope()
     // Si este mapa se va o lo tapan a media animación de centrar, el otro la retoma.
     val shown = remember { Shown() }
