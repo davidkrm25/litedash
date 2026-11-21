@@ -4,6 +4,16 @@ Todos los cambios que nota quien usa LiteDash. Formato
 [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/), versiones
 [SemVer](https://semver.org/lang/es/).
 
+## Sin publicar
+
+### Agregado
+- **Widget Autonomía (México):** anota cuando llenas el tanque («Llené el tanque», con los litros del ticket si los sabes) o
+  cuando cargas unos litros, y LiteDash calcula cuánta gasolina te queda y cuántos km de autonomía. Con litros anotados en
+  dos tanques llenos seguidos mide tu consumo real (km/L). Si tu auto da el nivel por OBD, manda el sensor. Trae las
+  gasolineras cerca con su precio de la CRE (Magna, Premium o Diésel), ordenadas por cercanía o por precio; al tocar una
+  se abre la ruta en tu app de mapas (o en el mapa de LiteDash). Los precios solo se bajan cuando la pantalla se ve y ya
+  tienen más de 6 horas. Viene apagado: se agrega desde Agregar widget → Auto.
+
 ## [1.5.14] - 2026-11-18
 
 ### Cambiado

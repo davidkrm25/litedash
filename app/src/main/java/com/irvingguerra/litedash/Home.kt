@@ -163,6 +163,8 @@ sealed interface Panel {
     data class CustomizeWidget(val tileId: String) : Panel
     /** Ajustes abiertos en Llantas (desde la vista de llantas o la pieza sin configurar). */
     data object TiresSettings : Panel
+    /** La pantalla Autonomía: tanque, cargas y gasolineras con precio. */
+    data object Fuel : Panel
 }
 
 class Dependencies(
@@ -176,6 +178,8 @@ class Dependencies(
     val updates: AppUpdates?,
     val weather: WeatherRepository,
     val trip: TripRepository,
+    /** Autonomía: el tanque, las cargas y las gasolineras de la CRE. */
+    val fuel: FuelStore,
     val reminders: ReminderRepository,
     val wheel: WheelKeys,
     val stats: Stats,
@@ -341,6 +345,7 @@ fun TileContent(d: Dependencies, p: Tile, apps: List<App>, car: CarPackage?, rev
         )
         TileTypes.WORKSHOP -> HealthTile(d, showCar = p.flag(WidgetFlags.CAR)) { actions.onPanel(Panel.Workshop) }
         TileTypes.PROJECTION -> ProjectionTile(d, apps, appKeyOf(p.data)) { actions.onPanel(Panel.Drawer) }
+        TileTypes.FUEL -> FuelTile(d) { actions.onPanel(Panel.Fuel) }
         TileTypes.TIRES -> TiresTile(d, showCar = p.flag(WidgetFlags.CAR), onOpen = actions.onTires, onSettings = { actions.onPanel(Panel.TiresSettings) })
         TileTypes.MAP -> Box(Modifier.expandable(p, actions)) {
             // Con «Usar app de mapas externa», el toque y Casa/Trabajo abren esa app; apagado, todo es el mapa de LiteDash.
@@ -898,6 +903,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                         },
                         onTires = { panel = null; tiresLayer.open = true },
                     )
+                    Panel.Fuel -> FuelPanel(d, close = { panel = null }, onOwnMap = { panel = null })
                     Panel.Templates -> TemplatesPanel(d.dashboard, close = { panel = null })
                     Panel.BarSettings -> BarSettingsPanel(d, apps, close = { panel = null })
                     Panel.Wallpaper -> PanelScaffold(

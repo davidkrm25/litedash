@@ -97,6 +97,7 @@ val TileSpecs = listOf(
     TileSpec(TileTypes.WORKSHOP, R.string.workshop, SizeLimits(2, 2), 4 to 2, R.string.tile_workshop_help),
     TileSpec(TileTypes.PROJECTION, R.string.tile_projection, SizeLimits(4, 2), 6 to 2, R.string.tile_projection_help),
     TileSpec(TileTypes.TIRES, R.string.tile_tires, SizeLimits(2, 2), 4 to 4, R.string.tile_tires_help),
+    TileSpec(TileTypes.FUEL, R.string.tile_fuel, SizeLimits(4, 2), 6 to 4, R.string.tile_fuel_help),
     TileSpec(TileTypes.APP, R.string.tile_app, SizeLimits(2, 2), 2 to 2, R.string.tile_app_help),
 )
 
@@ -501,7 +502,7 @@ private fun PlacePill(text: String, background: Color, onClick: () -> Unit) {
 }
 
 /** Abre [intent]; false si no hay app que lo atienda (pantallas sin marcador o sin mapas). */
-private fun Context.tryStart(intent: Intent): Boolean = try {
+internal fun Context.tryStart(intent: Intent): Boolean = try {
     startActivity(intent)
     true
 } catch (e: ActivityNotFoundException) {

@@ -116,6 +116,9 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
     /** La última posición (la lee el mapa); se queda aunque el GPS se apague. */
     var position by mutableStateOf<Location?>(null)
         private set
+    /** Quien quiera contar la distancia recorrida (la pantalla Autonomía): recibe cada tramo en metros, en el hilo principal. */
+    var onStep: ((Double) -> Unit)? = null
+
     /** El viaje tal como va (puede haber terminado: ver [current]). */
     internal var leg by mutableStateOf(TripLeg())
         private set
@@ -262,7 +265,9 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
         if ((speedKmh ?: 0f) > 3f) heading(l)?.let { bearing = it }
         // Solo puntos buenos y en movimiento: parado, el GPS "camina" solo unos metros.
         if (l.accuracy <= 30f && (speedKmh ?: 0f) > 3f) {
-            leg = leg.moved(now, last?.distanceTo(l)?.toDouble() ?: 0.0)
+            val step = last?.distanceTo(l)?.toDouble() ?: 0.0
+            leg = leg.moved(now, step)
+            onStep?.invoke(step)
             last = l
         }
     }

@@ -214,6 +214,8 @@ object TileTypes {
     const val PROJECTION = "projection"
     /** Presión de las cuatro llantas (módulo de llantas). */
     const val TIRES = "tires"
+    /** Cuánto te queda en el tanque y gasolineras cerca con su precio. */
+    const val FUEL = "fuel"
     const val APP = "app"
 }
 

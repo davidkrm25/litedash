@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Los precios de las gasolineras (CRE) se bajan solo cuando la pantalla Autonomía se ve; el permiso ya lo declara la app. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

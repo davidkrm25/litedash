@@ -170,6 +170,7 @@ dependencies {
     implementation(project(":feature:obd"))
     implementation(project(":feature:tpms"))
     implementation(project(":feature:link"))
+    implementation(project(":feature:fuel"))
 
     // Compose (foundation y ui) llega de core:ui; el BOM se queda para las librerías de Compose sin versión (tooling).
     implementation(platform(libs.compose.bom))
