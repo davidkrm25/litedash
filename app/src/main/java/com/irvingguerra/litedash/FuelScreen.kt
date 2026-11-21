@@ -154,16 +154,16 @@ internal fun GaugeColumn(reading: FuelReading?, modifier: Modifier, onFull: () -
             Typography.small, c.textMuted, maxLines = 2,
         )
         Box(
-            Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(c.primary).clickable(onClick = onFull),
+            Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).background(c.accent).clickable(onClick = onFull),
             contentAlignment = Alignment.Center,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Icon(Icons.fuel, c.onPrimary, 22.dp)
-                Label(stringResource(R.string.fuel_filled), Typography.body.copy(fontWeight = FontWeight.SemiBold), c.onPrimary, 1)
+                Icon(Icons.fuel, Color.White, 22.dp)
+                Label(stringResource(R.string.fuel_filled), Typography.body.copy(fontWeight = FontWeight.SemiBold), Color.White, 1)
             }
         }
         Box(
-            Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).border(1.dp, c.line, CircleShape).clickable(onClick = onAdd),
+            Modifier.fillMaxWidth().height(56.dp).clip(CircleShape).border(1.dp, c.accent.copy(alpha = 0.6f), CircleShape).clickable(onClick = onAdd),
             contentAlignment = Alignment.Center,
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -174,36 +174,30 @@ internal fun GaugeColumn(reading: FuelReading?, modifier: Modifier, onFull: () -
     }
 }
 
-/** El arco de cuánto te queda: se llena con la autonomía y cambia de color cuando queda poco. */
+/** El dial de cuánto te queda (como el de Dashito: marcas, números y aro): se llena con la autonomía y avisa cuando queda poco. */
 @Composable
 private fun RangeGauge(reading: FuelReading?) {
-    val c = LocalColors.current
     val locale = currentLocale()
-    BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        val side = minOf(maxWidth, maxHeight)
-        val fraction = if (reading == null) 0f else (reading.levelL / reading.capacityL).toFloat().coerceIn(0f, 1f)
-        val color = when {
-            reading == null -> c.line
-            fraction > 0.25f -> c.good
-            fraction > 0.12f -> c.warning
-            else -> c.danger
-        }
-        Canvas(Modifier.size(side)) {
-            val stroke = size.minDimension * 0.07f
-            val arc = Size(size.width - stroke, size.height - stroke)
-            val topLeft = Offset(stroke / 2, stroke / 2)
-            drawArc(c.line, 135f, 270f, false, topLeft, arc, style = Stroke(stroke, cap = StrokeCap.Round))
-            if (fraction > 0f) drawArc(color, 135f, 270f * fraction, false, topLeft, arc, style = Stroke(stroke, cap = StrokeCap.Round))
-        }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Label(
-                if (reading == null) "--" else String.format(locale, "%.0f", reading.rangeKm),
-                Typography.clock.copy(fontSize = (side.value * 0.26f).sp), maxLines = 1,
-            )
-            Label(stringResource(R.string.unit_km), Typography.subtitle, c.textMuted, 1)
-            Label(stringResource(R.string.fuel_range_label).uppercase(locale), Typography.label, c.textMuted, 1, Modifier.padding(top = 4.dp))
-        }
-    }
+    val colors = LocalColors.current
+    // La escala llega a la autonomía con el tanque lleno, redondeada a cientos (700 si aún no se sabe).
+    val full = reading?.let { it.capacityL * it.kmPerL } ?: 700.0
+    val top = (Math.ceil(full / 100.0).toInt() * 100).coerceIn(300, 1000)
+    val steps = top / 100
+    val labels = List(steps + 1) { String.format(locale, "%d", it * 100) }
+    val fraction = reading?.let { (it.rangeKm / top).toFloat() } ?: 0f
+    val low = reading != null && reading.levelL / reading.capacityL <= 0.12
+    GaugeCard(
+        number = if (reading == null) "--" else String.format(locale, "%.0f", reading.rangeKm),
+        unit = stringResource(R.string.unit_km),
+        tag = stringResource(R.string.fuel_range_label).uppercase(locale),
+        fraction = fraction,
+        ticks = steps,
+        look = GaugeLook(numbers = true),
+        carColor = colors.accent,
+        labels = labels,
+        redFrom = 1.1f,
+        warning = low,
+    )
 }
 
 // ───────────────────────────── tarjetas de datos ─────────────────────────────
@@ -231,13 +225,13 @@ internal fun FuelStat(part: String, reading: FuelReading?, locale: Locale, modif
             onClick = onTank, modifier = modifier,
         )
         FuelParts.AVERAGE -> StatCard(
-            Icons.speed, stringResource(R.string.fuel_consumption),
+            Icons.drop, stringResource(R.string.fuel_consumption),
             reading?.let { String.format(locale, "%.1f", it.kmPerL) } ?: dash, stringResource(R.string.fuel_unit_kml),
             detail = reading?.let { stringResource(if (it.calibrated) R.string.fuel_consumption_measured else R.string.fuel_consumption_assumed) },
             modifier = modifier,
         )
         FuelParts.SINCE -> StatCard(
-            Icons.road, stringResource(R.string.fuel_since),
+            Icons.route, stringResource(R.string.fuel_since),
             reading?.kmSinceFill?.let { String.format(locale, "%.0f", it) } ?: "0", stringResource(R.string.unit_km),
             detail = reading?.let { r ->
                 r.litersUsed?.let { stringResource(R.string.fuel_since_detail, dateText(r.lastFillAtMs, locale), String.format(locale, "%.1f", it)) }
@@ -245,7 +239,7 @@ internal fun FuelStat(part: String, reading: FuelReading?, locale: Locale, modif
             modifier = modifier,
         )
         else -> StatCard(
-            Icons.location, stringResource(R.string.fuel_accuracy),
+            Icons.target, stringResource(R.string.fuel_accuracy),
             stringResource(if (reading?.calibrated == true) R.string.fuel_calibrated else R.string.fuel_uncalibrated), "",
             detail = if (reading?.calibrated == true) stringResource(R.string.fuel_calibrated_help, reading.burns) else stringResource(R.string.fuel_uncalibrated_help),
             modifier = modifier,
@@ -280,7 +274,7 @@ private fun StatCard(
                 if (detail != null) Label(detail, Typography.small, c.textMuted, 2)
                 if (progress != null) {
                     Box(Modifier.padding(top = 6.dp).fillMaxWidth().height(5.dp).clip(CircleShape).background(c.line)) {
-                        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(5.dp).clip(CircleShape).background(c.good))
+                        Box(Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(5.dp).clip(CircleShape).background(c.accent))
                     }
                 }
             }
@@ -309,7 +303,7 @@ internal fun StationsCard(d: Dependencies, gpsGranted: Boolean, askGps: () -> Un
         Column(Modifier.fillMaxSize().padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.location, c.accent, 22.dp)
-                Label(stringResource(R.string.fuel_stations).uppercase(locale), Typography.label, c.textMuted, 1, Modifier.padding(start = 10.dp).weight(1f))
+                Label(stringResource(R.string.fuel_stations).uppercase(locale), Typography.label, c.textMuted, 1, Modifier.padding(start = 6.dp).weight(1f))
                 Segmented(
                     listOf(StationSort.NEAR to R.string.fuel_near, StationSort.CHEAP to R.string.fuel_cheap),
                     fuel.sort, fuel::select,
@@ -330,8 +324,7 @@ internal fun StationsCard(d: Dependencies, gpsGranted: Boolean, askGps: () -> Un
                     list.isEmpty() -> FuelNotice(stringResource(R.string.fuel_no_stations))
                     else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                         for ((i, near) in list.withIndex()) {
-                            if (i > 0) Divider()
-                            StationRow(near, fuel.grade, highlight = near.station.prices[fuel.grade] == cheapest, locale = locale) { onPick(near.station) }
+                                                        StationRow(near, fuel.grade, highlight = near.station.prices[fuel.grade] == cheapest, locale = locale) { onPick(near.station) }
                         }
                     }
                 }
@@ -376,7 +369,7 @@ private fun StationRow(near: NearStation, grade: FuelGrade, highlight: Boolean, 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Label(s.name.lowercase(locale).replaceFirstChar { it.titlecase(locale) }, Typography.subtitle, maxLines = 1)
+            Label(s.name.lowercase(locale).replaceFirstChar { it.titlecase(locale) }, Typography.subtitle.copy(fontSize = 15.sp), maxLines = 1)
             Label(detail, Typography.small, c.textMuted, 1)
         }
         val price = String.format(locale, "$%.2f", s.prices[grade] ?: 0.0)
@@ -414,7 +407,7 @@ private fun <T> Segmented(options: List<Pair<T, Int>>, selected: T, onSelect: (T
         for ((value, name) in options) {
             val on = value == selected
             Box(
-                Modifier.clip(CircleShape).background(if (on) c.primary else Color.Transparent).clickable { onSelect(value) }.padding(horizontal = 16.dp, vertical = 9.dp),
+                Modifier.clip(CircleShape).background(if (on) c.primary else Color.Transparent).clickable { onSelect(value) }.padding(horizontal = 12.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center,
             ) { Label(stringResource(name), Typography.small.copy(fontWeight = FontWeight.SemiBold), if (on) c.onPrimary else c.text, 1) }
         }
