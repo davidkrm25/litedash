@@ -10,6 +10,7 @@
     <string name="image_strength_medium">Media</string>
     <string name="image_strength_high">Alta</string>
     <string name="image_strength_max">Máxima</string>
+    <string name="image_strength_ai">IA</string>
     <string name="image_cut_failed">No se pudo separar el auto del fondo: prueba con una foto de fondo liso.</string>
     <string name="image_apply">Aplicar</string>
     <string name="image_unusable">No se pudo usar esa imagen; prueba con otra.</string>

@@ -55,6 +55,7 @@ android {
     defaultConfig {
         applicationId = "com.irvingguerra.litedash"
         minSdk = 23
+        ndk { abiFilters += setOf("arm64-v8a", "armeabi-v7a") }
         targetSdk = 37
         versionCode = versionCodeFrom(appVersionName)
         versionName = appVersionName
@@ -177,6 +178,7 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(libs.core)
     implementation(libs.profileinstaller)
+    implementation(libs.onnxruntime)
     debugImplementation(libs.compose.ui.tooling)
     testImplementation(libs.junit)
     // org.json de verdad en las pruebas (el de Android es solo un esqueleto fuera del equipo).

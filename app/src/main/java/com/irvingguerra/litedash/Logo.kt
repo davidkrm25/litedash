@@ -380,18 +380,22 @@ private class CutPreview(val source: Bitmap, val level: Int, val bitmap: Bitmap?
  * Quita el fondo de [source] (fuera del hilo principal). Uno a la vez: al tocar varias intensidades
  * seguidas, las que ya no se ven ni empiezan (cada una ocupa ~14 MB mientras corre).
  */
-private suspend fun cutPreview(source: Bitmap, level: Int): CutPreview = cutLock.withLock {
+private suspend fun cutPreview(appContext: Context, source: Bitmap, level: Int): CutPreview = cutLock.withLock {
     currentCoroutineContext().ensureActive()
-    cut(source, level)
+    cut(appContext, source, level)
 }
 
 private val cutLock = Mutex()
 
-private suspend fun cut(source: Bitmap, level: Int): CutPreview = withContext(Dispatchers.Default) {
+private suspend fun cut(appContext: Context, source: Bitmap, level: Int): CutPreview = withContext(Dispatchers.Default) {
     val w = source.width
     val h = source.height
     val pixels = IntArray(w * h).also { source.getPixels(it, 0, w, 0, 0, w, h) }
-    val cut = removeBackground(pixels, w, h, level)
+    if (level == AI_LEVEL) {
+        val ai = AiCutout.cut(appContext, source)
+        if (ai != null) return@withContext CutPreview(source, level, ai)
+    }
+    val cut = removeBackground(pixels, w, h, level.coerceAtMost(CUT_LEVELS - 1))
     CutPreview(source, level, cut?.let { Bitmap.createBitmap(it.pixels, it.width, it.height, Bitmap.Config.ARGB_8888) })
 }
 
@@ -887,7 +891,7 @@ fun ImageEditor(
         value = picked?.let { withContext(Dispatchers.IO) { decodePicked(context, it, CUT_MAX_PX, lowMemory = false) } }
     }
     var removing by remember(key) { mutableStateOf(false) }
-    var level by remember(key) { mutableIntStateOf(1) }
+    var level by remember(key) { mutableIntStateOf(AI_LEVEL) }
     // Lo que hay guardado: -1 = la original; si no, la intensidad con que se quitó el fondo.
     var saved by remember(key) { mutableIntStateOf(-1) }
     var applyFailed by remember(key) { mutableStateOf(false) }
@@ -895,7 +899,7 @@ fun ImageEditor(
     // Se queda la vista previa anterior mientras se calcula la nueva (sin parpadeo).
     val preview by produceState<CutPreview?>(null, source, removing, level) {
         val photo = source
-        if (removing && photo != null && (value?.source !== photo || value?.level != level)) value = cutPreview(photo, level)
+        if (removing && photo != null && (value?.source !== photo || value?.level != level)) value = cutPreview(context.applicationContext, photo, level)
     }
     val ready = preview?.takeIf { removing && it.source === source && it.level == level }
     val sourceImage = remember(source) { source?.asImageBitmap() }
@@ -923,7 +927,7 @@ fun ImageEditor(
         if (removing) {
             Label(stringResource(R.string.image_background_help), Typography.small, c.textMuted)
             Label(stringResource(R.string.image_strength), Typography.label, c.textMuted)
-            Segmented(List(CUT_LEVELS) { it to stringResource(CUT_STRENGTHS[it]) }, level, { level = it })
+            Segmented(List(CUT_LEVELS + 1) { it to stringResource(CUT_STRENGTHS[it]) }, level, { level = it })
             if (ready != null && ready.bitmap == null) Label(stringResource(R.string.image_cut_failed), Typography.small, c.danger)
         }
         val cut = ready?.bitmap
@@ -953,4 +957,8 @@ private val CUT_STRENGTHS = listOf(
     R.string.image_strength_medium,
     R.string.image_strength_high,
     R.string.image_strength_max,
+    R.string.image_strength_ai,
 )
+
+/** Nivel de "quitar fondo" con IA (el siguiente a los de [CUT_LEVELS]). */
+private const val AI_LEVEL = CUT_LEVELS
