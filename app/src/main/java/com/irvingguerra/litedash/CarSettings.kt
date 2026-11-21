@@ -87,6 +87,9 @@ internal fun CarSettings(d: Dependencies) {
     val tab = tabs(listOf(R.string.tab_my_car, R.string.tab_models, R.string.reminders), "car")
     val entry = pkg?.let { p -> catalog?.firstOrNull { it.id == p.id } }
 
+    if (tab == 0) SettingsCard(stringResource(R.string.car_photo), help = stringResource(R.string.car_photo_help)) {
+        ImageEditor(MY_CAR_PHOTO, MY_CAR_PHOTO, stringResource(R.string.car_photo_empty), placeholder = false) {}
+    }
     if (tab == 0) SettingsCard {
         Box(Modifier.fillMaxWidth().widthIn(max = 520.dp).aspectRatio(1.8f)) {
             if (pkg != null) {

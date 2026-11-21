@@ -179,9 +179,8 @@ fun CustomizeGaugePanel(d: Dependencies, tileId: String, close: () -> Unit, onPi
                     // Solo el velocímetro (no la carretera, que ya lleva el auto). "Tu auto", si hay uno instalado.
                     if (tile.type == TileTypes.SPEEDOMETER) {
                         Label(stringResource(R.string.gauge_front), Typography.label, c.textMuted)
-                        val hasCar = d.cars.pkg(d.prefs.carModel) != null
                         Segmented(
-                            GaugeFront.entries.filter { it != GaugeFront.CAR || hasCar || look.front == it }.map { it to stringResource(it.title) },
+                            GaugeFront.entries.map { it to stringResource(it.title) },
                             look.front,
                             { set(look.copy(front = it)) },
                         )

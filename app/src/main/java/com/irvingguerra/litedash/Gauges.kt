@@ -48,6 +48,8 @@ fun rememberSpeedFront(d: Dependencies, look: GaugeLook): (@Composable (Modifier
         when (look.front) {
             GaugeFront.NONE -> null
             GaugeFront.CAR -> pkg?.let { { m: Modifier -> CarStill(d.cars, it, paint, m, reflection = false) } }
+                // Sin auto del catálogo: la foto propia de Ajustes → Tu auto (sin foto no se ve nada).
+                ?: { m: Modifier -> SavedTileImage(MY_CAR_PHOTO, m) }
             GaugeFront.IMAGE -> look.image.takeIf { it.isNotEmpty() }?.let { name -> { m: Modifier -> SavedTileImage(name, m) } }
         }
     }
@@ -226,3 +228,6 @@ fun SpecGaugeCard(spec: GaugeSpec, value: Float?, units: UnitChoice, look: Gauge
 /** El número como se lee en la tarjeta (sin unidad). */
 fun gaugeText(spec: GaugeSpec, value: Float, units: UnitChoice, locale: Locale): String =
     String.format(locale, "%.${spec.decimals}f", spec.shown(value, units))
+
+/** Nombre de la foto del auto que se sube en Ajustes → Tu auto (files/images/mycar.png). */
+const val MY_CAR_PHOTO = "mycar"

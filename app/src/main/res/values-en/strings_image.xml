@@ -14,4 +14,7 @@
     <string name="image_cut_failed">Couldn\'t separate the car from the background: try a photo with a plain background.</string>
     <string name="image_apply">Apply</string>
     <string name="image_unusable">Couldn\'t use that image; try another one.</string>
+    <string name="car_photo">Your car photo</string>
+    <string name="car_photo_help">Upload a photo of your car and the app removes its background. It shows on the Home speedometer.</string>
+    <string name="car_photo_empty">No car photo yet.</string>
 </resources>

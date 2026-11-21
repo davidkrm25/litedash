@@ -63,16 +63,18 @@ fun PageTabs(pages: DashboardState, onSettings: () -> Unit, modifier: Modifier =
 private fun Tab(icon: ImageVector, name: String, selected: Boolean, onClick: () -> Unit) {
     val c = LocalColors.current
     val shape = RoundedCornerShape(16.dp)
+    // En pantallas bajas (celular de lado) solo el ícono: la barra mide 44 dp y el nombre se cortaba.
+    val short = isShortScreen()
     Column(
         Modifier
-            .widthIn(min = 72.dp)
+            .widthIn(min = if (short) 48.dp else 72.dp)
             .clip(shape)
             .then(if (selected) Modifier.background(c.surfaceHigh).border(1.dp, c.accent.copy(alpha = 0.5f), shape) else Modifier)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+            .padding(horizontal = if (short) 10.dp else 14.dp, vertical = if (short) 4.dp else 6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(icon, if (selected) c.accent else c.textMuted, 24.dp)
-        Label(name.uppercase(currentLocale()), Typography.label, if (selected) c.accent else c.textMuted, 1)
+        if (!short) Label(name.uppercase(currentLocale()), Typography.label, if (selected) c.accent else c.textMuted, 1)
     }
 }

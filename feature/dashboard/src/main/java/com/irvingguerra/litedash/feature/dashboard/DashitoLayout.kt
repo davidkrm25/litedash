@@ -6,7 +6,7 @@ import kotlin.math.roundToInt
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 1
+const val FACTORY_VERSION = 2
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -82,9 +82,15 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
         },
         // Autonomía: el medidor con sus botones, las gasolineras y las tarjetas.
         page(3) {
-            put(TileTypes.FUEL_PART, 0.0, 0.0, 0.5, 1.0, FuelParts.GAUGE, plain = true)
-            put(TileTypes.FUEL_PART, 0.5, 0.0, 0.77, 1.0, FuelParts.STATIONS)
-            put(TileTypes.FUEL_PART, 0.77, 0.0, 1.0, 1.0, FuelParts.STATS, plain = true)
+            if (c.columns < 12) {
+                // Pantalla chica: sin la columna de tarjetas, para que el medidor y las gasolineras alcancen su tamaño.
+                put(TileTypes.FUEL_PART, 0.0, 0.0, 0.5, 1.0, FuelParts.GAUGE, plain = true)
+                put(TileTypes.FUEL_PART, 0.5, 0.0, 1.0, 1.0, FuelParts.STATIONS)
+            } else {
+                put(TileTypes.FUEL_PART, 0.0, 0.0, 0.5, 1.0, FuelParts.GAUGE, plain = true)
+                put(TileTypes.FUEL_PART, 0.5, 0.0, 0.77, 1.0, FuelParts.STATIONS)
+                put(TileTypes.FUEL_PART, 0.77, 0.0, 1.0, 1.0, FuelParts.STATS, plain = true)
+            }
         },
         // Clima: el widget completo.
         page(4) {

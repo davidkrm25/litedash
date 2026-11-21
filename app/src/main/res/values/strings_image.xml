@@ -14,4 +14,7 @@
     <string name="image_cut_failed">No se pudo separar el auto del fondo: prueba con una foto de fondo liso.</string>
     <string name="image_apply">Aplicar</string>
     <string name="image_unusable">No se pudo usar esa imagen; prueba con otra.</string>
+    <string name="car_photo">Foto de tu auto</string>
+    <string name="car_photo_help">Sube una foto de tu auto y la app le quita el fondo. Se ve en el velocímetro del inicio.</string>
+    <string name="car_photo_empty">Aún no hay foto de tu auto.</string>
 </resources>
