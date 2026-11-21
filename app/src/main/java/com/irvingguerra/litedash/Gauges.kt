@@ -8,6 +8,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.irvingguerra.litedash.core.ui.Icons
 import com.irvingguerra.litedash.core.vehicle.Signal
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.irvingguerra.litedash.core.ui.Label
+import com.irvingguerra.litedash.core.ui.LocalColors
+import com.irvingguerra.litedash.core.ui.Typography
 import com.irvingguerra.litedash.core.vehicle.watch
 import com.irvingguerra.litedash.feature.car.CarStill
 import com.irvingguerra.litedash.feature.obd.CHARGING_MAX_V
@@ -21,7 +35,7 @@ import java.util.Locale
  * auto (OBD) si hay adaptador conectado; si no, del GPS (pide permiso la primera vez).
  */
 @Composable
-fun SpeedometerTile(d: Dependencies, look: GaugeLook) {
+fun SpeedometerTile(d: Dependencies, look: GaugeLook, dashito: Boolean = false) {
     // Con un adaptador ya guardado, se reconecta solo (sin abrir el Taller).
     val obdOn = rememberObd(d)?.state == ObdState.ON
     val (gps, ask) = rememberGpsPermission(d)
@@ -32,7 +46,21 @@ fun SpeedometerTile(d: Dependencies, look: GaugeLook) {
     if (!obdOn) KeepTripRunning(d.trip)
     val kmh = d.bus.watch(Signal.SPEED)
     val miles = d.prefs.units.miles
-    SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, speedTag(d), look, d.prefs.carColor, rememberSpeedFront(d, look))
+    val front = rememberSpeedFront(d, look)
+    if (!dashito) return SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, speedTag(d), look, d.prefs.carColor, front)
+    val c = LocalColors.current
+    val rpm = d.bus.watch(Signal.RPM)
+    Box(Modifier.fillMaxSize()) {
+        SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, speedTag(d), look, d.prefs.carColor, front)
+        Label(stringResource(R.string.dashito_title), Typography.label.copy(letterSpacing = 6.sp), c.text.copy(alpha = 0.8f), 1, Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
+        Row(
+            Modifier.align(Alignment.BottomCenter).clip(CircleShape).border(0.75.dp, c.accent.copy(alpha = 0.55f), CircleShape).padding(horizontal = 18.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Label("RPM", Typography.small, c.textMuted, 1)
+            Label((rpm ?: 0f).toInt().toString(), Typography.subtitle, c.accent, 1)
+        }
+    }
 }
 
 /**
@@ -184,11 +212,26 @@ fun gaugeOf(signal: String) = GaugeSpecs.firstOrNull { it.signal == signal }
  * elegir; sin adaptador lleva al Taller; si el auto no da ese dato, lo dice.
  */
 @Composable
-fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, onPick: () -> Unit, onWorkshop: () -> Unit) {
+fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = false, onPick: () -> Unit, onWorkshop: () -> Unit) {
     val spec = gaugeOf(signal)
         ?: return ShortcutTile(Icons.plus, stringResource(R.string.tile_gauge), stringResource(R.string.gauge_pick), onPick)
     // Con un adaptador ya guardado, se reconecta solo (sin abrir el Taller).
     val obd = rememberObd(d)
+    if (card) {
+        // Tarjeta de datos como en Dashito: ícono, nombre, valor y barra; al tocarla va a su pantalla.
+        val units = d.prefs.units
+        val locale = currentLocale()
+        val live = obd?.state == ObdState.ON && obd.canRead(spec.signal)
+        val value = if (live) d.bus.watch(spec.signal) else null
+        val withBar = spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.COOLANT || spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE
+        StatBox(
+            spec.icon, stringResource(spec.name), value?.let { gaugeText(spec, it, units, locale) } ?: "--", stringResource(spec.unit(units)),
+            bar = if (withBar) (value?.let(spec::fraction) ?: 0f) else null,
+            range = if (withBar) String.format(locale, "%.0f", spec.shown(spec.min, units)) to String.format(locale, "%.0f", spec.shown(spec.max, units)) else null,
+            onClick = { d.dashboard.goTo(if (spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION) 3 else 5) },
+        )
+        return
+    }
     // Sin adaptador (o sin ese dato) se ve igual, vacío y con "—", y una nota corta: no un texto largo.
     if (obd?.state != ObdState.ON) {
         val note = stringResource(if (obd?.state == ObdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)

@@ -228,7 +228,7 @@ internal fun BarPreview(repo: AppRepository, favorites: List<App>, items: List<B
 fun barThickness(prefs: Preferences, vertical: Boolean): Dp {
     val short = isShortScreen()
     val small = isSmallScreen() && !short
-    return (if (vertical) (if (small) 76.dp else 88.dp) else if (small) 96.dp else if (short) 64.dp else 84.dp) * prefs.barSize.scale
+    return (if (vertical) (if (small) 60.dp else 68.dp) else if (small) 96.dp else if (short) 64.dp else 84.dp) * prefs.barSize.scale
 }
 
 /** De vidrio, lo menos que se ve la barra de abajo. */

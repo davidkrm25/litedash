@@ -161,7 +161,7 @@ val DarkColors = Colors(
     line = Color(0xFF24373C),
     text = Brand.LightWhite,
     textMuted = Color(0xFF8B939E),
-    accent = Color(0xFF80D8C3),
+    accent = Color(0xFFFF5A52),
     danger = Color(0xFFFF6B5E),
     warning = Brand.Amber,
     good = Good,
@@ -177,7 +177,7 @@ val LightColors = Colors(
     line = Color(0xFFE3E6EA),
     text = LightInk,
     textMuted = Color(0xFF7D8590),
-    accent = LightAmber,
+    accent = Color(0xFFD62F2F),
     danger = Color(0xFFD93A2B),
     warning = LightAmber,
     good = Good,
@@ -258,7 +258,7 @@ fun Card(
     val look = LocalCardLook.current
     val plain = LocalPlainCard.current
     val shape = RoundedCornerShape(Radius.card)
-    var m = modifier.clip(shape).then(if (plain) Modifier else Modifier.skinSurface(look, c, shape))
+    var m = modifier.clip(shape).then(if (plain) Modifier else Modifier.skinSurface(look, c, shape).border(0.75.dp, c.accent.copy(alpha = 0.55f), shape))
     if (onClick != null) m = m.clickable(onClick = onClick)
     // Una vez por tema y piel, no en cada dibujo (un valor nuevo haría releer los colores a todo lo de adentro).
     val inner = remember(c, look.style, plain) { contentColors(c, look, plain) }

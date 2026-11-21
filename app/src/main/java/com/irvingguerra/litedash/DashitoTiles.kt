@@ -87,6 +87,11 @@ fun TripStatTile(d: Dependencies, kind: String) {
         }
         return
     }
+    if (kind == TripStatKinds.NOW) {
+        val leg = trip.current()
+        StatBox(Icons.road, stringResource(R.string.dashito_trip_now), stats.distance, stats.unit, sub = hms(leg.movingMs), onClick = { d.dashboard.goTo(2) })
+        return
+    }
     val reading = d.fuel.reading()
     val kmPerL = reading?.kmPerL ?: d.fuel.tank.assumedKmPerL
     val leg = trip.current()
@@ -111,9 +116,12 @@ private fun hms(ms: Long): String {
 
 /** Tarjeta con su ícono en un cuadro, el nombre en chico arriba y el valor grande con su unidad. */
 @Composable
-private fun StatBox(icon: ImageVector, name: String, value: String, unit: String) {
+internal fun StatBox(
+    icon: ImageVector, name: String, value: String, unit: String,
+    sub: String? = null, bar: Float? = null, range: Pair<String, String>? = null, onClick: (() -> Unit)? = null,
+) {
     val c = LocalColors.current
-    Card(Modifier.fillMaxSize()) {
+    Card(Modifier.fillMaxSize(), onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 12.dp)) {
             val size = fitFont(value, maxWidth * 0.5f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -124,7 +132,21 @@ private fun StatBox(icon: ImageVector, name: String, value: String, unit: String
                         Label(value, Typography.clock.copy(fontSize = size.sp), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
                         if (unit.isNotEmpty()) Label(unit, Typography.subtitle, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 4.dp))
                     }
+                    if (sub != null) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Icon(Icons.clock, c.textMuted, 16.dp)
+                        Label(sub, Typography.small, c.text, 1)
+                    }
+                    if (bar != null) {
+                        Box(Modifier.fillMaxWidth().padding(top = 4.dp).height(4.dp).clip(CircleShape).background(c.text.copy(alpha = 0.1f))) {
+                            Box(Modifier.fillMaxWidth(bar.coerceIn(0f, 1f)).fillMaxHeight().background(c.accent))
+                        }
+                        if (range != null) Row(Modifier.fillMaxWidth()) {
+                            Label(range.first, Typography.label, c.textMuted, 1, Modifier.weight(1f))
+                            Label(range.second, Typography.label, c.textMuted, 1)
+                        }
+                    }
                 }
+                if (onClick != null) Icon(Icons.chevron, c.textMuted, 24.dp)
             }
         }
     }

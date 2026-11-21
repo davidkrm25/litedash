@@ -264,4 +264,6 @@ private fun applyStatusBar(window: android.view.Window, hide: Boolean) {
     val bars = WindowCompat.getInsetsController(window, window.decorView)
     bars.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     if (hide) bars.hide(WindowInsetsCompat.Type.statusBars()) else bars.show(WindowInsetsCompat.Type.statusBars())
+    // La barra de navegación (atrás, inicio, recientes) siempre oculta: se asoma deslizando desde abajo.
+    bars.hide(WindowInsetsCompat.Type.navigationBars())
 }

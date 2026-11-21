@@ -246,6 +246,7 @@ class Dependencies(
         if (dashboard.factoryVersion < FACTORY_VERSION) {
             dashboard.factoryVersion = FACTORY_VERSION
             dashboard.applyFactory(FACTORY_PAGES)
+            obdModule = true
             // La barra de LiteDash, a la izquierda (como Dashito deja libre el lado derecho).
             prefs.barPosition = BarPosition.SIDE
         }
@@ -351,9 +352,9 @@ fun TileContent(d: Dependencies, p: Tile, apps: List<App>, car: CarPackage?, rev
         TileTypes.CLOCK -> ClockTile(d.prefs.driverName.takeIf { p.flag(WidgetFlags.GREETING) }, clockWeather(d, p.data), date = p.flag(WidgetFlags.DATE))
         TileTypes.WEATHER -> WeatherTile(d.weather, days = p.flag(WidgetFlags.DAYS), range = p.flag(WidgetFlags.RANGE))
         TileTypes.TRIP -> TripTile(d, time = p.flag(WidgetFlags.TIME), average = p.flag(WidgetFlags.AVERAGE), heading = p.flag(WidgetFlags.HEADING))
-        TileTypes.SPEEDOMETER -> SpeedometerTile(d, remember(p.data) { GaugeLook.parse(p.data) })
+        TileTypes.SPEEDOMETER -> SpeedometerTile(d, remember(p.data) { GaugeLook.parse(p.data) }, dashito = "title=1" in p.data)
         TileTypes.GAUGE -> GaugeTile(
-            d, signalOf(p.data), remember(p.data) { GaugeLook.parse(p.data) },
+            d, signalOf(p.data), remember(p.data) { GaugeLook.parse(p.data) }, card = "card=1" in p.data,
             onPick = { actions.onPanel(Panel.PickGauge(p.id)) },
             onWorkshop = { actions.onPanel(Panel.Workshop) },
         )
@@ -925,6 +926,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                     Panel.Fuel -> FuelPanel(d, close = { panel = null }, onOwnMap = { panel = null })
                     Panel.Templates -> TemplatesPanel(d.dashboard, close = { panel = null }, onDashito = {
                         d.dashboard.applyFactory(FACTORY_PAGES)
+                        d.obdModule = true
                         d.prefs.barPosition = BarPosition.SIDE
                     })
                     Panel.BarSettings -> BarSettingsPanel(d, apps, close = { panel = null })
@@ -1094,7 +1096,7 @@ fun dockFavorites(d: Dependencies, apps: List<App>): List<App> {
 
 /** Alto de la barra de arriba; con las pestañas de las páginas (ícono y nombre) es más alta, también en pantallas bajas. */
 @Composable
-private fun topBarHeight(tabbed: Boolean = false) = if (isShortScreen()) (if (tabbed) 58.dp else 44.dp) else (if (tabbed) 72.dp else 64.dp)
+private fun topBarHeight(tabbed: Boolean = false) = if (isShortScreen()) (if (tabbed) 58.dp else 44.dp) else (if (tabbed) 78.dp else 64.dp)
 private val TOP_BAR_HIDDEN = 12.dp
 
 @Composable
@@ -1156,11 +1158,12 @@ private fun TopBar(
             // Con varias páginas: el encabezado con las pestañas (OBD a la izquierda, hora y fecha a la derecha).
             val clock = rememberClock()
             ObdPill(obdOn)
-            PageTabs(pages, onSettings, Modifier.weight(1f))
             StatusIcons()
+            PageTabs(pages, onSettings, Modifier.weight(1f))
+            val short = isShortScreen()
             Column(horizontalAlignment = Alignment.End) {
-                Label(clock.full, Typography.title, maxLines = 1)
-                Label(clock.date.uppercase(currentLocale()), Typography.label, c.textMuted, maxLines = 1)
+                Label(clock.full, Typography.clock.copy(fontSize = if (short) 28.sp else 38.sp), maxLines = 1)
+                Label(clock.date.uppercase(currentLocale()), Typography.small, c.text.copy(alpha = 0.8f), maxLines = 1)
             }
         } else {
             val clock = rememberClock()

@@ -39,4 +39,6 @@
     <string name="dashito_tab_settings">Settings</string>
     <string name="dashito_obd_off">NO OBD</string>
     <string name="dashito_obd_on">OBD</string>
+    <string name="dashito_trip_now">Current trip</string>
+    <string name="dashito_title">Kal El</string>
 </resources>

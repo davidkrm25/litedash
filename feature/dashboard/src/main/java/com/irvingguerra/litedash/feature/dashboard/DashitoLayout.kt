@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 4
+const val FACTORY_VERSION = 5
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -15,6 +15,8 @@ object TripStatKinds {
     const val CONSUMPTION = "consumption"
     const val FUEL_USED = "fuel_used"
     const val RESET = "reset"
+    /** El viaje de ahora (distancia y tiempo) en una tarjeta; al tocarla va a Viaje. */
+    const val NOW = "now"
 }
 
 /** Las partes de Autonomía (van en [Tile.data] de [TileTypes.FUEL_PART]). */
@@ -149,7 +151,7 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
         b.build()
         return b.tiles
     }
-    val car = "front=car"
+    val car = "front=car;title=1"
     return listOf(
         // Inicio: cuatro datos a la izquierda, el velocímetro con tu auto al centro, y música, clima y Android Auto a la derecha.
         page(0) {
@@ -158,10 +160,10 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
                     Band(
                         0.22,
                         listOf(
-                            Item(TileTypes.GAUGE, data = Gauge.COOLANT, keep = 1),
-                            Item(TileTypes.TRIP, keep = 0),
-                            Item(TileTypes.GAUGE, data = Gauge.VOLTAGE, keep = 3),
-                            Item(TileTypes.GAUGE, data = Gauge.CONSUMPTION, keep = 2),
+                            Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1", keep = 1),
+                            Item(TileTypes.TRIP_STAT, data = TripStatKinds.NOW, keep = 0),
+                            Item(TileTypes.GAUGE, data = "${Gauge.VOLTAGE};card=1", keep = 3),
+                            Item(TileTypes.GAUGE, data = "${Gauge.CONSUMPTION};card=1", keep = 2),
                         ),
                         keep = 1,
                     ),
