@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 10
+const val FACTORY_VERSION = 11
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -251,17 +251,17 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
             bands(
                 listOf(
                     Band(
-                        0.30,
+                        0.32,
                         listOf(
-                            Item(TileTypes.DIAG, data = DiagParts.ADAPTER, minH = 2, keep = 1),
-                            Item(TileTypes.DIAG, data = DiagParts.PIDS, minH = 2, keep = 2),
-                            Item(TileTypes.DIAG, data = DiagParts.CHECK, minH = 2, keep = 3),
+                            Item(TileTypes.DIAG, weight = 0.8, data = DiagParts.ADAPTER, minH = 2, keep = 1),
+                            Item(TileTypes.DIAG, weight = 1.0, data = DiagParts.PIDS, minH = 2, keep = 2),
+                            Item(TileTypes.DIAG, weight = 0.8, data = DiagParts.CHECK, minH = 2, keep = 3),
                             Item(TileTypes.DIAG, weight = 0.9, data = DiagParts.SPACE, plain = true, minH = 1, keep = 5),
                             Item(TileTypes.DIAG, weight = 0.45, data = DiagParts.CONNECT, plain = true, minH = 1, keep = 0),
                         ),
                         keep = 1,
                     ),
-                    Band(0.70, listOf(Item(TileTypes.DIAG, data = DiagParts.LIST)), keep = 0),
+                    Band(0.68, listOf(Item(TileTypes.DIAG, data = DiagParts.LIST)), keep = 0),
                 ),
             )
         },
