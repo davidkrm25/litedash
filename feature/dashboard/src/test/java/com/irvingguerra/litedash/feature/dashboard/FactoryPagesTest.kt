@@ -46,7 +46,7 @@ class FactoryPagesTest {
         assertTrue(TileTypes.MUSIC in inicio && TileTypes.SPEEDOMETER in inicio && TileTypes.WEATHER in inicio)
         assertEquals(6, pages[2].count { it.type == TileTypes.TRIP_STAT && it.data != TripStatKinds.RESET })
         assertTrue(pages[2].any { it.data == TripStatKinds.RESET })
-        assertEquals(3, pages[1].count { it.type == TileTypes.GAUGE && it.data != "rpm;numbers=1" })
+        assertEquals(3, pages[1].count { it.type == TileTypes.GAUGE && !it.data.startsWith("rpm") })
         assertTrue(pages[5].any { it.data == DiagParts.ADAPTER } && pages[5].any { it.data == DiagParts.CONNECT })
         assertTrue(pages[3].any { it.data == FuelParts.STATIONS })
     }
