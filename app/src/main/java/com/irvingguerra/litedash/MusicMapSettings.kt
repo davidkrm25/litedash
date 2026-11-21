@@ -220,17 +220,17 @@ fun MapSettings(d: Dependencies) {
         known + apps.filter { it.pkg in detected && known.none { k -> k.pkg == it.pkg } }.distinctBy { it.pkg }
     }
     val selected = mapApp(d, apps)
+    // Un solo selector: el mapa de LiteDash o la app de navegación que se abre (Waze, Google Maps…).
+    Label(stringResource(R.string.map_provider), Typography.label, LocalColors.current.textMuted)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        for (app in mapApps) Button(app.name, { d.prefs.mapApp = app.key }, primary = app == selected)
+        Button(stringResource(R.string.map_provider_own), { d.prefs.mapExternal = false }, primary = !d.prefs.mapExternal)
+        for (app in mapApps) Button(app.name, { d.prefs.mapApp = app.key; d.prefs.mapExternal = true }, primary = d.prefs.mapExternal && app == selected)
     }
     Label(
         stringResource(if (mapApps.isEmpty()) R.string.map_no_apps else R.string.map_help),
         Typography.small,
         LocalColors.current.textMuted,
     )
-    if (mapApps.isNotEmpty()) {
-        SwitchRow(stringResource(R.string.map_external), d.prefs.mapExternal, { d.prefs.mapExternal = it }, stringResource(R.string.map_external_help))
-    }
 }
 
 /** Las apps instaladas que abren una dirección ("geo:") o son de mapas. Consulta a Android: fuera del hilo principal. */

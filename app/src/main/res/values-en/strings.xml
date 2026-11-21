@@ -845,4 +845,6 @@
     <string name="bar_size_large">Large</string>
     <string name="templates_tab_dashito">Dashito</string>
     <string name="templates_dashito_help">The 6 factory pages (Home, Dashboard, Trip, Range, Weather and Diagnostics). Replaces your current pages; you can switch to another template and come back here.</string>
+    <string name="map_provider">Map provider</string>
+    <string name="map_provider_own">LiteDash map</string>
 </resources>

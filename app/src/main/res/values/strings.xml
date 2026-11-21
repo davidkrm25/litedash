@@ -872,4 +872,6 @@
     <string name="bar_size_large">Grande</string>
     <string name="templates_tab_dashito">Dashito</string>
     <string name="templates_dashito_help">Las 6 páginas de fábrica (Inicio, Tablero, Viaje, Autonomía, Clima y Diagnóstico). Reemplaza tus páginas actuales; puedes cambiar a otra plantilla y volver aquí.</string>
+    <string name="map_provider">Proveedor del mapa</string>
+    <string name="map_provider_own">Mapa de LiteDash</string>
 </resources>
