@@ -60,4 +60,8 @@
     <string name="fuel_open">Ver Autonomía</string>
     <string name="fuel_consumption_engine">Medido con el motor</string>
     <string name="fuel_consumption_assumed_left">Supuesto (faltan %1$d km)</string>
+    <string name="fuel_mine">tuya</string>
+    <string name="fuel_new_station">Gasolinera nueva</string>
+    <string name="fuel_register_here">Registrar esta gasolinera</string>
+    <string name="fuel_register_help">La CRE no tiene una aquí. Se guarda en tu tablet con tu ubicación y el precio que anotaste (necesita el precio).</string>
 </resources>

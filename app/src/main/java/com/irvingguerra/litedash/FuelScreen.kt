@@ -59,6 +59,7 @@ import com.irvingguerra.litedash.core.ui.Icons
 import com.irvingguerra.litedash.core.ui.Label
 import com.irvingguerra.litedash.core.ui.LocalColors
 import com.irvingguerra.litedash.core.ui.Radius
+import com.irvingguerra.litedash.core.ui.SwitchRow
 import com.irvingguerra.litedash.core.ui.TextInput
 import com.irvingguerra.litedash.core.ui.Typography
 import com.irvingguerra.litedash.core.vehicle.Signal
@@ -308,8 +309,8 @@ internal fun StationsCard(d: Dependencies, gpsGranted: Boolean, askGps: () -> Un
     // Se recalcula al moverse ~100 m, no en cada punto del GPS.
     val lat = position?.latitude?.let { Math.round(it * 1000) / 1000.0 }
     val lon = position?.longitude?.let { Math.round(it * 1000) / 1000.0 }
-    val list = remember(snapshot, lat, lon, fuel.grade, fuel.sort) {
-        if (snapshot == null || lat == null || lon == null) emptyList() else snapshot.stations.around(lat, lon, fuel.grade, fuel.sort)
+    val list = remember(snapshot, fuel.myStations, lat, lon, fuel.grade, fuel.sort) {
+        if (lat == null || lon == null) emptyList() else fuel.allStations().around(lat, lon, fuel.grade, fuel.sort)
     }
     val cheapest = list.minOfOrNull { it.station.prices[fuel.grade] ?: Double.MAX_VALUE }
     Card(modifier) {
@@ -331,8 +332,8 @@ internal fun StationsCard(d: Dependencies, gpsGranted: Boolean, askGps: () -> Un
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when {
                     !gpsGranted -> FuelNotice(stringResource(R.string.fuel_no_gps), stringResource(R.string.tap_to_enable), askGps)
-                    snapshot == null && fuel.loading -> FuelNotice(stringResource(R.string.fuel_updating))
-                    snapshot == null -> FuelNotice(stringResource(if (fuel.offline) R.string.fuel_offline else R.string.fuel_no_prices))
+                    snapshot == null && list.isEmpty() && fuel.loading -> FuelNotice(stringResource(R.string.fuel_updating))
+                    snapshot == null && list.isEmpty() -> FuelNotice(stringResource(if (fuel.offline) R.string.fuel_offline else R.string.fuel_no_prices))
                     position == null -> FuelNotice(stringResource(R.string.fuel_waiting_gps))
                     list.isEmpty() -> FuelNotice(stringResource(R.string.fuel_no_stations))
                     else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -376,7 +377,8 @@ private fun StationRow(near: NearStation, grade: FuelGrade, highlight: Boolean, 
     }
     val km = String.format(locale, "%.1f", near.km)
     val otherPrice = other?.let { g -> s.prices[g]?.let { stringResource(R.string.fuel_other_price, gradeName(g), String.format(locale, "%.2f", it)) } }
-    val detail = if (otherPrice != null) stringResource(R.string.fuel_station_detail, km, otherPrice) else "$km " + stringResource(R.string.unit_km)
+    val base = if (otherPrice != null) stringResource(R.string.fuel_station_detail, km, otherPrice) else "$km " + stringResource(R.string.unit_km)
+    val detail = if (s.id.startsWith("mine:")) base + " · " + stringResource(R.string.fuel_mine) else base
     Row(
         Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.inner)).clickable(onClick = onClick).padding(vertical = 15.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -456,22 +458,39 @@ internal fun FuelDialogs(d: Dependencies, which: FuelDialog, onClose: () -> Unit
     var capacity by remember { mutableStateOf(trim(fuel.tank.capacityL)) }
     var assumed by remember { mutableStateOf(trim(fuel.tank.assumedKmPerL)) }
     val litersValue = number(liters)
+    // Registrar la gasolinera donde estás si la CRE no la trae (se guarda con el precio que anotes).
+    val here = d.trip.position
+    val canRegister = here != null && fuel.canRegisterHere(here.latitude, here.longitude)
+    var register by remember { mutableStateOf(false) }
+    var stationName by remember { mutableStateOf("") }
+    val defaultName = stringResource(R.string.fuel_new_station)
+    val saveStation = {
+        val p = number(price)
+        if (here != null && p != null) fuel.registerStation(stationName.trim().ifEmpty { defaultName }, here.latitude, here.longitude, fuel.grade, p, create = canRegister && register)
+    }
+    @Composable fun RegisterStation() {
+        if (!canRegister) return
+        SwitchRow(stringResource(R.string.fuel_register_here), register, { register = it }, stringResource(R.string.fuel_register_help))
+        if (register) TextInput(stationName, { stationName = it.take(40) }, defaultName, Modifier.fillMaxWidth())
+    }
     when (which) {
         FuelDialog.FULL -> FuelDialogFrame(
             stringResource(R.string.fuel_dialog_full_title), stringResource(R.string.fuel_dialog_full_help),
             confirmEnabled = liters.isBlank() || litersValue != null,
-            onConfirm = { fuel.fillUp(litersValue, number(price)); onClose() }, onCancel = onClose,
+            onConfirm = { fuel.fillUp(litersValue, number(price)); saveStation(); onClose() }, onCancel = onClose,
         ) {
             NumberField(liters, { liters = it }, stringResource(R.string.fuel_liters_optional), stringResource(R.string.fuel_unit_l))
             NumberField(price, { price = it }, stringResource(R.string.fuel_price_optional), "$/L")
+            RegisterStation()
         }
         FuelDialog.ADD -> FuelDialogFrame(
             stringResource(R.string.fuel_dialog_add_title), stringResource(R.string.fuel_dialog_add_help),
             confirmEnabled = litersValue != null,
-            onConfirm = { fuel.addLiters(litersValue ?: return@FuelDialogFrame, number(price)); onClose() }, onCancel = onClose,
+            onConfirm = { fuel.addLiters(litersValue ?: return@FuelDialogFrame, number(price)); saveStation(); onClose() }, onCancel = onClose,
         ) {
             NumberField(liters, { liters = it }, stringResource(R.string.fuel_liters), stringResource(R.string.fuel_unit_l))
             NumberField(price, { price = it }, stringResource(R.string.fuel_price_optional), "$/L")
+            RegisterStation()
         }
         FuelDialog.TANK -> FuelDialogFrame(
             stringResource(R.string.fuel_dialog_tank_title), stringResource(R.string.fuel_dialog_tank_help),

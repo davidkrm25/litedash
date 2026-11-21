@@ -12,7 +12,9 @@ import com.irvingguerra.litedash.feature.fuel.CreRepository
 import com.irvingguerra.litedash.feature.fuel.FuelGrade
 import com.irvingguerra.litedash.feature.fuel.FuelReading
 import com.irvingguerra.litedash.feature.fuel.FuelTank
+import com.irvingguerra.litedash.feature.fuel.Station
 import com.irvingguerra.litedash.feature.fuel.StationSnapshot
+import com.irvingguerra.litedash.feature.fuel.distanceKm
 import com.irvingguerra.litedash.feature.fuel.StationSort
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -48,6 +50,51 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
     /** La última puesta al día de precios falló (sin red): se muestra lo guardado, si hay. */
     var offline by mutableStateOf(false)
         private set
+
+    /** Gasolineras que registraste tú (no están en la CRE): se guardan aquí, con el precio que anotaste al cargar. */
+    var myStations by mutableStateOf(loadMine())
+        private set
+
+    private fun loadMine(): List<Station> = try {
+        val a = org.json.JSONArray(prefs.getString(MINE, null) ?: "[]")
+        (0 until a.length()).mapNotNull { i ->
+            val o = a.getJSONObject(i)
+            val g = FuelGrade.fromStored(o.optString("g"))
+            Station(o.getString("id"), o.getString("n"), o.getDouble("lat"), o.getDouble("lon"), mapOf(g to o.getDouble("p")))
+        }
+    } catch (e: Exception) { emptyList() }
+
+    private fun saveMine() = prefs.edit {
+        val a = org.json.JSONArray()
+        for (s in myStations) for ((g, p) in s.prices) a.put(org.json.JSONObject().put("id", s.id).put("n", s.name).put("lat", s.lat).put("lon", s.lon).put("g", g.stored).put("p", p))
+        putString(MINE, a.toString())
+    }
+
+    /** ¿Hay una gasolinera de la CRE (con cualquier precio) a menos de [NEAR_STATION_KM] de aquí? */
+    private fun creNear(lat: Double, lon: Double) = snapshot?.stations?.any { distanceKm(lat, lon, it.lat, it.lon) < NEAR_STATION_KM } == true
+
+    private fun mineNear(lat: Double, lon: Double) = myStations.firstOrNull { distanceKm(lat, lon, it.lat, it.lon) < NEAR_STATION_KM }
+
+    /** Se puede registrar aquí: no hay ninguna de la CRE ni tuya a menos de 100 m. */
+    fun canRegisterHere(lat: Double, lon: Double) = !creNear(lat, lon) && mineNear(lat, lon) == null
+
+    /** Las de la CRE y las tuyas (las tuyas se ocultan si la CRE ya trae una a menos de 100 m). */
+    fun allStations(): List<Station> =
+        snapshot?.stations.orEmpty() + myStations.filter { !creNear(it.lat, it.lon) }
+
+    /**
+     * Al cargar con precio: si ya hay una gasolinera tuya aquí, se le pone el precio de [grade]; si no y [create], se
+     * registra una nueva con [name]. Nada más se toca.
+     */
+    fun registerStation(name: String, lat: Double, lon: Double, grade: FuelGrade, price: Double, create: Boolean) {
+        val here = mineNear(lat, lon)
+        myStations = when {
+            here != null -> myStations.map { if (it.id == here.id) it.copy(prices = it.prices + (grade to price)) else it }
+            create -> myStations + Station("mine:" + System.currentTimeMillis(), name, lat, lon, mapOf(grade to price))
+            else -> return
+        }
+        saveMine()
+    }
 
     private var savedOdo = odoMeters
 
@@ -176,6 +223,8 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
         const val ODO = "odo_meters"
         const val GRADE = "grade"
         const val SORT = "sort"
+        const val MINE = "my_stations"
+        const val NEAR_STATION_KM = 0.1
         const val ENGINE_KM = "engine_km"
         const val ENGINE_L = "engine_liters"
         /** Con menos km que estos, lo medido por el motor aún no es confiable. */

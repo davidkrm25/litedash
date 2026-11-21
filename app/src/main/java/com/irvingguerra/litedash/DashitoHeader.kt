@@ -55,7 +55,6 @@ fun PageTabs(pages: DashboardState, onSettings: () -> Unit, modifier: Modifier =
             val name = TabNames.getOrNull(i)?.let { stringResource(it) } ?: stringResource(R.string.page_n, i + 1)
             Tab(TabIcons.getOrElse(i) { Icons.dashboard }, name, pages.page == i) { pages.goTo(i) }
         }
-        Tab(Icons.gear, stringResource(R.string.dashito_tab_settings), false, onSettings)
     }
 }
 
