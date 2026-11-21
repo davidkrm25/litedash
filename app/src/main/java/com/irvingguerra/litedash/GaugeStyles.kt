@@ -513,7 +513,7 @@ private fun NeedleGauge(number: String, unit: String, tag: String, p: GaugeParts
         val redStroke = Stroke(stroke * 0.9f)
         val steps = p.ticks * 2
         // Un número cada dos marcas largas.
-        val numbers = if (!p.look.numbers) emptyList() else (0..steps step 4).map { i ->
+        val numbers = if (!p.look.numbers) emptyList() else (0..steps step (if (p.look.ring) 2 else 4)).map { i ->
             place(measurer, p.label(i / 2), d.at(START_ANGLE + SWEEP * i / steps, d.radius + stroke * 0.4f + margin * 0.55f), tickStyle)
         }
         val hubRadius = hubText.sp.toPx() * 1.25f
@@ -693,7 +693,7 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
         // En chico, delgado; de ~200 dp para arriba engorda hasta 2.4 veces a los ~500 dp (pantalla completa):
         // un aro de 12 dp en una esfera enorme se veía como un hilo (Irving, 2026-11-09).
         val grow = 1f + 1.4f * ((size.minDimension.toDp() - 200.dp) / 300.dp).coerceIn(0f, 1f)
-        val base = (size.minDimension * 0.025f * grow).coerceIn(2.dp.toPx(), 36.dp.toPx())
+        val base = (size.minDimension * 0.025f * grow * (if (p.look.ring) 1.4f else 1f)).coerceIn(2.dp.toPx(), 36.dp.toPx())
         val neon = (size.minDimension * 0.035f * grow).coerceIn(3.dp.toPx(), 44.dp.toPx())
         // Los cuadros ya son anchos: crecen la mitad que el aro liso (si no, en grande se veían toscos).
         val cell = (size.minDimension * 0.06f * (1f + (grow - 1f) / 2)).coerceIn(5.dp.toPx(), 36.dp.toPx())
@@ -738,7 +738,16 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
             when (p.look.rim) {
                 GaugeRim.SMOOTH -> {
                     track.draw(this, c, p)
-                    if (f > 0.002f) drawArc(color, START_ANGLE, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
+                    if (f > 0.002f && p.look.ring) {
+                        // Degradado fijo a lo largo del arco (azul claro → acento) con un brillo suave alrededor.
+                        val ends = if (p.warning) listOf(c.danger, c.danger) else listOf(shades.first(), shades.last())
+                        val brush = Brush.sweepGradient(0f to ends[0], (SWEEP / 360f) to ends[1], 1f to ends[1], center = d.center)
+                        rotate(START_ANGLE, d.center) {
+                            drawArc(ends[1].copy(alpha = 0.10f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 2.6f, cap = StrokeCap.Round))
+                            drawArc(ends[1].copy(alpha = 0.18f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 1.7f, cap = StrokeCap.Round))
+                            drawArc(brush, 0f, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
+                        }
+                    } else if (f > 0.002f) drawArc(color, START_ANGLE, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
                 }
                 GaugeRim.NEON -> {
                     track.draw(this, c, p)

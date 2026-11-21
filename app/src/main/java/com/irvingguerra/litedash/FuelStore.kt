@@ -94,7 +94,7 @@ class FuelStore(context: Context, trip: TripRepository, private val bus: Vehicle
     }
 
     /** Lo que se muestra ahora; el sensor del auto (OBD) manda si lo da. */
-    fun reading(): FuelReading? = tank.reading(odoMeters, bus.value(Signal.FUEL), engineKmPerL)
+    fun reading(): FuelReading? = tank.reading(odoMeters, bus.value(Signal.FUEL), engineKmPerL)?.copy(engineKmLeft = (MIN_ENGINE_KM - engineKm).coerceAtLeast(0.0))
 
     fun fillUp(liters: Double?, price: Double?) {
         tank = tank.filledUp(odoMeters, System.currentTimeMillis(), liters, price)

@@ -192,7 +192,7 @@ private fun RangeGauge(reading: FuelReading?) {
         tag = stringResource(R.string.fuel_range_label).uppercase(locale),
         fraction = fraction,
         ticks = steps,
-        look = GaugeLook(numbers = true),
+        look = GaugeLook(numbers = true, ring = true),
         carColor = colors.accent,
         labels = labels,
         redFrom = 1.1f,
@@ -228,7 +228,14 @@ internal fun FuelStat(part: String, reading: FuelReading?, locale: Locale, modif
         FuelParts.AVERAGE -> StatCard(
             Icons.drop, stringResource(R.string.fuel_consumption),
             reading?.let { String.format(locale, "%.1f", it.kmPerL) } ?: dash, stringResource(R.string.fuel_unit_kml),
-            detail = reading?.let { stringResource(if (it.calibrated) R.string.fuel_consumption_measured else if (it.fromEngine) R.string.fuel_consumption_engine else R.string.fuel_consumption_assumed) },
+            detail = reading?.let {
+                when {
+                    it.calibrated -> stringResource(R.string.fuel_consumption_measured)
+                    it.fromEngine -> stringResource(R.string.fuel_consumption_engine)
+                    it.engineKmLeft > 0.0 -> stringResource(R.string.fuel_consumption_assumed_left, Math.ceil(it.engineKmLeft).toInt())
+                    else -> stringResource(R.string.fuel_consumption_assumed)
+                }
+            },
             modifier = modifier,
         )
         FuelParts.SINCE -> StatCard(
@@ -266,11 +273,11 @@ private fun StatCard(
     val c = LocalColors.current
     Card(modifier.fillMaxWidth(), onClick = onClick) {
         Row(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Box(Modifier.size(44.dp).clip(RoundedCornerShape(Radius.inner)).background(c.surfaceHigh), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 24.dp) }
+            Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 26.dp) }
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                 Label(label.uppercase(currentLocale()), Typography.label, c.textMuted, 1)
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Label(value, Typography.title, maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                    Label(value, Typography.title.copy(fontSize = 30.sp, fontWeight = FontWeight.Bold), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
                     if (unit.isNotEmpty()) Label(unit, Typography.body, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 3.dp))
                 }
                 if (detail != null) Label(detail, Typography.small, c.textMuted, 2)
@@ -371,18 +378,18 @@ private fun StationRow(near: NearStation, grade: FuelGrade, highlight: Boolean, 
     val otherPrice = other?.let { g -> s.prices[g]?.let { stringResource(R.string.fuel_other_price, gradeName(g), String.format(locale, "%.2f", it)) } }
     val detail = if (otherPrice != null) stringResource(R.string.fuel_station_detail, km, otherPrice) else "$km " + stringResource(R.string.unit_km)
     Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.inner)).clickable(onClick = onClick).padding(vertical = 12.dp, horizontal = 4.dp),
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(Radius.inner)).clickable(onClick = onClick).padding(vertical = 15.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Label(s.name.lowercase(locale).replaceFirstChar { it.titlecase(locale) }, Typography.subtitle.copy(fontSize = 15.sp), maxLines = 1)
+            Label(s.name.lowercase(locale).split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.titlecase(locale) } }, Typography.subtitle.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold), maxLines = 1)
             Label(detail, Typography.small, c.textMuted, 1)
         }
         val price = String.format(locale, "$%.2f", s.prices[grade] ?: 0.0)
         Box(
-            Modifier.padding(start = 10.dp).clip(RoundedCornerShape(Radius.inner)).background(if (highlight) c.good.copy(alpha = 0.18f) else Color.Transparent)
+            Modifier.padding(start = 10.dp).clip(RoundedCornerShape(Radius.inner)).background(if (highlight) c.accent.copy(alpha = 0.16f) else Color.Transparent)
                 .padding(horizontal = 10.dp, vertical = 6.dp),
-        ) { Label(price, Typography.title.copy(fontSize = 20.sp), if (highlight) c.good else c.text, 1) }
+        ) { Label(price, Typography.title.copy(fontSize = 20.sp), if (highlight) c.accent else c.text, 1) }
     }
 }
 
@@ -413,9 +420,9 @@ private fun <T> Segmented(options: List<Pair<T, Int>>, selected: T, onSelect: (T
         for ((value, name) in options) {
             val on = value == selected
             Box(
-                Modifier.clip(CircleShape).background(if (on) c.primary else Color.Transparent).clickable { onSelect(value) }.padding(horizontal = 12.dp, vertical = 8.dp),
+                Modifier.clip(CircleShape).then(if (on) Modifier.background(c.accent.copy(alpha = 0.16f)).border(1.dp, c.accent.copy(alpha = 0.6f), CircleShape) else Modifier).clickable { onSelect(value) }.padding(horizontal = 12.dp, vertical = 8.dp),
                 contentAlignment = Alignment.Center,
-            ) { Label(stringResource(name), Typography.small.copy(fontWeight = FontWeight.SemiBold), if (on) c.onPrimary else c.text, 1) }
+            ) { Label(stringResource(name), Typography.small.copy(fontWeight = FontWeight.SemiBold), if (on) c.accent else c.text, 1) }
         }
     }
 }

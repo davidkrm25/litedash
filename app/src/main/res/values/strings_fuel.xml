@@ -59,4 +59,5 @@
     <string name="fuel_save">Guardar</string>
     <string name="fuel_open">Ver Autonomía</string>
     <string name="fuel_consumption_engine">Medido con el motor</string>
+    <string name="fuel_consumption_assumed_left">Supuesto (faltan %1$d km)</string>
 </resources>

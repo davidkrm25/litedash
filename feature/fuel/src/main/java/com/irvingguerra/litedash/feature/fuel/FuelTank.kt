@@ -29,6 +29,8 @@ data class FuelReading(
     val lastFillAtMs: Long?,
     /** true = [kmPerL] sale de lo que el motor ha gastado (MAF o gasto de gasolina), no del supuesto. */
     val fromEngine: Boolean = false,
+    /** Km que faltan para que el motor mida el consumo (0 = ya se midió). */
+    val engineKmLeft: Double = 0.0,
 )
 
 /**
@@ -163,7 +165,10 @@ data class FuelTank(
 
     companion object {
         const val DEFAULT_CAPACITY_L = 45.0
-        const val DEFAULT_KM_PER_L = 12.0
+        /** El supuesto de fábrica (15.4 km/L): con 45 L da ~690 km, lo que marca el tablero del auto de Dashito. */
+        const val DEFAULT_KM_PER_L = 15.4
+        /** El supuesto de las versiones anteriores: si es lo que quedó guardado, nadie lo eligió y pasa al nuevo. */
+        private const val OLD_DEFAULT_KM_PER_L = 12.0
         const val MIN_CAPACITY_L = 5.0
         const val MAX_CAPACITY_L = 400.0
         const val MIN_KM_PER_L = 2.0
@@ -183,7 +188,7 @@ data class FuelTank(
                 val cap = o.optDouble("cap", DEFAULT_CAPACITY_L).coerceIn(MIN_CAPACITY_L, MAX_CAPACITY_L)
                 FuelTank(
                     capacityL = cap,
-                    assumedKmPerL = o.optDouble("assumed", DEFAULT_KM_PER_L).coerceIn(MIN_KM_PER_L, MAX_KM_PER_L),
+                    assumedKmPerL = o.optDouble("assumed", DEFAULT_KM_PER_L).let { if (it == OLD_DEFAULT_KM_PER_L) DEFAULT_KM_PER_L else it }.coerceIn(MIN_KM_PER_L, MAX_KM_PER_L),
                     levelL = if (o.has("level")) o.getDouble("level").coerceIn(0.0, cap) else null,
                     levelOdo = o.optDouble("levelOdo", 0.0),
                     lastFullOdo = if (o.has("fullOdo")) o.getDouble("fullOdo") else null,

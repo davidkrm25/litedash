@@ -144,4 +144,18 @@ class FuelTankTest {
         assertEquals(10.0, r.kmPerL, 1e-9)
         assertTrue(!r.fromEngine)
     }
+
+    @Test
+    fun fullTankWithDefaultAssumptionGivesAbout690Km() {
+        val r = FuelTank().filledUp(0.0, now = 1).reading(0.0)!!
+        assertEquals(693.0, r.rangeKm, 1.0)
+    }
+
+    @Test
+    fun savedOldDefaultMovesToTheNewOne() {
+        val old = FuelTank(assumedKmPerL = 12.0).toJson()
+        assertEquals(FuelTank.DEFAULT_KM_PER_L, FuelTank.fromJson(old).assumedKmPerL, 1e-9)
+        val own = FuelTank(assumedKmPerL = 9.5).toJson()
+        assertEquals(9.5, FuelTank.fromJson(own).assumedKmPerL, 1e-9)
+    }
 }
