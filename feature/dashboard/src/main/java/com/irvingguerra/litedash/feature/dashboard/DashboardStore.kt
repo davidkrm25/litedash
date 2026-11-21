@@ -190,4 +190,4 @@ private const val PAGE_SAVED_AT_PREFIX = "page_saved_at_"
 private const val BACKGROUND_PREFIX = "page_background_"
 
 /** Hasta cuántas páginas puede tener el inicio. */
-const val MAX_PAGES = 5
+const val MAX_PAGES = 6
