@@ -39,4 +39,5 @@
     <string name="recipe_open_bluetooth">Opens the Bluetooth app and comes back</string>
     <string name="recipe_open_radio">Opens the radio app and comes back</string>
     <string name="recipe_failed">No way found</string>
+    <string name="music_enable_control">Turn on music control</string>
 </resources>

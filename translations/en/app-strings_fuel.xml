@@ -60,4 +60,9 @@
     <string name="fuel_save">Save</string>
     <string name="fuel_open">Open Range</string>
     <string name="fuel_consumption_engine">Measured from the engine</string>
+    <string name="fuel_consumption_assumed_left">Assumed (%1$d km to go)</string>
+    <string name="fuel_mine">yours</string>
+    <string name="fuel_new_station">New station</string>
+    <string name="fuel_register_here">Register this station</string>
+    <string name="fuel_register_help">The CRE has none here. It is saved on your tablet with your location and the price you entered (price required).</string>
 </resources>
