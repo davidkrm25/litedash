@@ -1158,8 +1158,8 @@ private fun TopBar(
             PageTabs(pages, onSettings, Modifier.weight(1f))
             val short = isShortScreen()
             Column(horizontalAlignment = Alignment.End) {
-                Label(clock.full, Typography.clock.copy(fontSize = if (short) 28.sp else 38.sp), maxLines = 1)
-                Label(clock.date.uppercase(currentLocale()), Typography.small, c.text.copy(alpha = 0.8f), maxLines = 1)
+                Label(clock.full, Typography.clock.copy(fontSize = if (short) 32.sp else 46.sp), maxLines = 1)
+                Label(clock.date.uppercase(currentLocale()), if (short) Typography.small else Typography.body, c.text.copy(alpha = 0.85f), maxLines = 1)
             }
         } else {
             val clock = rememberClock()
