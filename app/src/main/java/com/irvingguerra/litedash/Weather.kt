@@ -350,7 +350,7 @@ class WeatherRepository(private val context: Context, private val prefs: Prefere
         private const val KEY_ON = "enabled"
 
         /** Cada cuánto se renueva mientras se ve el inicio. */
-        const val STALE_MS = 30 * 60_000L
+        const val STALE_MS = 15 * 60_000L
 
         /** Tras una falla (sin red o sin ubicación), cuándo se vuelve a intentar. */
         const val RETRY_MS = 5 * 60_000L

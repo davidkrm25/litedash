@@ -295,17 +295,19 @@ private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean,
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val h = maxHeight
         val hours = m.hours.isNotEmpty() && h > 360.dp
-        val days = w.next.isNotEmpty() && h > 470.dp
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (h > 520.dp) 10.dp else 6.dp)) {
+        // Compacto (menos de 520 dp): número, chips y espacios más chicos para que los días quepan siempre.
+        val tight = h < 520.dp
+        val days = w.next.isNotEmpty() && h > 380.dp
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (h > 520.dp) 10.dp else 4.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Icon(iconOf(sky, w.day), skyColor(sky, w.day, c), 64.dp)
-                Label(big, Typography.clock.copy(fontSize = 64.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Light), maxLines = 1, modifier = Modifier.weight(1f))
+                Icon(iconOf(sky, w.day), skyColor(sky, w.day, c), if (tight) 48.dp else 64.dp)
+                Label(big, Typography.clock.copy(fontSize = if (tight) 48.sp else 64.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Light), maxLines = 1, modifier = Modifier.weight(1f))
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).clickable(onClick = onRefresh).padding(8.dp)) {
-                    Icon(Icons.refresh, c.textMuted, 28.dp)
+                    Icon(Icons.refresh, c.textMuted.copy(alpha = 0.7f), 24.dp)
                     Label(android.text.format.DateFormat.getTimeFormat(context).format(m.fetchedAt), Typography.small, c.textMuted, maxLines = 1)
                 }
             }
-            Label(stringResource(textOfCode(w.code)), Typography.title.copy(fontSize = 24.sp), maxLines = 1)
+            Label(stringResource(textOfCode(w.code)), Typography.title.copy(fontSize = if (tight) 20.sp else 24.sp), maxLines = 1)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 m.feels?.let { Label(stringResource(R.string.weather_feels, it), Typography.body, c.textMuted, maxLines = 1) }
                 Icon(Icons.location, c.textMuted, 18.dp)
@@ -331,7 +333,7 @@ private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean,
             )
             for (row in chips.chunked(3)) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 for ((icon, text) in row) Row(
-                    Modifier.weight(1f).background(c.text.copy(alpha = 0.07f), androidx.compose.foundation.shape.CircleShape).padding(vertical = 12.dp),
+                    Modifier.weight(1f).background(c.text.copy(alpha = 0.07f), androidx.compose.foundation.shape.CircleShape).padding(vertical = if (tight) 8.dp else 12.dp),
                     horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(icon, c.accent, 20.dp)
