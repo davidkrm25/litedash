@@ -300,10 +300,9 @@ fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = 
             else -> spec.min to spec.max
         }
         val cardName = when {
-            !arrow -> null
             spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.COOLANT -> R.string.dashito_coolant
             spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE -> R.string.dashito_voltage
-            spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION -> R.string.dashito_avg
+            spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.CONSUMPTION && arrow -> R.string.dashito_avg
             else -> null
         }
         val withBar = spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.COOLANT || spec.signal == com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE
@@ -317,8 +316,8 @@ fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = 
     }
     // Sin adaptador (o sin ese dato) se ve igual, vacío y con "—", y una nota corta: no un texto largo.
     if (obd?.state != ObdState.ON) {
-        val note = if (legend) stringResource(R.string.gauge_rpm) else stringResource(if (obd?.state == ObdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)
-        return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onWorkshop, note = note)
+        val note = if (legend) "RPM" else stringResource(if (obd?.state == ObdState.CONNECTING) R.string.obd_connecting_short else R.string.gauge_no_obd)
+        return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onWorkshop, note = note, empty = if (legend) "0" else "—")
     }
     if (!obd.canRead(spec.signal)) return SpecGaugeCard(spec, null, d.prefs.units, look, d.prefs.carColor, onClick = onPick, note = stringResource(R.string.gauge_no_data))
     val value = d.bus.watch(spec.signal)
@@ -331,11 +330,11 @@ fun GaugeTile(d: Dependencies, signal: String, look: GaugeLook, card: Boolean = 
  * lectura: "—"); la usan la pieza y la vista previa de Personalizar medidor.
  */
 @Composable
-fun SpecGaugeCard(spec: GaugeSpec, value: Float?, units: UnitChoice, look: GaugeLook, carColor: Color, onClick: (() -> Unit)? = null, note: String? = null) {
+fun SpecGaugeCard(spec: GaugeSpec, value: Float?, units: UnitChoice, look: GaugeLook, carColor: Color, onClick: (() -> Unit)? = null, note: String? = null, empty: String = "—") {
     val locale = currentLocale()
     val labels = remember(spec, units, locale) { List(spec.ticks + 1) { spec.label(it, units, locale) } }
     GaugeCard(
-        number = value?.let { gaugeText(spec, it, units, locale) } ?: "—",
+        number = value?.let { gaugeText(spec, it, units, locale) } ?: empty,
         unit = stringResource(spec.unit(units)),
         // La nota (sin OBD, conectando…) va donde va la etiqueta del dato.
         tag = note ?: spec.tag?.let { stringResource(it) } ?: "",

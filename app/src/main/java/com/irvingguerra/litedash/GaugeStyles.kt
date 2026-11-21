@@ -139,6 +139,8 @@ data class GaugeLook(
     val image: String = "",
     /** El aro, solo de la Esfera (se guarda aunque se escoja otro estilo). */
     val rim: GaugeRim = GaugeRim.SMOOTH,
+    /** Como en Dashito: aro fino por fuera, número más grande y etiqueta espaciada (no se edita; lo pone el diseño de fábrica). */
+    val ring: Boolean = false,
 ) {
     fun encode(signal: String = ""): String = buildList {
         if (signal.isNotEmpty()) add(signal)
@@ -151,6 +153,7 @@ data class GaugeLook(
         if (redline) add("redline=1")
         if (front != GaugeFront.NONE) add("front=${front.stored}")
         if (image.isNotEmpty()) add("img=$image")
+        if (ring) add("ring=1")
     }.joinToString(";")
 
     companion object {
@@ -173,6 +176,7 @@ data class GaugeLook(
                 // "car=1" es de la 1.4.74.
                 front = GaugeFront.entries.firstOrNull { it.stored == f["front"] } ?: if (f["car"] == "1") GaugeFront.CAR else GaugeFront.NONE,
                 image = f["img"].orEmpty(),
+                ring = f["ring"] == "1",
             )
         }
     }
@@ -472,12 +476,15 @@ private class Glow(private val center: Offset, private val radius: Float, privat
 
 /** El número grande, su unidad y la etiqueta (OBD, GPS…) debajo si cabe. */
 @Composable
-private fun Readout(number: String, unit: String, tag: String, size: Float, color: Color, showTag: Boolean, modifier: Modifier = Modifier) {
+private fun Readout(number: String, unit: String, tag: String, size: Float, color: Color, showTag: Boolean, modifier: Modifier = Modifier, dashito: Boolean = false) {
     val c = LocalColors.current
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Label(number, Typography.clock.copy(fontSize = size.sp), maxLines = 1)
-        Label(unit, Typography.small, c.textMuted, maxLines = 1)
-        if (showTag && tag.isNotEmpty()) Box(Modifier.padding(top = 6.dp)) { Label(tag, Typography.label, color, maxLines = 1) }
+        Label(unit, if (dashito) Typography.title else Typography.small, c.textMuted, maxLines = 1)
+        if (showTag && tag.isNotEmpty()) Box(Modifier.padding(top = 6.dp)) {
+            if (dashito) Label(tag.uppercase(), Typography.label.copy(letterSpacing = 5.sp), c.textMuted, maxLines = 1)
+            else Label(tag, Typography.label, color, maxLines = 1)
+        }
     }
 }
 
@@ -600,7 +607,8 @@ private fun GaugeParts.showTag(fits: Boolean) = fits && frontSpace == 0.dp
 private fun GaugeParts.centerNumberSize(side: Dp): Float {
     val front = if (frontSpace > 0.dp) 0.9f else 1f
     val rim = if (look.style == GaugeStyle.DIAL && look.rim != GaugeRim.SMOOTH) 0.9f else 1f
-    return (side.value * 0.235f).coerceIn(28f, 108f) * front * rim
+    val big = if (look.ring) 1.3f else 1f
+    return (side.value * 0.235f).coerceIn(28f, 140f) * front * rim * big
 }
 
 /**
@@ -613,7 +621,7 @@ private fun GaugeParts.centerOffset(side: Dp): Dp = side * 0.04f - frontSpace * 
 @Composable
 private fun CenterReadout(number: String, unit: String, tag: String, p: GaugeParts, side: Dp) {
     val c = LocalColors.current
-    Readout(number, unit, tag, p.centerNumberSize(side), p.readoutColor(c), p.showTag(side > 220.dp), Modifier.offset(y = p.centerOffset(side)))
+    Readout(number, unit, tag, p.centerNumberSize(side), p.readoutColor(c), p.showTag(side > 220.dp), Modifier.offset(y = p.centerOffset(side)), dashito = p.look.ring)
 }
 
 @Composable
@@ -723,7 +731,7 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
             val color = c.gauge(p.look.color, p.car, f, p.warning)
             drawCircle(sphere.of(color), d.radius, d.center)
             // Con el auto al frente (Inicio de Dashito): un aro finito por fuera del arco.
-            if (p.frontSpace > 0.dp && p.look.rim == GaugeRim.SMOOTH) {
+            if (p.look.ring && p.look.rim == GaugeRim.SMOOTH) {
                 val ring = d.radius + base * 0.9f
                 if (ring <= size.minDimension / 2f) drawCircle(c.text.copy(alpha = 0.22f), ring, d.center, style = Stroke(1.dp.toPx()))
             }
