@@ -186,7 +186,9 @@ class WeatherRepository(private val context: Context, private val prefs: Prefere
         if (!active) return true
         val last = forecast
         // Una edad negativa es el reloj atrasado: se trae de nuevo en cuanto se pueda.
-        if (!force && last != null && System.currentTimeMillis() - last.fetchedAt in 0 until STALE_MS) return true
+        // Lo guardado por una versión anterior no trae humedad, viento ni horas (hours vacío): se baja de nuevo.
+        val complete = last != null && last.hours.isNotEmpty()
+        if (!force && last != null && complete && System.currentTimeMillis() - last.fetchedAt in 0 until STALE_MS) return true
         val place = location()
         if (place == null) {
             failure = "sin ubicación"

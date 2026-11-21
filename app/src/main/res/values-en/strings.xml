@@ -847,4 +847,14 @@
     <string name="templates_dashito_help">The 6 factory pages (Home, Dashboard, Trip, Range, Weather and Diagnostics). Replaces your current pages; you can switch to another template and come back here.</string>
     <string name="map_provider">Map provider</string>
     <string name="map_provider_own">LiteDash map</string>
+    <string name="weather_mostly_clear">Mostly clear</string>
+    <string name="weather_place_unknown">Unknown location</string>
+    <string name="weather_percent_spaced">%1$d %%</string>
+    <string name="weather_clouds_value">Clouds %1$d %%</string>
+    <string name="weather_uv_value">UV %1$d %2$s</string>
+    <string name="uv_low">low</string>
+    <string name="uv_moderate">moderate</string>
+    <string name="uv_high">high</string>
+    <string name="uv_very_high">very high</string>
+    <string name="uv_extreme">extreme</string>
 </resources>

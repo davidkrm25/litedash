@@ -4,6 +4,10 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -54,6 +58,20 @@ fun iconOf(sky: Sky, day: Boolean) = when (sky) {
     Sky.RAIN -> Icons.rain
     Sky.STORM -> Icons.storm
     Sky.SNOW -> Icons.snow
+}
+
+/** La descripción más fina (por el código del cielo): despejado, mayormente despejado, parcialmente nublado, nublado… */
+fun textOfCode(code: Int) = if (code == 1) R.string.weather_mostly_clear else textOf(skyOf(code))
+
+/** El color propio de cada cielo (sol amarillo, lluvia azul…) para la vista completa. */
+fun skyColor(sky: Sky, day: Boolean, c: Colors): Color = when (sky) {
+    Sky.CLEAR -> if (day) Color(0xFFFFC83D) else Color(0xFFB8C4E8)
+    Sky.PARTLY -> Color(0xFFFFC83D)
+    Sky.CLOUDY -> c.textMuted
+    Sky.FOG -> c.textMuted
+    Sky.RAIN -> Color(0xFF4FC3F7)
+    Sky.STORM -> Color(0xFF7E8CFF)
+    Sky.SNOW -> Color(0xFF9FD8FF)
 }
 
 fun textOf(sky: Sky) = when (sky) {
@@ -179,10 +197,14 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
     } catch (e: IllegalArgumentException) {
         "" // una fecha que no se entiende: el día va sin nombre
     }
+    val scope = rememberCoroutineScope()
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val rich = w.more != null && maxHeight > 300.dp && maxWidth > 280.dp
     Card(Modifier.fillMaxSize()) {
         // Un tinte suave del color del cielo desde la esquina (como el clima de iOS); nada se anima.
         // (Sin tarjeta no: sería un rectángulo de color sobre el fondo.) Hasta la esquina contraria, en cualquier pantalla.
-        if (!LocalPlainCard.current) Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(skyTint(sky, w.day, c), Color.Transparent), end = Offset.Infinite)))
+        // En la vista completa va tarjeta limpia, como Dashito.
+        if (!LocalPlainCard.current && !rich) Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(skyTint(sky, w.day, c), Color.Transparent), end = Offset.Infinite)))
         BoxWithConstraints(Modifier.fillMaxSize().padding(TilePadding)) {
             // El tamaño se lee aquí: dentro de las filas y columnas no se alcanza.
             val width = maxWidth
@@ -190,8 +212,8 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
             val tall = height > 120.dp
             val nextDays = if (days) w.next else emptyList()
             val more = w.more
-            if (more != null && height > 300.dp && width > 280.dp) {
-                RichWeather(w, more, big, detail, repo.miles, ::dayName)
+            if (rich && more != null) {
+                RichWeather(w, more, big, repo.miles, ::dayName) { scope.launch { repo.refreshIfStale(force = true) } }
                 return@BoxWithConstraints
             }
             if (!tall) {
@@ -230,6 +252,7 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
             }
         }
     }
+    }
 }
 
 /** Un día del pronóstico en una fila: nombre, ícono y máxima, uno sobre otro. */
@@ -256,67 +279,102 @@ private fun skyTint(sky: Sky, day: Boolean, c: Colors): Color {
 private val SkyBlue = Color(0xFF5B8CFF)
 
 
-private val Compass = listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO")
+private val CompassEs = listOf("N", "NE", "E", "SE", "S", "SO", "O", "NO")
+private val CompassEn = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
 
 /** La vista completa (como la página Clima de Dashito): ahora, datos, próximas horas y próximos días; lo de abajo solo si cabe. */
 @Composable
-private fun RichWeather(w: Weather, m: WeatherMore, big: String, detail: String, miles: Boolean, dayName: (String) -> String) {
+private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean, dayName: (String) -> String, onRefresh: () -> Unit) {
     val c = LocalColors.current
     val locale = currentLocale()
     val today = w.today
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sky = skyOf(w.code)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val h = maxHeight
-        val roomy = h > 420.dp
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        val hours = m.hours.isNotEmpty() && h > 360.dp
+        val days = w.next.isNotEmpty() && h > 470.dp
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (h > 520.dp) 10.dp else 6.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Icon(iconOf(skyOf(w.code), w.day), c.accent, 56.dp)
-                Column(Modifier.weight(1f)) {
-                    Label(big, Typography.clock.copy(fontSize = 52.sp), maxLines = 1)
-                    Label(detail, Typography.small, c.textMuted, maxLines = 1)
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    m.feels?.let { Label(stringResource(R.string.weather_feels, it), Typography.small, maxLines = 1) }
-                    m.place?.let { Label(it, Typography.small, c.textMuted, maxLines = 1) }
-                    Label(stringResource(R.string.weather_updated, android.text.format.DateFormat.getTimeFormat(androidx.compose.ui.platform.LocalContext.current).format(m.fetchedAt)), Typography.label, c.textMuted, maxLines = 1)
+                Icon(iconOf(sky, w.day), skyColor(sky, w.day, c), 64.dp)
+                Label(big, Typography.clock.copy(fontSize = 64.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Light), maxLines = 1, modifier = Modifier.weight(1f))
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).clickable(onClick = onRefresh).padding(8.dp)) {
+                    Icon(Icons.refresh, c.textMuted, 28.dp)
+                    Label(android.text.format.DateFormat.getTimeFormat(context).format(m.fetchedAt), Typography.small, c.textMuted, maxLines = 1)
                 }
             }
+            Label(stringResource(textOfCode(w.code)), Typography.title.copy(fontSize = 24.sp), maxLines = 1)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                m.feels?.let { Label(stringResource(R.string.weather_feels, it), Typography.body, c.textMuted, maxLines = 1) }
+                Icon(Icons.location, c.textMuted, 18.dp)
+                Label(m.place ?: stringResource(R.string.weather_place_unknown), Typography.body, c.textMuted, maxLines = 1)
+            }
+            val dirs = if (locale.language == "es") CompassEs else CompassEn
             val wind = m.windKmh?.let {
                 val v = Math.round(if (miles) it * 0.621371 else it).toInt()
-                val dir = m.windDeg?.let { d -> " " + Compass[((d + 22) / 45) % 8] }.orEmpty()
+                val dir = m.windDeg?.let { d -> " " + dirs[((d + 22) / 45) % 8] }.orEmpty()
                 stringResource(if (miles) R.string.weather_mph else R.string.weather_kmh, v) + dir
             }
+            val uv = today?.uv?.let { u ->
+                val level = stringResource(when { u <= 2 -> R.string.uv_low; u <= 5 -> R.string.uv_moderate; u <= 7 -> R.string.uv_high; u <= 10 -> R.string.uv_very_high; else -> R.string.uv_extreme })
+                stringResource(R.string.weather_uv_value, u, level)
+            }
             val chips = listOfNotNull(
-                m.humidity?.let { stringResource(R.string.weather_humidity) to stringResource(R.string.weather_percent, it) },
-                wind?.let { stringResource(R.string.weather_wind) to it },
-                m.cloud?.let { stringResource(R.string.weather_clouds) to stringResource(R.string.weather_percent, it) },
-                today?.uv?.let { stringResource(R.string.weather_uv) to it.toString() },
-                today?.sunrise?.let { stringResource(R.string.weather_sunrise) to it },
-                today?.sunset?.let { stringResource(R.string.weather_sunset) to it },
+                today?.let { Icons.thermometer to "↑${it.max}° ↓${it.min}°" },
+                m.humidity?.let { Icons.drop to stringResource(R.string.weather_percent_spaced, it) },
+                wind?.let { Icons.wind to it },
+                uv?.let { Icons.sun to it },
+                m.cloud?.let { Icons.cloud to stringResource(R.string.weather_clouds_value, it) },
+                if (today?.sunrise != null && today.sunset != null) Icons.sunrise to "${today.sunrise}–${today.sunset}" else null,
             )
             for (row in chips.chunked(3)) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                for ((k, v) in row) Column(Modifier.weight(1f).background(c.text.copy(alpha = 0.06f), androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).padding(10.dp)) {
-                    Label(k, Typography.label, c.textMuted, maxLines = 1)
-                    Label(v, Typography.subtitle, maxLines = 1)
+                for ((icon, text) in row) Row(
+                    Modifier.weight(1f).background(c.text.copy(alpha = 0.07f), androidx.compose.foundation.shape.CircleShape).padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(icon, c.accent, 20.dp)
+                    Label(text, Typography.body, maxLines = 1, modifier = Modifier.padding(start = 8.dp))
                 }
                 repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
             }
-            if (m.hours.isNotEmpty() && h > 360.dp) {
+            if (hours) {
                 Label(stringResource(R.string.weather_next_hours), Typography.label, c.textMuted, maxLines = 1)
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    for (x in m.hours.take(5)) Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (x in m.hours.take(5)) Column(
+                        Modifier.weight(1f).background(c.text.copy(alpha = 0.07f), androidx.compose.foundation.shape.RoundedCornerShape(16.dp)).padding(vertical = 10.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
                         Label(x.time, Typography.label, c.textMuted, maxLines = 1)
-                        Icon(iconOf(skyOf(x.code), x.day), c.text, 22.dp)
-                        Label(stringResource(R.string.weather_degrees, x.temp), Typography.small, maxLines = 1)
+                        val s = skyOf(x.code)
+                        Icon(iconOf(s, x.day), skyColor(s, x.day, c), 26.dp)
+                        Label(stringResource(R.string.weather_degrees, x.temp), Typography.subtitle, maxLines = 1)
                     }
                 }
             }
-            if (roomy && w.next.isNotEmpty()) {
+            if (days) {
                 Label(stringResource(R.string.weather_next_days), Typography.label, c.textMuted, maxLines = 1)
+                val low = w.next.minOf { it.min }
+                val high = w.next.maxOf { it.max }
+                val span = (high - low).coerceAtLeast(1).toFloat()
                 for (d in w.next.take(3)) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Label(dayName(d.date), Typography.small, c.textMuted, maxLines = 1, modifier = Modifier.weight(1f))
-                    Icon(iconOf(skyOf(d.code), true), c.text, 20.dp)
-                    Label(d.rain?.let { stringResource(R.string.weather_percent, it) }.orEmpty(), Typography.small, c.textMuted, maxLines = 1, modifier = Modifier.weight(1f))
-                    Label(stringResource(R.string.weather_range, d.max, d.min), Typography.small, maxLines = 1)
+                    Label(dayName(d.date).trimEnd('.'), Typography.subtitle, maxLines = 1, modifier = Modifier.width(54.dp))
+                    val s = skyOf(d.code)
+                    Icon(iconOf(s, true), skyColor(s, true, c), 26.dp)
+                    Label(d.rain?.let { stringResource(R.string.weather_percent_spaced, it) }.orEmpty(), Typography.body, skyColor(Sky.RAIN, true, c), maxLines = 1, modifier = Modifier.width(52.dp))
+                    Label(stringResource(R.string.weather_degrees, d.min), Typography.body, c.textMuted, maxLines = 1)
+                    Box(Modifier.weight(1f).height(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(c.text.copy(alpha = 0.08f))) {
+                        val from = (d.min - low) / span
+                        val to = (d.max - low) / span
+                        Row(Modifier.fillMaxSize()) {
+                            Spacer(Modifier.weight(from.coerceIn(0f, 1f).coerceAtLeast(0.0001f)))
+                            Box(
+                                Modifier.weight((to - from).coerceAtLeast(0.02f)).fillMaxSize().clip(androidx.compose.foundation.shape.CircleShape)
+                                    .background(Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent))),
+                            )
+                            Spacer(Modifier.weight((1f - to).coerceAtLeast(0.0001f)))
+                        }
+                    }
+                    Label(stringResource(R.string.weather_degrees, d.max), Typography.subtitle, maxLines = 1)
                 }
             }
         }
