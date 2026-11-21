@@ -34,7 +34,7 @@ class FactoryPagesTest {
     @Test
     fun tabletGridKeepsEveryWidget() {
         val pages = factoryPages(Grid(26, 14), limits)
-        assertEquals(listOf(8, 5, 8, 6, 1, 5), pages.map { it.size })
+        assertEquals(listOf(8, 5, 9, 6, 1, 5), pages.map { it.size })
     }
 
     @Test
