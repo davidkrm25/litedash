@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
         for (ms in REFIT_MS) window.decorView.postDelayed(refitLater, ms)
     }
 
+
     private val refitLater = Runnable { refit() }
 
     override fun onDestroy() {
@@ -124,6 +125,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // De vuelta en LiteDash, el panel de al lado de Mapas ya no hace falta.
+        SidePanel.hide(this)
         inFront = true
         dependencies.music.cancelReturn()
         // Al abrir LiteDash se busca al celular vinculado. Sin vínculo el enlace ni se arma (Ajustes → Celular lo arma

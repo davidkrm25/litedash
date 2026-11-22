@@ -542,7 +542,7 @@ class Preferences(context: Context) {
     var freeformMaps by bool(PrefKeys.FREEFORM_MAPS, false)
     var freeformWidth by int(PrefKeys.FREEFORM_WIDTH, 50)
     /** Pedirle al sistema la división real (fija, sin barra flotante); si no, ventana libre. */
-    var freeformDock by bool(PrefKeys.FREEFORM_DOCK, true)
+    var freeformDock by bool(PrefKeys.FREEFORM_DOCK, false)
 
     /** En pantalla dividida, al lado del mapa va la carretera (si no, el auto 3D). */
     var splitRoad by bool(PrefKeys.SPLIT_ROAD, false)

@@ -131,6 +131,10 @@ object SplitScreen {
                 .onFailure { Log.w(TAG, "sin modo de ventana: ${it.message}") }
             if (dock) intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
             context.startActivity(intent, options.toBundle())
+            // Con la ventana libre, el panel fijo del otro lado (si ya hay permiso de mostrar sobre otras apps).
+            if (!dock) {
+                if (SidePanel.allowed(context)) SidePanel.show(context, screen.widthPixels - width, left = d.prefs.splitCarLeft) else SidePanel.askPermission(context)
+            }
             true
         } catch (e: Exception) {
             Log.w(TAG, "ventana libre: ${e.message}", e)
