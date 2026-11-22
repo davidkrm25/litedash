@@ -14,6 +14,14 @@ import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
+import androidx.compose.foundation.layout.Row
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.res.stringResource
+import com.irvingguerra.litedash.core.ui.Segmented
+import com.irvingguerra.litedash.feature.music.RadioTile
+import com.irvingguerra.litedash.feature.dashboard.TripStatKinds
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,17 +152,29 @@ private class PanelOwner : LifecycleOwner, ViewModelStoreOwner, SavedStateRegist
     }
 }
 
-/** Velocímetro, RPM y música, con un botón para volver al tablero. */
+/** Velocímetro, RPM, tiempo de manejo, clima, autonomía y música (o radio, a elegir), con un botón para volver al tablero. */
 @androidx.compose.runtime.Composable
 private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
     val c = LocalColors.current
     val look = remember { GaugeLook() }
     val rpm = remember { GaugeLook() }
+    // Lo que suena manda al empezar: si es la radio, arranca en Radio.
+    var radio by remember { mutableStateOf(d.music.radio.song?.playing == true && d.music.song?.playing != true) }
     Box(Modifier.fillMaxSize().background(c.background).padding(10.dp)) {
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(Modifier.weight(1.3f)) { SpeedometerTile(d, look) }
-            Box(Modifier.weight(1f)) { GaugeTile(d, com.irvingguerra.litedash.core.vehicle.Signal.RPM, rpm, card = true, onPick = {}, onWorkshop = {}) }
-            Box(Modifier.weight(0.8f)) { MusicTile(d.music, 0) }
+            Box(Modifier.weight(0.9f)) { GaugeTile(d, com.irvingguerra.litedash.core.vehicle.Signal.RPM, rpm, card = true, onPick = {}, onWorkshop = {}) }
+            Row(Modifier.weight(0.6f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.weight(1f)) { TripStatTile(d, TripStatKinds.TIME) }
+                Box(Modifier.weight(1f)) { WeatherTile(d.weather, days = false, range = false) }
+            }
+            Box(Modifier.weight(0.7f)) { FuelTile(d) {} }
+            Column(Modifier.weight(1.1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Segmented(listOf(false to stringResource(R.string.music), true to stringResource(R.string.tile_radio)), radio, { radio = it })
+                Box(Modifier.weight(1f)) {
+                    if (radio) RadioTile(d.music, 0, onIdle = {}) else MusicTile(d.music, 0)
+                }
+            }
         }
         IconButton(Icons.close, onBack, Modifier.align(Alignment.TopEnd).padding(4.dp), background = c.surfaceHigh)
     }
