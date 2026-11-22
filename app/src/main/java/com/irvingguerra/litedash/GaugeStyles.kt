@@ -756,14 +756,17 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
                         val ends = if (p.warning) listOf(c.danger, c.danger) else listOf(shades.first(), shades.last())
                         val brush = Brush.sweepGradient(0f to ends[0], (SWEEP / 360f) to ends[1], 1f to ends[1], center = d.center)
                         rotate(START_ANGLE, d.center) {
-                            drawArc(ends[1].copy(alpha = 0.16f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 2.6f, cap = StrokeCap.Round))
+                            drawArc(ends[1].copy(alpha = 0.07f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 4.6f, cap = StrokeCap.Round))
+                            drawArc(ends[1].copy(alpha = 0.12f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 3.4f, cap = StrokeCap.Round))
+                            drawArc(ends[1].copy(alpha = 0.20f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 2.4f, cap = StrokeCap.Round))
                             drawArc(ends[1].copy(alpha = 0.28f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 1.7f, cap = StrokeCap.Round))
                             drawArc(brush, 0f, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
                         }
                         // La punta del arco: un punto claro con su brillo, como en Dashito.
                         val tip = d.at(START_ANGLE + SWEEP * f, d.radius)
-                        drawCircle(ends[1].copy(alpha = 0.25f), rimStroke.width * 1.1f, tip)
-                        drawCircle(Color.White.copy(alpha = 0.95f), rimStroke.width * 0.42f, tip)
+                        drawCircle(ends[1].copy(alpha = 0.18f), rimStroke.width * 2.0f, tip)
+                        drawCircle(ends[1].copy(alpha = 0.35f), rimStroke.width * 1.3f, tip)
+                        drawCircle(Color.White, rimStroke.width * 0.5f, tip)
                     } else if (f > 0.002f) drawArc(color, START_ANGLE, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
                 }
                 GaugeRim.NEON -> {
