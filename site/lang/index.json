@@ -3,7 +3,7 @@
   {
    "lang": "id",
    "name": "Bahasa Indonesia",
-   "progress": 100,
+   "progress": 76,
    "bytes": 61378,
    "sha256": "8e014ec164138c6b7089e38a6115781b5f5c6c4901a79692a784c55e1082db90",
    "base": 10501499,
@@ -13,7 +13,7 @@
   {
    "lang": "de",
    "name": "Deutsch",
-   "progress": 100,
+   "progress": 76,
    "bytes": 63804,
    "sha256": "40bb3d957734f0867decc2db2ac433fc7ba76968dd5d1a4440459e2126e18e33",
    "base": 10501499,
@@ -23,7 +23,7 @@
   {
    "lang": "fr",
    "name": "Français",
-   "progress": 100,
+   "progress": 76,
    "bytes": 67610,
    "sha256": "005900af037f438b490a4854da92434380eca9d555fd6174833d808231560c11",
    "base": 10501499,
@@ -33,7 +33,7 @@
   {
    "lang": "it",
    "name": "Italiano",
-   "progress": 100,
+   "progress": 76,
    "bytes": 63538,
    "sha256": "4a6ccd0c6de80ce6640932fe2c4f3fef973e2a7a61fab83e7906f792201f290d",
    "base": 10501499,
@@ -43,7 +43,7 @@
   {
    "lang": "hu",
    "name": "Magyar",
-   "progress": 100,
+   "progress": 76,
    "bytes": 67340,
    "sha256": "ed07cdbc1f63cdb9999273e73058d281fb2492fcd94634ffff36e969cbb41cc7",
    "base": 10501499,
@@ -53,7 +53,7 @@
   {
    "lang": "nl",
    "name": "Nederlands",
-   "progress": 100,
+   "progress": 76,
    "bytes": 63121,
    "sha256": "9d45ac9f5e58a7856aec13e17309a89b5faa3438d2284d1155de301800db04ac",
    "base": 10501499,
@@ -63,7 +63,7 @@
   {
    "lang": "pl",
    "name": "Polski",
-   "progress": 100,
+   "progress": 76,
    "bytes": 64496,
    "sha256": "e76f7f7fc068f7175fbd16a9834f814d076170a0584bddccece0494745c054be",
    "base": 10501499,
@@ -73,7 +73,7 @@
   {
    "lang": "pt",
    "name": "Português",
-   "progress": 100,
+   "progress": 76,
    "bytes": 63866,
    "sha256": "c4ca8f892197bf830801e66c95c4b9446e4396e294b538280f759977555aedde",
    "base": 10501499,
@@ -83,7 +83,7 @@
   {
    "lang": "ro",
    "name": "Română",
-   "progress": 100,
+   "progress": 76,
    "bytes": 65322,
    "sha256": "80c1e27e50a47c122418b3d7347875b3fda4dc2dcb7ea887573b2c59f2289945",
    "base": 10501499,
@@ -93,7 +93,7 @@
   {
    "lang": "sv",
    "name": "Svenska",
-   "progress": 100,
+   "progress": 76,
    "bytes": 61844,
    "sha256": "4daeb7ab13008a79550e12ed0017abdf65f98f71658ec3c95ec38f0fb750ab05",
    "base": 10501499,
@@ -103,7 +103,7 @@
   {
    "lang": "vi",
    "name": "Tiếng Việt",
-   "progress": 100,
+   "progress": 76,
    "bytes": 69997,
    "sha256": "eb59e881e4e057a7154522b4fecaaa19d4bc1d733c0c3c454001de8999693108",
    "base": 10501499,
@@ -113,7 +113,7 @@
   {
    "lang": "tr",
    "name": "Türkçe",
-   "progress": 100,
+   "progress": 76,
    "bytes": 63839,
    "sha256": "1729db8eabf273ac729529de050444e35e3cfd6705f5dd80a7fcd66c1433b83d",
    "base": 10501499,
@@ -125,7 +125,7 @@
   {
    "lang": "cs",
    "name": "Čeština",
-   "progress": 100,
+   "progress": 76,
    "bytes": 63628,
    "sha256": "111316e3b4c93663db4996287d2600b056b07f22e94682cb022c8132835e068f",
    "base": 10501499,
@@ -135,7 +135,7 @@
   {
    "lang": "el",
    "name": "Ελληνικά",
-   "progress": 100,
+   "progress": 76,
    "bytes": 97681,
    "sha256": "7a64dc6dc93ce07428ee2cc97dfed1be2be3121260018cb251f2204f5149f1a4",
    "base": 10501499,
@@ -145,7 +145,7 @@
   {
    "lang": "ru",
    "name": "Русский",
-   "progress": 100,
+   "progress": 76,
    "bytes": 91683,
    "sha256": "265f4cf3d91248b112cd974d945b17e2819e751b37721c6182bd290590cc650a",
    "base": 10501499,
@@ -155,7 +155,7 @@
   {
    "lang": "uk",
    "name": "Українська",
-   "progress": 100,
+   "progress": 76,
    "bytes": 92032,
    "sha256": "aee3bef7239f1823ff94c6b50d54875909c248cde391631eebdf383caa7a32ea",
    "base": 10501499,
@@ -165,7 +165,7 @@
   {
    "lang": "hi",
    "name": "हिन्दी",
-   "progress": 100,
+   "progress": 76,
    "bytes": 107384,
    "sha256": "2e682ea756e12bba3c5ad7c9948805284ea3b2a6e8a67a9b17c37a4a29cd1dbe",
    "base": 10501499,
@@ -175,7 +175,7 @@
   {
    "lang": "th",
    "name": "ไทย",
-   "progress": 100,
+   "progress": 76,
    "bytes": 107829,
    "sha256": "95b1a09b8ca2cee686029acb32fd0f8d6f789a3a03786f68c469f3576e94a7b4",
    "base": 10501499,
@@ -185,7 +185,7 @@
   {
    "lang": "ja",
    "name": "日本語",
-   "progress": 100,
+   "progress": 76,
    "bytes": 75168,
    "sha256": "95944fccc48f111c1fd112fb62e6b6c13451a51b981745f1220567222a143714",
    "base": 10501499,
@@ -195,7 +195,7 @@
   {
    "lang": "zh-CN",
    "name": "简体中文",
-   "progress": 100,
+   "progress": 76,
    "bytes": 58802,
    "sha256": "8ca911a6a816a2df0c2ea897b8f6b35449a99eb14385825de20bc11faa05a60d",
    "base": 10501499,
@@ -205,7 +205,7 @@
   {
    "lang": "ko",
    "name": "한국어",
-   "progress": 100,
+   "progress": 76,
    "bytes": 66306,
    "sha256": "ba89294a0289875db5aaaec62eaf7366fd1cee7397fff8c8f2fc22e0219f16ed",
    "base": 10501499,

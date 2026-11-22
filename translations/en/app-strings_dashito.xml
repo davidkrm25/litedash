@@ -25,9 +25,10 @@
     <string name="dashito_check_engine">Check engine</string>
     <string name="dashito_codes_unread">Codes not read</string>
     <string name="dashito_codes_found">Fault codes stored</string>
+    <string name="dashito_disconnect_adapter">Disconnect adapter</string>
     <string name="dashito_connect_adapter">Connect adapter</string>
-    <string name="dashito_engine_values">Live engine values</string>
-    <string name="dashito_fault_codes">Car fault codes</string>
+    <string name="dashito_engine_values">Live values, one by one.</string>
+    <string name="dashito_fault_codes">Stored codes turn on the check engine light; pending ones do not yet.</string>
     <string name="dashito_connect_to_see">Connect the OBD to see values.</string>
     <string name="dashito_tab_engine">Engine data</string>
     <string name="dashito_tab_codes">Fault codes</string>
@@ -50,4 +51,21 @@
     <string name="dashito_avg">Avg. consumption</string>
     <string name="projection_open">Open %1$s</string>
     <string name="map_no_live">No live location</string>
+    <string name="pid_now">Now</string>
+    <string name="pid_min">Min</string>
+    <string name="pid_max">Max</string>
+    <string name="pid_bytes">Bytes: %1$s</string>
+    <string name="pid_what_title">What it is</string>
+    <string name="pid_normal_title">Normal</string>
+    <string name="pid_odd_title">If it looks odd</string>
+    <string name="pid_formula_title">How it is calculated</string>
+    <string name="pid_mode_pid">Mode 01, PID %1$s.</string>
+    <string name="pid_code_stored">Stored: turns on the check engine light</string>
+    <string name="pid_code_pending">Pending: showed up once, light not on yet</string>
+    <string name="pid_reading">Reading…</string>
+    <string name="dashito_check_on">On</string>
+    <string name="dashito_check_off">Off</string>
+    <string name="dashito_check_detail">%1$s · %2$s</string>
+    <plurals name="dashito_codes_n"><item quantity="one">%1$d code</item><item quantity="other">%1$d codes</item></plurals>
+    <plurals name="dashito_pending_n"><item quantity="one">%1$d pending</item><item quantity="other">%1$d pending</item></plurals>
 </resources>

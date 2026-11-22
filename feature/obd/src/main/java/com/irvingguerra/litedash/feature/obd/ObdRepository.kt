@@ -18,6 +18,8 @@ import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.SystemClock
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -37,6 +39,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
@@ -91,6 +94,8 @@ data class EngineReport(
     val voltage: Float?,
 )
 
+private const val DIAG_ROUND_GAP_MS = 400L
+
 /** Nombres comunes de adaptadores ELM327 (para ponerlos primero en la lista). */
 private val OBD_NAMES = Regex("obd|elm|vlink|vgate|icar|obdlink|konnwei|v-link", RegexOption.IGNORE_CASE)
 
@@ -132,6 +137,22 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
     /** PIDs que contesta este auto (vacío hasta conectar). */
     var supported by mutableStateOf<Set<Int>>(emptySet())
         private set
+
+    /** Lo último que contestó cada dato (PID) mientras Diagnóstico lo muestra: los bytes tal cual llegaron. */
+    val pidRaw = mutableStateMapOf<Int, IntArray>()
+    /** Mínimo y máximo que ha tenido cada dato numérico en esta conexión. */
+    val pidRange = mutableStateMapOf<Int, Pair<Float, Float>>()
+    private var diagWatchers by mutableIntStateOf(0)
+
+    /** Diagnóstico pide leer todos los datos del auto mientras se ve (true) y deja de pedirlos al irse (false). */
+    fun diagWatch(on: Boolean) { diagWatchers = (diagWatchers + if (on) 1 else -1).coerceAtLeast(0) }
+
+    private fun storePid(code: Int, raw: IntArray) {
+        pidRaw[code] = raw
+        val n = pidSpec(code)?.value?.invoke(raw)?.number() ?: return
+        val r = pidRange[code]
+        pidRange[code] = if (r == null) n to n else minOf(r.first, n) to maxOf(r.second, n)
+    }
 
     private val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -356,6 +377,8 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
                     elm = e
                     tires = TireSession(e)
                     supported = pids
+                    pidRaw.clear()
+                    pidRange.clear()
                     adapter = version
                     target = t
                     if (l is BluetoothLink && t is ObdTarget.Bluetooth) l.used?.let { rememberSocket(t, it) }
@@ -513,8 +536,9 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
      * Lee todo lo del motor de una vez para el Taller. Si ya se está leyendo (el Taller y la pieza
      * Salud piden a la vez al conectar), espera esa misma lectura: el auto no contesta dos veces.
      */
-    suspend fun report(): EngineReport? {
-        val running = reading?.takeIf { it.isActive }
+    suspend fun report(again: Boolean = false): EngineReport? {
+        if (again) lastReport = null
+        val running = reading?.takeIf { it.isActive && !again }
             ?: scope.async { readReport().also { if (it != null) lastReport = it } }.also { reading = it }
         return running.await()
     }
@@ -644,9 +668,31 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
      * Lee lo que se está mostrando mientras dure la conexión. El plan (qué PIDs) se arma solo cuando
      * cambia lo que se muestra; sin nada que leer, espera ese cambio sin dar vueltas.
      */
-    private suspend fun poll(e: Elm327) {
+    private suspend fun poll(e: Elm327) = coroutineScope {
+        launch { diagnose(e) }
         val reader = Reader(e)
         snapshotFlow { bus.wanted }.distinctUntilChanged().collectLatest { shown -> reader.read(shown) }
+    }
+
+    /**
+     * Diagnóstico: mientras se ve, pregunta uno por uno todos los datos que el auto da (sin tocar el plan de lo
+     * demás; el candado reparte el adaptador). Un dato que no contesta se salta; si se perdió el adaptador, lo nota
+     * la lectura del motor.
+     */
+    private suspend fun diagnose(e: Elm327) {
+        snapshotFlow { diagWatchers > 0 }.distinctUntilChanged().collectLatest { on ->
+            if (!on) return@collectLatest
+            val codes = diagPids(supported)
+            while (codes.isNotEmpty()) {
+                for (code in codes) {
+                    currentCoroutineContext().ensureActive()
+                    val raw = try { lock.withLock { e.pid(code) } } catch (x: IOException) { null }
+                    if (raw != null) withContext(Dispatchers.Main) { storePid(code, raw) }
+                    delay(ObdTiming.POLL_GAP_MS)
+                }
+                delay(DIAG_ROUND_GAP_MS)
+            }
+        }
     }
 
     private inner class Reader(private val e: Elm327) {

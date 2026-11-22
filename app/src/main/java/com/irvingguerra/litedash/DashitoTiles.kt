@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -53,6 +54,7 @@ import com.irvingguerra.litedash.feature.dashboard.FuelParts
 import com.irvingguerra.litedash.feature.dashboard.TileTypes
 import com.irvingguerra.litedash.feature.dashboard.TripStatKinds
 import com.irvingguerra.litedash.feature.obd.ObdState
+import com.irvingguerra.litedash.feature.obd.diagPids
 
 /** Los widgets que trae el diseño de fábrica (no tienen opciones propias: se mueven y agrandan como los demás). */
 val DASHITO_TYPES = setOf(TileTypes.TRIP_STAT, TileTypes.FUEL_PART, TileTypes.DIAG)
@@ -221,15 +223,25 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
             "", obd?.adapter ?: "—", onWorkshop,
         )
         DiagParts.PIDS -> {
-            val count = if (on) obd?.supported?.size else null
+            val count = if (on) obd?.let { diagPids(it.supported).size } else null
             InfoCard(Icons.chip, R.string.dashito_pids_title, count?.toString() ?: "--", "PIDs", stringResource(if (on) R.string.dashito_pids_read else R.string.dashito_pids_wait), onWorkshop, chevron = true)
         }
-        DiagParts.CHECK -> InfoCard(
-            Icons.warning, R.string.dashito_check_engine,
-            codes?.size?.toString() ?: "--", "",
-            stringResource(if (codes == null) R.string.dashito_codes_unread else if (codes.isEmpty()) R.string.obd_no_codes else R.string.dashito_codes_found),
-            onWorkshop, chevron = true,
-        )
+        DiagParts.CHECK -> {
+            val stored = report?.let { (it.stored + it.permanent).distinct().size } ?: 0
+            val pending = report?.pending?.size ?: 0
+            val lit = report != null && (stored > 0 || report.readiness?.mil == true)
+            val res = LocalContext.current.resources
+            InfoCard(
+                Icons.warning, R.string.dashito_check_engine,
+                when { report == null -> "--"; lit -> stringResource(R.string.dashito_check_on); else -> stringResource(R.string.dashito_check_off) }, "",
+                when {
+                    report == null -> stringResource(R.string.dashito_codes_unread)
+                    stored == 0 && pending == 0 -> stringResource(R.string.obd_no_codes)
+                    else -> stringResource(R.string.dashito_check_detail, res.getQuantityString(R.plurals.dashito_codes_n, stored, stored), res.getQuantityString(R.plurals.dashito_pending_n, pending, pending))
+                },
+                onWorkshop, chevron = true, alert = lit,
+            )
+        }
         DiagParts.SPACE -> Unit
         DiagParts.CONNECT -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
@@ -265,14 +277,17 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
 }
 
 @Composable
-private fun InfoCard(icon: ImageVector, name: Int, value: String, unit: String, detail: String, onClick: () -> Unit, chevron: Boolean = false) {
+private fun InfoCard(icon: ImageVector, name: Int, value: String, unit: String, detail: String, onClick: () -> Unit, chevron: Boolean = false, alert: Boolean = false) {
     val c = LocalColors.current
-    Card(Modifier.fillMaxSize(), onClick = onClick) {
+    val tint = if (alert) c.danger else c.accent
+    // En alerta (check engine encendido): contorno y brillo rojos, como en Dashito.
+    val frame = if (alert) Modifier.shadow(14.dp, RoundedCornerShape(Radius.card), ambientColor = c.danger, spotColor = c.danger).border(1.dp, c.danger.copy(alpha = 0.85f), RoundedCornerShape(Radius.card)) else Modifier
+    Card(Modifier.fillMaxSize().then(frame), onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 8.dp)) {
             // El valor se achica a lo que quepa ("Sin conexión" completo en vez de cortado).
             val size = fitFont(value, maxWidth - (if (chevron) 86.dp else 58.dp), maxHeight, 0.36f, min = 18f, max = 38f, extraChars = 1f)
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 28.dp) }
+                Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(tint.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, tint, 28.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
                     Label(stringResource(name).uppercase(currentLocale()), Typography.label, c.textMuted, 1)
                     Row(verticalAlignment = Alignment.Bottom) {
@@ -293,7 +308,6 @@ private fun DiagList(d: Dependencies, connected: Boolean, codes: List<String>?) 
     val c = LocalColors.current
     var tab by remember { mutableStateOf(0) }
     val obd = rememberObd(d)
-    val specs = remember(connected, obd?.supported) { GaugeSpecs.filter { obd?.canRead(it.signal) == true } }
     Card(Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().padding(TilePadding)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -314,34 +328,10 @@ private fun DiagList(d: Dependencies, connected: Boolean, codes: List<String>?) 
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                 when {
                     !connected -> Label(stringResource(R.string.dashito_diag_empty), Typography.body.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), c.textMuted, 4, Modifier.padding(horizontal = 56.dp))
-                    tab == 1 -> if (codes.isNullOrEmpty()) Label(stringResource(R.string.obd_no_codes), Typography.subtitle, c.textMuted)
-                        else LazyColumn(Modifier.fillMaxSize()) {
-                            items(codes) { code ->
-                                Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.warning, c.warning, 20.dp)
-                                    Label(code, Typography.subtitle, maxLines = 1, modifier = Modifier.padding(start = 12.dp))
-                                }
-                                Divider()
-                            }
-                        }
-                    else -> if (specs.isEmpty()) Label(stringResource(R.string.dashito_diag_empty), Typography.body.copy(textAlign = androidx.compose.ui.text.style.TextAlign.Center), c.textMuted, 4, Modifier.padding(horizontal = 56.dp))
-                        else LazyColumn(Modifier.fillMaxSize()) {
-                            items(specs) { spec -> LiveValueRow(d, spec); Divider() }
-                        }
+                    tab == 1 -> if (obd != null) CodesPane(obd)
+                    else -> if (obd != null) PidGrid(obd)
                 }
             }
         }
-    }
-}
-
-/** Una fila de datos del motor: el nombre y el valor en vivo (pide la señal solo mientras se ve). */
-@Composable
-private fun LiveValueRow(d: Dependencies, spec: GaugeSpec) {
-    val c = LocalColors.current
-    val value = d.bus.watch(spec.signal)
-    Row(Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(spec.icon, c.accent, 22.dp)
-        Label(stringResource(spec.name), Typography.subtitle, maxLines = 1, modifier = Modifier.padding(start = 12.dp).weight(1f))
-        Label(value?.let { String.format(currentLocale(), "%.1f", it) } ?: "--", Typography.subtitle, c.accent, 1)
     }
 }

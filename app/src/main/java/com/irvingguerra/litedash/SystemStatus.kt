@@ -208,7 +208,7 @@ fun Volume(buttonSize: Dp, vertical: Boolean = false) {
 }
 
 /** La capa de la barra del volumen ocupa toda la ventana desde su esquina (la píldora se acomoda adentro). */
-private object WholeWindow : PopupPositionProvider {
+internal object WholeWindow : PopupPositionProvider {
     override fun calculatePosition(anchorBounds: IntRect, windowSize: IntSize, layoutDirection: LayoutDirection, popupContentSize: IntSize) = IntOffset.Zero
 }
 

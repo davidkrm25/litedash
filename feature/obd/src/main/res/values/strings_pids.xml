@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Catálogo de datos del motor (PID del modo 01): nombre, descripción corta y los cuatro apartados del detalle. -->
+    <string name="pid_01_name" formatted="false">Check engine</string>
+    <string name="pid_01_desc" formatted="false">Foco de falla y códigos guardados</string>
+    <string name="pid_01_what" formatted="false">Dice si el foco de falla (check engine) está prendido y cuántos códigos guardados tiene la computadora.</string>
+    <string name="pid_01_normal" formatted="false">Sin fallas: foco apagado y cero códigos.</string>
+    <string name="pid_01_odd" formatted="false">Con el foco prendido, abre Códigos de falla para ver cuáles son. Si el foco parpadea es una falla de encendido grave: baja la velocidad y revísalo pronto.</string>
+    <string name="pid_03_name" formatted="false">Sistema de combustible</string>
+    <string name="pid_03_desc" formatted="false">Normal = ya ajusta con el sensor de oxígeno</string>
+    <string name="pid_03_what" formatted="false">Cómo está mezclando la computadora: ajustando con el sensor de oxígeno (lazo cerrado) o sin él (lazo abierto).</string>
+    <string name="pid_03_normal" formatted="false">Frío, unos minutos en lazo abierto; ya caliente, en Normal (lazo cerrado).</string>
+    <string name="pid_03_odd" formatted="false">Si con el motor caliente no pasa a Normal, puede fallar un sensor de oxígeno o el de temperatura.</string>
+    <string name="pid_04_name" formatted="false">Carga del motor</string>
+    <string name="pid_04_desc" formatted="false">Qué tanto está trabajando el motor</string>
+    <string name="pid_04_what" formatted="false">Porcentaje del máximo de aire que podría meter el motor a esas RPM. Es una medida de cuánto esfuerzo está haciendo.</string>
+    <string name="pid_04_normal" formatted="false">Ralentí 20–35 %. Crucero en plano 25–50 %. Acelerando fuerte cerca de 100 %.</string>
+    <string name="pid_04_odd" formatted="false">Alta en ralentí (más de 40 %) puede ser el aire acondicionado o un consumo eléctrico grande; si no, una fuga de vacío.</string>
+    <string name="pid_05_name" formatted="false">Temp. del refrigerante</string>
+    <string name="pid_05_desc" formatted="false">Normal 85–105 °C ya caliente</string>
+    <string name="pid_05_what" formatted="false">Temperatura del anticongelante del motor. Es el dato más importante para cuidar el motor.</string>
+    <string name="pid_05_normal" formatted="false">85–105 °C ya caliente. Tarda 5–10 min en llegar. El ventilador suele prender cerca de 100 °C.</string>
+    <string name="pid_05_odd" formatted="false">Más de 110 °C: oríllate y apaga el motor; puede faltar anticongelante o fallar el ventilador o el termostato. Si nunca pasa de 70–75 °C, el termostato se quedó abierto (gasta más gasolina).</string>
+    <string name="pid_06_name" formatted="false">Ajuste corto de combustible</string>
+    <string name="pid_06_desc" formatted="false">Corrección inmediata; normal ±10 %</string>
+    <string name="pid_06_what" formatted="false">Cuánta gasolina le quita o le pone la computadora en el momento para mantener la mezcla ideal.</string>
+    <string name="pid_06_normal" formatted="false">Oscila alrededor de 0 %, dentro de ±10 %.</string>
+    <string name="pid_06_odd" formatted="false">Fijo arriba de +10 %: mezcla pobre (aire de más o falta gasolina). Fijo abajo de –10 %: mezcla rica (inyector con fuga o filtro de aire tapado).</string>
+    <string name="pid_07_name" formatted="false">Ajuste largo de combustible</string>
+    <string name="pid_07_desc" formatted="false">Corrección aprendida; fuera de ±10 % hay falla</string>
+    <string name="pid_07_what" formatted="false">La corrección que la computadora aprendió con el tiempo para compensar desgaste o fugas.</string>
+    <string name="pid_07_normal" formatted="false">Cerca de 0 %, dentro de ±10 %.</string>
+    <string name="pid_07_odd" formatted="false">Más de +10 %: entra aire de más o falta gasolina (fuga de vacío, bomba, filtro). Menos de –10 %: sobra gasolina.</string>
+    <string name="pid_0a_name" formatted="false">Presión de combustible</string>
+    <string name="pid_0a_desc" formatted="false">Presión del riel de gasolina</string>
+    <string name="pid_0a_what" formatted="false">Presión con la que la bomba manda gasolina a los inyectores.</string>
+    <string name="pid_0a_normal" formatted="false">Entre 250 y 450 kPa en la mayoría de los autos de inyección en puerto; mucho más en inyección directa.</string>
+    <string name="pid_0a_odd" formatted="false">Baja: bomba débil o filtro tapado (el auto jalonea). Alta: regulador dañado.</string>
+    <string name="pid_0b_name" formatted="false">Presión de admisión (MAP)</string>
+    <string name="pid_0b_desc" formatted="false">Vacío del múltiple; baja en ralentí</string>
+    <string name="pid_0b_what" formatted="false">Presión del aire dentro del múltiple de admisión. Con ella la computadora calcula cuánto aire entra.</string>
+    <string name="pid_0b_normal" formatted="false">Ralentí 25–45 kPa. Acelerando sube; a plena carga cerca de la presión del aire (100 kPa), y más con turbo.</string>
+    <string name="pid_0b_odd" formatted="false">Alta en ralentí: fuga de vacío o sensor dañado. Si no cambia nunca, el sensor está pegado.</string>
+    <string name="pid_0c_name" formatted="false">RPM</string>
+    <string name="pid_0c_desc" formatted="false">Revoluciones del motor</string>
+    <string name="pid_0c_what" formatted="false">Cuántas vueltas por minuto da el cigüeñal.</string>
+    <string name="pid_0c_normal" formatted="false">Ralentí 600–900 rpm en caliente. Carretera 1,800–3,000 rpm.</string>
+    <string name="pid_0c_odd" formatted="false">Ralentí que sube y baja o muy bajo: sensor, mariposa sucia o fuga de vacío.</string>
+    <string name="pid_0d_name" formatted="false">Velocidad</string>
+    <string name="pid_0d_desc" formatted="false">La que mide la computadora del motor</string>
+    <string name="pid_0d_what" formatted="false">Velocidad del auto según la computadora, por el sensor de las ruedas o la transmisión.</string>
+    <string name="pid_0d_normal" formatted="false">Igual al velocímetro del tablero (el tablero suele marcar un poco más).</string>
+    <string name="pid_0d_odd" formatted="false">Si marca 0 andando, el sensor de velocidad falló.</string>
+    <string name="pid_0e_name" formatted="false">Avance del encendido</string>
+    <string name="pid_0e_desc" formatted="false">Grados antes del punto muerto superior</string>
+    <string name="pid_0e_what" formatted="false">Cuánto antes de que el pistón llegue arriba salta la chispa.</string>
+    <string name="pid_0e_normal" formatted="false">En ralentí 5–20°; sube con las RPM y baja con la carga.</string>
+    <string name="pid_0e_odd" formatted="false">Muy retrasado o fijo: la computadora protege al motor (golpeteo, gasolina mala o sensor).</string>
+    <string name="pid_0f_name" formatted="false">Temp. del aire de admisión</string>
+    <string name="pid_0f_desc" formatted="false">Aire que entra al motor; cerca de la ambiente</string>
+    <string name="pid_0f_what" formatted="false">Temperatura del aire que entra al motor.</string>
+    <string name="pid_0f_normal" formatted="false">Cerca de la temperatura de afuera; algo más alta con el motor caliente y parado.</string>
+    <string name="pid_0f_odd" formatted="false">Mucho más alta que la ambiente andando: toma de aire caliente o sensor dañado.</string>
+    <string name="pid_10_name" formatted="false">Flujo de aire (MAF)</string>
+    <string name="pid_10_desc" formatted="false">Con él se calcula el consumo</string>
+    <string name="pid_10_what" formatted="false">Gramos de aire que entran al motor por segundo.</string>
+    <string name="pid_10_normal" formatted="false">Ralentí 2–6 g/s en un motor de 1.6–2.0 L; sube con las RPM.</string>
+    <string name="pid_10_odd" formatted="false">Muy bajo para las RPM: sensor sucio. Limpiarlo con limpiador de MAF suele bastar.</string>
+    <string name="pid_11_name" formatted="false">Acelerador</string>
+    <string name="pid_11_desc" formatted="false">Apertura de la mariposa</string>
+    <string name="pid_11_what" formatted="false">Qué tan abierta está la mariposa por donde entra el aire.</string>
+    <string name="pid_11_normal" formatted="false">Ralentí 10–20 %. Pisando a fondo, cerca de 100 %.</string>
+    <string name="pid_11_odd" formatted="false">Si sube sola en ralentí, la mariposa está sucia o el sensor falla.</string>
+    <string name="pid_13_name" formatted="false">Sensores de oxígeno</string>
+    <string name="pid_13_desc" formatted="false">Cuántos tiene el escape</string>
+    <string name="pid_13_what" formatted="false">Cuántos sensores de oxígeno tiene el escape del auto.</string>
+    <string name="pid_13_normal" formatted="false">Dos (antes y después del catalizador) en un cuatro cilindros; cuatro en un V6 o V8.</string>
+    <string name="pid_13_odd" formatted="false">No cambia mientras manejas.</string>
+    <string name="pid_14_name" formatted="false">Sensor de oxígeno 1</string>
+    <string name="pid_14_desc" formatted="false">Antes del catalizador; oscila 0.1–0.9 V</string>
+    <string name="pid_14_what" formatted="false">Mide si la mezcla sale rica o pobre antes del catalizador.</string>
+    <string name="pid_14_normal" formatted="false">Oscila rápido entre 0.1 y 0.9 V con el motor caliente.</string>
+    <string name="pid_14_odd" formatted="false">Fijo en un valor o muy lento: sensor viejo o mezcla fuera de control.</string>
+    <string name="pid_15_name" formatted="false">Sensor de oxígeno 2</string>
+    <string name="pid_15_desc" formatted="false">Después del catalizador; estable</string>
+    <string name="pid_15_what" formatted="false">Mide el aire después del catalizador para saber si este funciona.</string>
+    <string name="pid_15_normal" formatted="false">Estable alrededor de 0.4–0.8 V.</string>
+    <string name="pid_15_odd" formatted="false">Si oscila igual que el primero, el catalizador ya no limpia (código P0420).</string>
+    <string name="pid_1c_name" formatted="false">Norma OBD</string>
+    <string name="pid_1c_desc" formatted="false">Estándar que cumple el carro</string>
+    <string name="pid_1c_what" formatted="false">La norma de diagnóstico a bordo con la que cumple el auto.</string>
+    <string name="pid_1c_normal" formatted="false">OBD-II en autos de México y Estados Unidos; EOBD en Europa.</string>
+    <string name="pid_1c_odd" formatted="false">No cambia.</string>
+    <string name="pid_1f_name" formatted="false">Tiempo desde el arranque</string>
+    <string name="pid_1f_desc" formatted="false">Desde que se encendió el motor</string>
+    <string name="pid_1f_what" formatted="false">Segundos que lleva el motor encendido desde el último arranque.</string>
+    <string name="pid_1f_normal" formatted="false">Empieza en 0 al arrancar y sube de uno en uno.</string>
+    <string name="pid_1f_odd" formatted="false">Si se reinicia solo andando, el motor se apagó y se volvió a encender.</string>
+    <string name="pid_21_name" formatted="false">Distancia con check engine</string>
+    <string name="pid_21_desc" formatted="false">Recorrida con el foco encendido</string>
+    <string name="pid_21_what" formatted="false">Kilómetros recorridos con el foco de falla prendido.</string>
+    <string name="pid_21_normal" formatted="false">0 km si nunca ha estado prendido.</string>
+    <string name="pid_21_odd" formatted="false">Si crece, llevas manejando con una falla pendiente: revísala.</string>
+    <string name="pid_2e_name" formatted="false">Purga evaporativa</string>
+    <string name="pid_2e_desc" formatted="false">Vapores del tanque que se queman</string>
+    <string name="pid_2e_what" formatted="false">Cuánto abre la válvula que manda los vapores de gasolina del tanque al motor.</string>
+    <string name="pid_2e_normal" formatted="false">Cerrada en frío y en ralentí; se abre al manejar en caliente.</string>
+    <string name="pid_2e_odd" formatted="false">Siempre cerrada o abierta: válvula de purga pegada (puede dar códigos P044x).</string>
+    <string name="pid_2f_name" formatted="false">Nivel de combustible</string>
+    <string name="pid_2f_desc" formatted="false">Gasolina en el tanque</string>
+    <string name="pid_2f_what" formatted="false">Cuánta gasolina hay en el tanque según el flotador.</string>
+    <string name="pid_2f_normal" formatted="false">Baja poco a poco; sube al llenar.</string>
+    <string name="pid_2f_odd" formatted="false">Salta mucho: el flotador falla. Algunos autos no entregan este dato.</string>
+    <string name="pid_30_name" formatted="false">Calentamientos desde borrar</string>
+    <string name="pid_30_desc" formatted="false">Arranques en frío contados</string>
+    <string name="pid_30_what" formatted="false">Veces que el motor se calentó por completo desde que se borraron los códigos.</string>
+    <string name="pid_30_normal" formatted="false">Sube de a uno por cada viaje largo.</string>
+    <string name="pid_30_odd" formatted="false">Si es 0 o muy bajo, se borraron códigos o se desconectó la batería hace poco.</string>
+    <string name="pid_31_name" formatted="false">Distancia desde borrar</string>
+    <string name="pid_31_desc" formatted="false">Recorrida desde que se borraron los códigos</string>
+    <string name="pid_31_what" formatted="false">Kilómetros recorridos desde que se borraron los códigos o se desconectó la batería.</string>
+    <string name="pid_31_normal" formatted="false">Crece al manejar.</string>
+    <string name="pid_31_odd" formatted="false">Si es muy poca, los monitores de la verificación quizá aún no terminan.</string>
+    <string name="pid_33_name" formatted="false">Presión barométrica</string>
+    <string name="pid_33_desc" formatted="false">Baja con la altura (a 1600 m, ~85 kPa)</string>
+    <string name="pid_33_what" formatted="false">Presión del aire de afuera, medida por el auto.</string>
+    <string name="pid_33_normal" formatted="false">101 kPa a nivel del mar; ~85 kPa a 1,600 m; ~77 kPa a 2,240 m.</string>
+    <string name="pid_33_odd" formatted="false">Si no baja al subir a la montaña, el sensor falló.</string>
+    <string name="pid_3c_name" formatted="false">Temp. del catalizador</string>
+    <string name="pid_3c_desc" formatted="false">Antes del catalizador (banco 1)</string>
+    <string name="pid_3c_what" formatted="false">Temperatura de los gases al entrar al catalizador.</string>
+    <string name="pid_3c_normal" formatted="false">Entre 300 y 800 °C manejando.</string>
+    <string name="pid_3c_odd" formatted="false">Arriba de 900 °C: mezcla rica o falla de encendido; puede dañar el catalizador.</string>
+    <string name="pid_42_name" formatted="false">Voltaje de la computadora</string>
+    <string name="pid_42_desc" formatted="false">Con el motor andando ~13.5–14.5 V</string>
+    <string name="pid_42_what" formatted="false">Voltaje de la batería que ve la computadora.</string>
+    <string name="pid_42_normal" formatted="false">Apagado ~12.4–12.8 V. Con el motor andando 13.5–14.5 V.</string>
+    <string name="pid_42_odd" formatted="false">Menos de 13 V andando: el alternador no carga. Más de 15 V: regulador dañado.</string>
+    <string name="pid_43_name" formatted="false">Carga absoluta</string>
+    <string name="pid_43_desc" formatted="false">Aire por cilindro respecto al máximo</string>
+    <string name="pid_43_what" formatted="false">Aire que entra por cada ciclo del motor, como porcentaje del máximo teórico.</string>
+    <string name="pid_43_normal" formatted="false">Ralentí 15–30 %; acelerando fuerte, 80–100 % o más con turbo.</string>
+    <string name="pid_43_odd" formatted="false">Alta en ralentí: fuga de vacío o falla del sensor.</string>
+    <string name="pid_44_name" formatted="false">Mezcla comandada (λ)</string>
+    <string name="pid_44_desc" formatted="false">1.00 = mezcla ideal; &lt;1 rica, &gt;1 pobre</string>
+    <string name="pid_44_what" formatted="false">Mezcla de aire y gasolina que la computadora pide, en lambda.</string>
+    <string name="pid_44_normal" formatted="false">1.00 en crucero. Menor a 1 al acelerar fuerte; mayor a 1 al desacelerar.</string>
+    <string name="pid_44_odd" formatted="false">Fija lejos de 1.00 con el motor caliente: sensor de oxígeno o de aire con falla.</string>
+    <string name="pid_45_name" formatted="false">Acelerador relativo</string>
+    <string name="pid_45_desc" formatted="false">Apertura respecto a la mínima aprendida</string>
+    <string name="pid_45_what" formatted="false">Apertura de la mariposa contada desde la posición cerrada que aprendió la computadora.</string>
+    <string name="pid_45_normal" formatted="false">0 % en ralentí; 100 % a fondo.</string>
+    <string name="pid_45_odd" formatted="false">Distinto de 0 % en ralentí: mariposa sucia o necesita reaprender.</string>
+    <string name="pid_46_name" formatted="false">Temp. ambiente</string>
+    <string name="pid_46_desc" formatted="false">Aire exterior</string>
+    <string name="pid_46_what" formatted="false">Temperatura del aire de afuera según el sensor del auto.</string>
+    <string name="pid_46_normal" formatted="false">Parecida al clima de afuera.</string>
+    <string name="pid_46_odd" formatted="false">Muy distinta del clima real: el sensor está sobre calentado por el motor (normal tras parar) o dañado.</string>
+    <string name="pid_47_name" formatted="false">Acelerador (sensor B)</string>
+    <string name="pid_47_desc" formatted="false">Segundo sensor de la mariposa</string>
+    <string name="pid_47_what" formatted="false">Segundo sensor de la mariposa; la computadora lo compara con el primero.</string>
+    <string name="pid_47_normal" formatted="false">Parecido al acelerador A (puede ir invertido).</string>
+    <string name="pid_47_odd" formatted="false">Si no coincide con el A, falla uno de los dos sensores.</string>
+    <string name="pid_49_name" formatted="false">Pedal (sensor D)</string>
+    <string name="pid_49_desc" formatted="false">Qué tanto pisas el acelerador</string>
+    <string name="pid_49_what" formatted="false">Posición del pedal del acelerador electrónico.</string>
+    <string name="pid_49_normal" formatted="false">0–20 % sin pisar; sube al pisar.</string>
+    <string name="pid_49_odd" formatted="false">Si no vuelve a 0 % al soltar, el pedal o su sensor falla.</string>
+    <string name="pid_4a_name" formatted="false">Pedal (sensor E)</string>
+    <string name="pid_4a_desc" formatted="false">Sensor redundante del pedal</string>
+    <string name="pid_4a_what" formatted="false">Segundo sensor del pedal, para comprobar al primero.</string>
+    <string name="pid_4a_normal" formatted="false">Parecido al sensor D.</string>
+    <string name="pid_4a_odd" formatted="false">Si no coincide con el D, falla uno de los dos.</string>
+    <string name="pid_4c_name" formatted="false">Mariposa comandada</string>
+    <string name="pid_4c_desc" formatted="false">Lo que la computadora pide abrir</string>
+    <string name="pid_4c_what" formatted="false">Apertura de la mariposa que la computadora está pidiendo.</string>
+    <string name="pid_4c_normal" formatted="false">Debe seguir de cerca al acelerador real.</string>
+    <string name="pid_4c_odd" formatted="false">Si el real no la alcanza, la mariposa está sucia o dañada.</string>
+    <string name="pid_4d_name" formatted="false">Tiempo con check engine</string>
+    <string name="pid_4d_desc" formatted="false">Minutos con el foco encendido</string>
+    <string name="pid_4d_what" formatted="false">Minutos que el motor ha andado con el foco de falla prendido.</string>
+    <string name="pid_4d_normal" formatted="false">0 min si nunca ha estado prendido.</string>
+    <string name="pid_4d_odd" formatted="false">Si crece, hay una falla activa sin atender.</string>
+    <string name="pid_4e_name" formatted="false">Tiempo desde borrar</string>
+    <string name="pid_4e_desc" formatted="false">Minutos desde que se borraron los códigos</string>
+    <string name="pid_4e_what" formatted="false">Minutos de motor encendido desde que se borraron los códigos.</string>
+    <string name="pid_4e_normal" formatted="false">Crece al manejar.</string>
+    <string name="pid_4e_odd" formatted="false">Muy bajo: se borraron códigos o se desconectó la batería hace poco.</string>
+    <string name="pid_5c_name" formatted="false">Temp. del aceite</string>
+    <string name="pid_5c_desc" formatted="false">Aceite del motor</string>
+    <string name="pid_5c_what" formatted="false">Temperatura del aceite del motor.</string>
+    <string name="pid_5c_normal" formatted="false">80–110 °C ya caliente; tarda más que el refrigerante.</string>
+    <string name="pid_5c_odd" formatted="false">Más de 130 °C: reduce la marcha; revisa nivel y calidad del aceite.</string>
+    <string name="pid_5e_name" formatted="false">Gasto de combustible</string>
+    <string name="pid_5e_desc" formatted="false">Litros por hora que gasta el motor</string>
+    <string name="pid_5e_what" formatted="false">Gasolina que está gastando el motor en este momento.</string>
+    <string name="pid_5e_normal" formatted="false">Ralentí 0.6–1.2 L/h; carretera 5–8 L/h.</string>
+    <string name="pid_5e_odd" formatted="false">Muy alto en ralentí: mezcla rica o inyector con fuga.</string>
+    <string name="pid_mil_none" formatted="false">Sin fallas</string>
+    <string name="pid_fuel_normal" formatted="false">Normal</string>
+    <string name="pid_fuel_open" formatted="false">Lazo abierto</string>
+    <string name="pid_fuel_fault" formatted="false">Con falla</string>
+    <string name="pid_unknown_name">Dato %1$s</string>
+    <string name="pid_unknown_desc" formatted="false">Sin descripción</string>
+    <string name="pid_unknown_what" formatted="false">El auto reporta este dato, pero LiteDash aún no sabe explicarlo.</string>
+    <string name="pid_unknown_normal" formatted="false">Sin referencia.</string>
+    <string name="pid_unknown_odd" formatted="false">Sin referencia.</string>
+    <plurals name="pid_mil_n"><item quantity="one">%1$d código</item><item quantity="other">%1$d códigos</item></plurals>
+    <plurals name="pid_sensors"><item quantity="one">%1$d sensor</item><item quantity="other">%1$d sensores</item></plurals>
+</resources>

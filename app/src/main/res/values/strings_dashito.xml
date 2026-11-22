@@ -25,8 +25,8 @@
     <string name="dashito_codes_found">Códigos de falla guardados</string>
     <string name="dashito_disconnect_adapter">Desconectar adaptador</string>
     <string name="dashito_connect_adapter">Conectar adaptador</string>
-    <string name="dashito_engine_values">Valores en vivo del motor</string>
-    <string name="dashito_fault_codes">Códigos de falla del auto</string>
+    <string name="dashito_engine_values">Valores en vivo, uno por uno.</string>
+    <string name="dashito_fault_codes">Guardados prenden el check engine; pendientes aún no.</string>
     <string name="dashito_connect_to_see">Conecta el OBD para ver valores.</string>
     <string name="dashito_tab_engine">Datos del motor</string>
     <string name="dashito_tab_codes">Códigos de falla</string>
@@ -49,4 +49,21 @@
     <string name="dashito_avg">Consumo prom.</string>
     <string name="projection_open">Abrir %1$s</string>
     <string name="map_no_live">Sin ubicación en vivo</string>
+    <string name="pid_now">Ahora</string>
+    <string name="pid_min">Mín</string>
+    <string name="pid_max">Máx</string>
+    <string name="pid_bytes">Bytes: %1$s</string>
+    <string name="pid_what_title">Qué es</string>
+    <string name="pid_normal_title">Normal</string>
+    <string name="pid_odd_title">Si sale raro</string>
+    <string name="pid_formula_title">Cómo se calcula</string>
+    <string name="pid_mode_pid">Modo 01, PID %1$s.</string>
+    <string name="pid_code_stored">Guardado: prende el check engine</string>
+    <string name="pid_code_pending">Pendiente: apareció una vez, aún no prende el foco</string>
+    <string name="pid_reading">Leyendo…</string>
+    <string name="dashito_check_on">Encendido</string>
+    <string name="dashito_check_off">Apagado</string>
+    <string name="dashito_check_detail">%1$s · %2$s</string>
+    <plurals name="dashito_codes_n"><item quantity="one">%1$d código</item><item quantity="other">%1$d códigos</item></plurals>
+    <plurals name="dashito_pending_n"><item quantity="one">%1$d pendiente</item><item quantity="other">%1$d pendientes</item></plurals>
 </resources>

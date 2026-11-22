@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Catálogo de datos del motor (PID del modo 01): nombre, descripción corta y los cuatro apartados del detalle. -->
+    <string name="pid_01_name" formatted="false">Check engine</string>
+    <string name="pid_01_desc" formatted="false">Warning light and stored codes</string>
+    <string name="pid_01_what" formatted="false">Tells whether the check engine light is on and how many stored codes the computer has.</string>
+    <string name="pid_01_normal" formatted="false">No faults: light off and zero codes.</string>
+    <string name="pid_01_odd" formatted="false">With the light on, open Fault codes to see which ones. If it flashes it is a serious misfire: slow down and get it checked soon.</string>
+    <string name="pid_03_name" formatted="false">Fuel system</string>
+    <string name="pid_03_desc" formatted="false">Normal = already adjusting with the O2 sensor</string>
+    <string name="pid_03_what" formatted="false">How the computer is mixing fuel: adjusting with the oxygen sensor (closed loop) or without it (open loop).</string>
+    <string name="pid_03_normal" formatted="false">Cold, a few minutes in open loop; once warm, Normal (closed loop).</string>
+    <string name="pid_03_odd" formatted="false">If it does not reach Normal with a warm engine, an oxygen sensor or the temperature sensor may be failing.</string>
+    <string name="pid_04_name" formatted="false">Engine load</string>
+    <string name="pid_04_desc" formatted="false">How hard the engine is working</string>
+    <string name="pid_04_what" formatted="false">Percentage of the most air the engine could take in at those RPM. A measure of how much effort it is making.</string>
+    <string name="pid_04_normal" formatted="false">Idle 20–35 %. Flat-road cruise 25–50 %. Hard acceleration near 100 %.</string>
+    <string name="pid_04_odd" formatted="false">High at idle (over 40 %) can be the A/C or a large electrical load; otherwise a vacuum leak.</string>
+    <string name="pid_05_name" formatted="false">Coolant temp.</string>
+    <string name="pid_05_desc" formatted="false">Normal 85–105 °C when warm</string>
+    <string name="pid_05_what" formatted="false">Temperature of the engine coolant. The most important reading to protect the engine.</string>
+    <string name="pid_05_normal" formatted="false">85–105 °C when warm. Takes 5–10 min to get there. The fan usually starts near 100 °C.</string>
+    <string name="pid_05_odd" formatted="false">Over 110 °C: pull over and stop the engine; coolant may be low or the fan or thermostat may have failed. If it never exceeds 70–75 °C, the thermostat is stuck open (uses more fuel).</string>
+    <string name="pid_06_name" formatted="false">Short-term fuel trim</string>
+    <string name="pid_06_desc" formatted="false">Instant correction; normal ±10 %</string>
+    <string name="pid_06_what" formatted="false">How much fuel the computer is adding or removing right now to keep the mixture ideal.</string>
+    <string name="pid_06_normal" formatted="false">Swings around 0 %, within ±10 %.</string>
+    <string name="pid_06_odd" formatted="false">Stuck above +10 %: lean mixture (extra air or too little fuel). Stuck below –10 %: rich mixture (leaking injector or clogged air filter).</string>
+    <string name="pid_07_name" formatted="false">Long-term fuel trim</string>
+    <string name="pid_07_desc" formatted="false">Learned correction; beyond ±10 % is a fault</string>
+    <string name="pid_07_what" formatted="false">The correction the computer learned over time to compensate for wear or leaks.</string>
+    <string name="pid_07_normal" formatted="false">Near 0 %, within ±10 %.</string>
+    <string name="pid_07_odd" formatted="false">Above +10 %: extra air or too little fuel (vacuum leak, pump, filter). Below –10 %: too much fuel.</string>
+    <string name="pid_0a_name" formatted="false">Fuel pressure</string>
+    <string name="pid_0a_desc" formatted="false">Fuel rail pressure</string>
+    <string name="pid_0a_what" formatted="false">Pressure with which the pump sends fuel to the injectors.</string>
+    <string name="pid_0a_normal" formatted="false">Between 250 and 450 kPa on most port-injection cars; much higher on direct injection.</string>
+    <string name="pid_0a_odd" formatted="false">Low: weak pump or clogged filter (the car stumbles). High: faulty regulator.</string>
+    <string name="pid_0b_name" formatted="false">Intake pressure (MAP)</string>
+    <string name="pid_0b_desc" formatted="false">Manifold vacuum; low at idle</string>
+    <string name="pid_0b_what" formatted="false">Air pressure inside the intake manifold. The computer uses it to work out how much air is coming in.</string>
+    <string name="pid_0b_normal" formatted="false">Idle 25–45 kPa. Rises when accelerating; at full load near air pressure (100 kPa), more with a turbo.</string>
+    <string name="pid_0b_odd" formatted="false">High at idle: vacuum leak or faulty sensor. If it never changes, the sensor is stuck.</string>
+    <string name="pid_0c_name" formatted="false">RPM</string>
+    <string name="pid_0c_desc" formatted="false">Engine revolutions</string>
+    <string name="pid_0c_what" formatted="false">How many turns per minute the crankshaft makes.</string>
+    <string name="pid_0c_normal" formatted="false">Idle 600–900 rpm when warm. Highway 1,800–3,000 rpm.</string>
+    <string name="pid_0c_odd" formatted="false">Idle that hunts or is very low: sensor, dirty throttle body or vacuum leak.</string>
+    <string name="pid_0d_name" formatted="false">Speed</string>
+    <string name="pid_0d_desc" formatted="false">What the engine computer measures</string>
+    <string name="pid_0d_what" formatted="false">Vehicle speed according to the computer, from the wheel or transmission sensor.</string>
+    <string name="pid_0d_normal" formatted="false">Same as the dashboard speedometer (the dash usually reads a little higher).</string>
+    <string name="pid_0d_odd" formatted="false">If it reads 0 while moving, the speed sensor failed.</string>
+    <string name="pid_0e_name" formatted="false">Ignition timing</string>
+    <string name="pid_0e_desc" formatted="false">Degrees before top dead center</string>
+    <string name="pid_0e_what" formatted="false">How long before the piston reaches the top the spark fires.</string>
+    <string name="pid_0e_normal" formatted="false">At idle 5–20°; rises with RPM and falls with load.</string>
+    <string name="pid_0e_odd" formatted="false">Very retarded or fixed: the computer is protecting the engine (knock, bad fuel or a sensor).</string>
+    <string name="pid_0f_name" formatted="false">Intake air temp.</string>
+    <string name="pid_0f_desc" formatted="false">Air entering the engine; near ambient</string>
+    <string name="pid_0f_what" formatted="false">Temperature of the air entering the engine.</string>
+    <string name="pid_0f_normal" formatted="false">Close to the outside temperature; a bit higher with a hot engine at a stop.</string>
+    <string name="pid_0f_odd" formatted="false">Much higher than ambient while moving: hot air intake or faulty sensor.</string>
+    <string name="pid_10_name" formatted="false">Air flow (MAF)</string>
+    <string name="pid_10_desc" formatted="false">Used to work out consumption</string>
+    <string name="pid_10_what" formatted="false">Grams of air entering the engine per second.</string>
+    <string name="pid_10_normal" formatted="false">Idle 2–6 g/s on a 1.6–2.0 L engine; rises with RPM.</string>
+    <string name="pid_10_odd" formatted="false">Too low for the RPM: dirty sensor. MAF cleaner usually fixes it.</string>
+    <string name="pid_11_name" formatted="false">Throttle</string>
+    <string name="pid_11_desc" formatted="false">Throttle opening</string>
+    <string name="pid_11_what" formatted="false">How open the throttle plate is.</string>
+    <string name="pid_11_normal" formatted="false">Idle 10–20 %. Floored, near 100 %.</string>
+    <string name="pid_11_odd" formatted="false">If it rises by itself at idle, the throttle body is dirty or the sensor is failing.</string>
+    <string name="pid_13_name" formatted="false">Oxygen sensors</string>
+    <string name="pid_13_desc" formatted="false">How many the exhaust has</string>
+    <string name="pid_13_what" formatted="false">How many oxygen sensors the car\'s exhaust has.</string>
+    <string name="pid_13_normal" formatted="false">Two (before and after the catalytic converter) on a four-cylinder; four on a V6 or V8.</string>
+    <string name="pid_13_odd" formatted="false">It does not change while you drive.</string>
+    <string name="pid_14_name" formatted="false">Oxygen sensor 1</string>
+    <string name="pid_14_desc" formatted="false">Before the catalytic converter; swings 0.1–0.9 V</string>
+    <string name="pid_14_what" formatted="false">Measures whether the mixture is rich or lean before the catalytic converter.</string>
+    <string name="pid_14_normal" formatted="false">Swings quickly between 0.1 and 0.9 V with a warm engine.</string>
+    <string name="pid_14_odd" formatted="false">Stuck at one value or very slow: old sensor or mixture out of control.</string>
+    <string name="pid_15_name" formatted="false">Oxygen sensor 2</string>
+    <string name="pid_15_desc" formatted="false">After the catalytic converter; steady</string>
+    <string name="pid_15_what" formatted="false">Measures the exhaust after the catalytic converter to tell whether it works.</string>
+    <string name="pid_15_normal" formatted="false">Steady around 0.4–0.8 V.</string>
+    <string name="pid_15_odd" formatted="false">If it swings like the first one, the converter no longer cleans (code P0420).</string>
+    <string name="pid_1c_name" formatted="false">OBD standard</string>
+    <string name="pid_1c_desc" formatted="false">Standard the car complies with</string>
+    <string name="pid_1c_what" formatted="false">The on-board diagnostics standard the car complies with.</string>
+    <string name="pid_1c_normal" formatted="false">OBD-II on cars in Mexico and the US; EOBD in Europe.</string>
+    <string name="pid_1c_odd" formatted="false">It does not change.</string>
+    <string name="pid_1f_name" formatted="false">Time since start</string>
+    <string name="pid_1f_desc" formatted="false">Since the engine was started</string>
+    <string name="pid_1f_what" formatted="false">Seconds the engine has run since the last start.</string>
+    <string name="pid_1f_normal" formatted="false">Starts at 0 when you start and counts up.</string>
+    <string name="pid_1f_odd" formatted="false">If it resets by itself while driving, the engine stalled and restarted.</string>
+    <string name="pid_21_name" formatted="false">Distance with check engine</string>
+    <string name="pid_21_desc" formatted="false">Driven with the light on</string>
+    <string name="pid_21_what" formatted="false">Kilometers driven with the warning light on.</string>
+    <string name="pid_21_normal" formatted="false">0 km if it has never been on.</string>
+    <string name="pid_21_odd" formatted="false">If it grows, you have been driving with a fault: get it checked.</string>
+    <string name="pid_2e_name" formatted="false">Evaporative purge</string>
+    <string name="pid_2e_desc" formatted="false">Tank vapors being burned</string>
+    <string name="pid_2e_what" formatted="false">How far the valve that sends fuel vapor from the tank to the engine is open.</string>
+    <string name="pid_2e_normal" formatted="false">Closed when cold and at idle; opens while driving warm.</string>
+    <string name="pid_2e_odd" formatted="false">Always closed or always open: stuck purge valve (can set P044x codes).</string>
+    <string name="pid_2f_name" formatted="false">Fuel level</string>
+    <string name="pid_2f_desc" formatted="false">Fuel in the tank</string>
+    <string name="pid_2f_what" formatted="false">How much fuel is in the tank according to the float.</string>
+    <string name="pid_2f_normal" formatted="false">Drops slowly; rises when you fill up.</string>
+    <string name="pid_2f_odd" formatted="false">Jumps around: the float is failing. Some cars do not report this.</string>
+    <string name="pid_30_name" formatted="false">Warm-ups since clear</string>
+    <string name="pid_30_desc" formatted="false">Cold starts counted</string>
+    <string name="pid_30_what" formatted="false">Times the engine fully warmed up since the codes were cleared.</string>
+    <string name="pid_30_normal" formatted="false">Goes up by one per long trip.</string>
+    <string name="pid_30_odd" formatted="false">If it is 0 or very low, codes were cleared or the battery was disconnected recently.</string>
+    <string name="pid_31_name" formatted="false">Distance since clear</string>
+    <string name="pid_31_desc" formatted="false">Driven since the codes were cleared</string>
+    <string name="pid_31_what" formatted="false">Kilometers driven since the codes were cleared or the battery was disconnected.</string>
+    <string name="pid_31_normal" formatted="false">Grows as you drive.</string>
+    <string name="pid_31_odd" formatted="false">If it is very low, the emissions monitors may not have finished yet.</string>
+    <string name="pid_33_name" formatted="false">Barometric pressure</string>
+    <string name="pid_33_desc" formatted="false">Drops with altitude (1,600 m ≈ 85 kPa)</string>
+    <string name="pid_33_what" formatted="false">Outside air pressure as measured by the car.</string>
+    <string name="pid_33_normal" formatted="false">101 kPa at sea level; about 85 kPa at 1,600 m; about 77 kPa at 2,240 m.</string>
+    <string name="pid_33_odd" formatted="false">If it does not drop going up a mountain, the sensor failed.</string>
+    <string name="pid_3c_name" formatted="false">Catalyst temp.</string>
+    <string name="pid_3c_desc" formatted="false">Before the converter (bank 1)</string>
+    <string name="pid_3c_what" formatted="false">Temperature of the exhaust gases entering the catalytic converter.</string>
+    <string name="pid_3c_normal" formatted="false">Between 300 and 800 °C while driving.</string>
+    <string name="pid_3c_odd" formatted="false">Over 900 °C: rich mixture or misfire; it can damage the converter.</string>
+    <string name="pid_42_name" formatted="false">Control module voltage</string>
+    <string name="pid_42_desc" formatted="false">With the engine running ~13.5–14.5 V</string>
+    <string name="pid_42_what" formatted="false">Battery voltage as seen by the computer.</string>
+    <string name="pid_42_normal" formatted="false">Off ~12.4–12.8 V. Engine running 13.5–14.5 V.</string>
+    <string name="pid_42_odd" formatted="false">Below 13 V while running: the alternator is not charging. Above 15 V: faulty regulator.</string>
+    <string name="pid_43_name" formatted="false">Absolute load</string>
+    <string name="pid_43_desc" formatted="false">Air per cylinder versus the maximum</string>
+    <string name="pid_43_what" formatted="false">Air entering per engine cycle as a percentage of the theoretical maximum.</string>
+    <string name="pid_43_normal" formatted="false">Idle 15–30 %; hard acceleration 80–100 %, more with a turbo.</string>
+    <string name="pid_43_odd" formatted="false">High at idle: vacuum leak or sensor fault.</string>
+    <string name="pid_44_name" formatted="false">Commanded mixture (λ)</string>
+    <string name="pid_44_desc" formatted="false">1.00 = ideal; &lt;1 rich, &gt;1 lean</string>
+    <string name="pid_44_what" formatted="false">Air-fuel mixture the computer is asking for, in lambda.</string>
+    <string name="pid_44_normal" formatted="false">1.00 at cruise. Below 1 under hard acceleration; above 1 when decelerating.</string>
+    <string name="pid_44_odd" formatted="false">Stuck far from 1.00 with a warm engine: faulty oxygen or air sensor.</string>
+    <string name="pid_45_name" formatted="false">Relative throttle</string>
+    <string name="pid_45_desc" formatted="false">Opening versus the learned minimum</string>
+    <string name="pid_45_what" formatted="false">Throttle opening counted from the closed position the computer learned.</string>
+    <string name="pid_45_normal" formatted="false">0 % at idle; 100 % floored.</string>
+    <string name="pid_45_odd" formatted="false">Not 0 % at idle: dirty throttle body or it needs to relearn.</string>
+    <string name="pid_46_name" formatted="false">Ambient temp.</string>
+    <string name="pid_46_desc" formatted="false">Outside air</string>
+    <string name="pid_46_what" formatted="false">Outside air temperature according to the car\'s sensor.</string>
+    <string name="pid_46_normal" formatted="false">Close to the actual weather.</string>
+    <string name="pid_46_odd" formatted="false">Very different from the real weather: sensor heated by the engine (normal after stopping) or faulty.</string>
+    <string name="pid_47_name" formatted="false">Throttle (sensor B)</string>
+    <string name="pid_47_desc" formatted="false">Second throttle sensor</string>
+    <string name="pid_47_what" formatted="false">Second throttle position sensor; the computer compares it with the first.</string>
+    <string name="pid_47_normal" formatted="false">Similar to throttle A (may be mirrored).</string>
+    <string name="pid_47_odd" formatted="false">If it does not match A, one of the two sensors is failing.</string>
+    <string name="pid_49_name" formatted="false">Pedal (sensor D)</string>
+    <string name="pid_49_desc" formatted="false">How far you press the accelerator</string>
+    <string name="pid_49_what" formatted="false">Position of the electronic accelerator pedal.</string>
+    <string name="pid_49_normal" formatted="false">0–20 % untouched; rises as you press.</string>
+    <string name="pid_49_odd" formatted="false">If it does not return to 0 % when released, the pedal or its sensor is failing.</string>
+    <string name="pid_4a_name" formatted="false">Pedal (sensor E)</string>
+    <string name="pid_4a_desc" formatted="false">Redundant pedal sensor</string>
+    <string name="pid_4a_what" formatted="false">Second pedal sensor, used to check the first.</string>
+    <string name="pid_4a_normal" formatted="false">Similar to sensor D.</string>
+    <string name="pid_4a_odd" formatted="false">If it does not match D, one of the two is failing.</string>
+    <string name="pid_4c_name" formatted="false">Commanded throttle</string>
+    <string name="pid_4c_desc" formatted="false">What the computer asks it to open</string>
+    <string name="pid_4c_what" formatted="false">Throttle opening the computer is requesting.</string>
+    <string name="pid_4c_normal" formatted="false">Should closely follow the actual throttle.</string>
+    <string name="pid_4c_odd" formatted="false">If the actual one does not catch up, the throttle body is dirty or faulty.</string>
+    <string name="pid_4d_name" formatted="false">Time with check engine</string>
+    <string name="pid_4d_desc" formatted="false">Minutes with the light on</string>
+    <string name="pid_4d_what" formatted="false">Minutes the engine has run with the warning light on.</string>
+    <string name="pid_4d_normal" formatted="false">0 min if it has never been on.</string>
+    <string name="pid_4d_odd" formatted="false">If it grows, there is an active fault that has not been dealt with.</string>
+    <string name="pid_4e_name" formatted="false">Time since clear</string>
+    <string name="pid_4e_desc" formatted="false">Minutes since the codes were cleared</string>
+    <string name="pid_4e_what" formatted="false">Engine minutes since the codes were cleared.</string>
+    <string name="pid_4e_normal" formatted="false">Grows as you drive.</string>
+    <string name="pid_4e_odd" formatted="false">Very low: codes were cleared or the battery was disconnected recently.</string>
+    <string name="pid_5c_name" formatted="false">Oil temp.</string>
+    <string name="pid_5c_desc" formatted="false">Engine oil</string>
+    <string name="pid_5c_what" formatted="false">Temperature of the engine oil.</string>
+    <string name="pid_5c_normal" formatted="false">80–110 °C when warm; takes longer than the coolant.</string>
+    <string name="pid_5c_odd" formatted="false">Over 130 °C: slow down; check oil level and quality.</string>
+    <string name="pid_5e_name" formatted="false">Fuel rate</string>
+    <string name="pid_5e_desc" formatted="false">Liters per hour the engine uses</string>
+    <string name="pid_5e_what" formatted="false">Fuel the engine is using at this moment.</string>
+    <string name="pid_5e_normal" formatted="false">Idle 0.6–1.2 L/h; highway 5–8 L/h.</string>
+    <string name="pid_5e_odd" formatted="false">Very high at idle: rich mixture or leaking injector.</string>
+    <string name="pid_mil_none" formatted="false">No faults</string>
+    <string name="pid_fuel_normal" formatted="false">Normal</string>
+    <string name="pid_fuel_open" formatted="false">Open loop</string>
+    <string name="pid_fuel_fault" formatted="false">Faulted</string>
+    <string name="pid_unknown_name">Data %1$s</string>
+    <string name="pid_unknown_desc" formatted="false">No description</string>
+    <string name="pid_unknown_what" formatted="false">The car reports this value, but LiteDash cannot explain it yet.</string>
+    <string name="pid_unknown_normal" formatted="false">No reference.</string>
+    <string name="pid_unknown_odd" formatted="false">No reference.</string>
+    <plurals name="pid_mil_n"><item quantity="one">%1$d code</item><item quantity="other">%1$d codes</item></plurals>
+    <plurals name="pid_sensors"><item quantity="one">%1$d sensor</item><item quantity="other">%1$d sensors</item></plurals>
+</resources>
