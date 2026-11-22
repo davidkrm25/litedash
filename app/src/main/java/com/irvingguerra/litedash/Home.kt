@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -1202,7 +1203,15 @@ private fun TopBar(
             StatusIcons(trip)
             PageTabs(pages, onSettings, Modifier.weight(1f))
             val short = isShortScreen()
-            Column(horizontalAlignment = Alignment.End) {
+            // Con fondo brillante y borde del acento, como un dial: la hora y la fecha se encuentran de un vistazo.
+            val dial = RoundedCornerShape(Radius.card)
+            Column(
+                Modifier.clip(dial)
+                    .background(Brush.linearGradient(listOf(c.accent.copy(alpha = 0.25f), c.surfaceHigh.copy(alpha = 0.6f), c.accent.copy(alpha = 0.1f))))
+                    .border(1.dp, c.accent.copy(alpha = 0.65f), dial)
+                    .padding(horizontal = 14.dp, vertical = 4.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
                 Label(clock.full, Typography.clock.copy(fontSize = if (short) 32.sp else 46.sp), maxLines = 1)
                 Label(clock.date.uppercase(currentLocale()), if (short) Typography.small else Typography.body, c.text.copy(alpha = 0.85f), maxLines = 1)
             }
@@ -1216,7 +1225,13 @@ private fun TopBar(
             }
             WeatherChip(weather)
             StatusIcons(trip)
-            Label(clock.full, Typography.subtitle, maxLines = 1)
+            val dial = RoundedCornerShape(Radius.card)
+            Box(
+                Modifier.clip(dial)
+                    .background(Brush.linearGradient(listOf(c.accent.copy(alpha = 0.25f), c.surfaceHigh.copy(alpha = 0.6f), c.accent.copy(alpha = 0.1f))))
+                    .border(1.dp, c.accent.copy(alpha = 0.65f), dial)
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
+            ) { Label(clock.full, Typography.subtitle, maxLines = 1) }
         }
     }
 }
