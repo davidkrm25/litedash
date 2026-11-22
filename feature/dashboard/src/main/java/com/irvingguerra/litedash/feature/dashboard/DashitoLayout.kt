@@ -162,7 +162,7 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
             bands(
                 listOf(
                     Band(
-                        0.285,
+                        0.28,
                         listOf(
                             Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1;arrow=1", keep = 1, minH = 2),
                             Item(TileTypes.TRIP_STAT, data = TripStatKinds.NOW, keep = 0, minH = 2),
@@ -171,7 +171,7 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
                         ),
                         keep = 1,
                     ),
-                    Band(0.40, listOf(Item(TileTypes.SPEEDOMETER, data = car, plain = true)), keep = 0),
+                    Band(0.405, listOf(Item(TileTypes.SPEEDOMETER, data = car, plain = true)), keep = 0),
                     Band(
                         0.315,
                         listOf(
