@@ -359,6 +359,8 @@ private fun Connection(d: Dependencies, permitted: Boolean, onPermitted: (Boolea
                 }
             }
         }
+        // Un auto inventado para ver cómo queda todo sin el auto (Diagnóstico, tablero, alertas).
+        SwitchRow(stringResource(R.string.obd_demo), obd.simulated, { if (it) obd.startDemo() else obd.stopDemo() }, stringResource(R.string.obd_demo_help))
     }
 }
 

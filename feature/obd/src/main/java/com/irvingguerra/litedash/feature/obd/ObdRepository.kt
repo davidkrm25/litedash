@@ -95,6 +95,7 @@ data class EngineReport(
 )
 
 private const val DIAG_ROUND_GAP_MS = 400L
+private const val DEMO_TICK_MS = 200L
 
 /** Nombres comunes de adaptadores ELM327 (para ponerlos primero en la lista). */
 private val OBD_NAMES = Regex("obd|elm|vlink|vgate|icar|obdlink|konnwei|v-link", RegexOption.IGNORE_CASE)
@@ -143,6 +144,58 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
     /** Mínimo y máximo que ha tenido cada dato numérico en esta conexión. */
     val pidRange = mutableStateMapOf<Int, Pair<Float, Float>>()
     private var diagWatchers by mutableIntStateOf(0)
+
+    /** Datos simulados (un auto inventado, [DemoData]) en vez de un adaptador: para ver las pantallas sin el auto. */
+    var simulated by mutableStateOf(false)
+        private set
+    private var demoJob: Job? = null
+    private var demoCleared = false
+
+    /** Empieza el modo simulado: corta lo que hubiera y se comporta como un adaptador conectado. */
+    fun startDemo() {
+        if (simulated) return
+        kept = false
+        stopWatchingBluetooth()
+        drop()
+        simulated = true
+        demoCleared = false
+        pidRaw.clear()
+        pidRange.clear()
+        supported = DemoData.supported
+        adapter = target?.name ?: "ELM327"
+        lastReport = DemoData.report(demoCleared)
+        state = ObdState.ON
+        demoJob = scope.launch {
+            val start = SystemClock.elapsedRealtime()
+            while (isActive) {
+                val base = DemoData.signals((SystemClock.elapsedRealtime() - start) / 1000f)
+                val shown = bus.wanted
+                val values = mutableListOf<Pair<String, Float?>>()
+                for (signal in shown) base[signal]?.let { values += signal to it }
+                for (d in DerivedSignals) if (d.signal in shown) values += d.signal to d.compute(base)
+                val watching = diagWatchers > 0
+                withContext(Dispatchers.Main) {
+                    for ((signal, value) in values) bus.publish(signal, value, Source.OBD)
+                    if (watching) for (code in DemoData.supported) DemoData.raw(code, base, demoCleared)?.let { storePid(code, it) }
+                }
+                delay(DEMO_TICK_MS)
+            }
+        }
+    }
+
+    /** Termina el modo simulado y deja todo como sin adaptador. */
+    fun stopDemo() {
+        if (!simulated) return
+        demoJob?.cancel()
+        demoJob = null
+        simulated = false
+        supported = emptySet()
+        pidRaw.clear()
+        pidRange.clear()
+        lastReport = null
+        state = ObdState.OFF
+        scope.launch(Dispatchers.Main) { bus.clear(Source.OBD) }
+    }
 
     /** Diagnóstico pide leer todos los datos del auto mientras se ve (true) y deja de pedirlos al irse (false). */
     fun diagWatch(on: Boolean) { diagWatchers = (diagWatchers + if (on) 1 else -1).coerceAtLeast(0) }
@@ -306,6 +359,7 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
      * lo está (o si se había rendido) y desde aquí se mantiene conectado. Llamarlo de más no repite nada.
      */
     fun keep() {
+        if (simulated) return
         kept = true
         if (state == ObdState.OFF || state == ObdState.ERROR && retryJob?.isActive != true) connect()
     }
@@ -325,6 +379,7 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
 
     /** El usuario (o [keep]) pide conectarse a [t] o al último que funcionó: racha nueva de reintentos, y se mantiene. */
     fun connect(t: ObdTarget? = target) {
+        if (simulated && t != null) stopDemo()
         if (t == null || state == ObdState.CONNECTING || state == ObdState.ON && target == t) return
         kept = true
         retries = 0
@@ -333,6 +388,7 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
 
     /** Un intento de conexión (del usuario o un reintento de [retryDelay]). */
     private fun attempt(t: ObdTarget) {
+        stopDemo()
         needsLocalNetwork = t is ObdTarget.Wifi && !localNetworkAllowed(context)
         if (needsLocalNetwork) return
         // También para la búsqueda BLE: buscar y conectar a la vez hace fallar la conexión en varios Android.
@@ -456,6 +512,7 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
 
     /** El usuario lo corta (o apaga el módulo): ya no se mantiene conectado hasta que algo lo vuelva a pedir. */
     fun disconnect() {
+        if (simulated) { stopDemo(); return }
         kept = false
         stopWatchingBluetooth()
         drop()
@@ -537,6 +594,7 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
      * Salud piden a la vez al conectar), espera esa misma lectura: el auto no contesta dos veces.
      */
     suspend fun report(again: Boolean = false): EngineReport? {
+        if (simulated) return DemoData.report(demoCleared).also { lastReport = it }
         if (again) lastReport = null
         val running = reading?.takeIf { it.isActive && !again }
             ?: scope.async { readReport().also { if (it != null) lastReport = it } }.also { reading = it }
@@ -621,7 +679,14 @@ class ObdRepository(private val context: Context, private val bus: VehicleBus) {
     }
 
     /** Borra los códigos (el Taller pide confirmar antes con una alerta). */
-    suspend fun clearCodes(): Boolean = withElm("borrar códigos") { it.clearCodes() } ?: false
+    suspend fun clearCodes(): Boolean {
+        if (simulated) {
+            demoCleared = true
+            lastReport = DemoData.report(demoCleared)
+            return true
+        }
+        return withElm("borrar códigos") { it.clearCodes() } ?: false
+    }
 
     /** Para los reportes: estado, adaptador, protocolo, qué datos da el auto, su primera respuesta y los últimos fallos. */
     suspend fun describe(): String {

@@ -68,4 +68,10 @@
     <string name="dashito_check_detail">%1$s · %2$s</string>
     <plurals name="dashito_codes_n"><item quantity="one">%1$d code</item><item quantity="other">%1$d codes</item></plurals>
     <plurals name="dashito_pending_n"><item quantity="one">%1$d pending</item><item quantity="other">%1$d pending</item></plurals>
+    <string name="dashito_obd_demo">SIMULATED DATA</string>
+    <string name="dashito_adapter_demo">Simulated</string>
+    <string name="dashito_pids_demo">Simulated list</string>
+    <string name="dashito_codes_demo">Simulated codes</string>
+    <string name="obd_demo">Simulated data</string>
+    <string name="obd_demo_help">A pretend car to see how everything looks without the car: moving values, 32 data points and two fault codes. It turns off by itself when you connect an adapter.</string>
 </resources>

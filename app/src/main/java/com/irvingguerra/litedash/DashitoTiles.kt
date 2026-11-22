@@ -216,7 +216,7 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
         DiagParts.ADAPTER -> InfoCard(
             Icons.bluetooth, R.string.dashito_adapter,
             when {
-                on -> stringResource(R.string.dashito_connected)
+                on -> stringResource(if (obd?.simulated == true) R.string.dashito_adapter_demo else R.string.dashito_connected)
                 connecting -> stringResource(R.string.obd_connecting_short)
                 else -> stringResource(R.string.dashito_no_connection)
             },
@@ -224,7 +224,7 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
         )
         DiagParts.PIDS -> {
             val count = if (on) obd?.let { diagPids(it.supported).size } else null
-            InfoCard(Icons.chip, R.string.dashito_pids_title, count?.toString() ?: "--", "PIDs", stringResource(if (on) R.string.dashito_pids_read else R.string.dashito_pids_wait), onWorkshop, chevron = true)
+            InfoCard(Icons.chip, R.string.dashito_pids_title, count?.toString() ?: "--", "PIDs", stringResource(if (on) (if (obd?.simulated == true) R.string.dashito_pids_demo else R.string.dashito_pids_read) else R.string.dashito_pids_wait), onWorkshop, chevron = true)
         }
         DiagParts.CHECK -> {
             val stored = report?.let { (it.stored + it.permanent).distinct().size } ?: 0

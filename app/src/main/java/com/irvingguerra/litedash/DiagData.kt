@@ -208,6 +208,7 @@ internal fun CodesPane(obd: ObdRepository) {
             }
         }
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
+            if (obd.simulated) Label(stringResource(R.string.dashito_codes_demo), Typography.small, c.textMuted, 1, Modifier.weight(1f))
             if (stored.isNotEmpty() || pending.isNotEmpty() || report?.readiness?.mil == true) {
                 Confirmed(
                     stringResource(R.string.obd_clear), stringResource(R.string.obd_clear_question), stringResource(R.string.obd_clear_confirm),

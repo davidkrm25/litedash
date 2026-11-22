@@ -29,12 +29,12 @@ import com.irvingguerra.litedash.feature.dashboard.DashboardState
 
 /** Un puntito y «SIN OBD» / «OBD»: si el adaptador está conectado. */
 @Composable
-fun ObdPill(on: Boolean) {
+fun ObdPill(on: Boolean, demo: Boolean = false) {
     val c = LocalColors.current
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Icon(Icons.bluetooth, c.text.copy(alpha = 0.8f), 20.dp)
-        Box(Modifier.size(10.dp).clip(CircleShape).background(if (on) c.good else c.text.copy(alpha = 0.45f)))
-        Label(stringResource(if (on) R.string.dashito_obd_on else R.string.dashito_obd_off), Typography.label, c.text.copy(alpha = 0.8f), 1)
+        Box(Modifier.size(10.dp).clip(CircleShape).background(if (demo) c.warning else if (on) c.good else c.text.copy(alpha = 0.45f)))
+        Label(stringResource(if (demo) R.string.dashito_obd_demo else if (on) R.string.dashito_obd_on else R.string.dashito_obd_off), Typography.label, if (demo) c.warning else c.text.copy(alpha = 0.8f), 1)
     }
 }
 

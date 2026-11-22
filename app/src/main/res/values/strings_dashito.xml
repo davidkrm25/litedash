@@ -66,4 +66,10 @@
     <string name="dashito_check_detail">%1$s · %2$s</string>
     <plurals name="dashito_codes_n"><item quantity="one">%1$d código</item><item quantity="other">%1$d códigos</item></plurals>
     <plurals name="dashito_pending_n"><item quantity="one">%1$d pendiente</item><item quantity="other">%1$d pendientes</item></plurals>
+    <string name="dashito_obd_demo">DATOS SIMULADOS</string>
+    <string name="dashito_adapter_demo">Simulado</string>
+    <string name="dashito_pids_demo">Lista simulada</string>
+    <string name="dashito_codes_demo">Códigos simulados</string>
+    <string name="obd_demo">Datos simulados</string>
+    <string name="obd_demo_help">Un auto de mentira para ver cómo queda todo sin el auto: valores que se mueven, 32 datos y dos códigos de falla. Al conectar un adaptador se apaga solo.</string>
 </resources>
