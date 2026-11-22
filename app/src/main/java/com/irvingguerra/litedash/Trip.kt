@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import java.net.InetSocketAddress
+import java.net.DatagramSocket
+import java.net.DatagramPacket
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -98,6 +101,27 @@ internal data class TripLeg(val meters: Double = 0.0, val movingMs: Long = 0L, v
  * sistema: fuera del hilo principal. Quien llama revisa antes el permiso.
  */
 @SuppressLint("MissingPermission")
+/** Un paquete de la app del teléfono: "LDGPS1;lat;lon;velocidad m/s;rumbo;precisión;altura;hora" (-1 = sin dato). */
+internal fun parsePhoneFix(text: String): Location? {
+    val p = text.trim().split(';')
+    if (p.size < 8 || p[0] != "LDGPS1") return null
+    val lat = p[1].toDoubleOrNull() ?: return null
+    val lon = p[2].toDoubleOrNull() ?: return null
+    if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return null
+    return Location(LocationManager.GPS_PROVIDER).apply {
+        latitude = lat
+        longitude = lon
+        p[3].toFloatOrNull()?.takeIf { it >= 0f }?.let { speed = it }
+        p[4].toFloatOrNull()?.takeIf { it >= 0f }?.let { bearing = it }
+        p[5].toFloatOrNull()?.takeIf { it >= 0f }?.let { accuracy = it }
+        p[6].toDoubleOrNull()?.let { altitude = it }
+        time = System.currentTimeMillis()
+        elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+    }
+}
+
+private const val PHONE_GPS_PORT = 8765
+
 internal fun LocationManager.newestLastKnown(providers: List<String>): Location? =
     providers.mapNotNull { p ->
         try {
@@ -194,6 +218,7 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
             bus.want(Signal.SPEED)
             lastTickAt = SystemClock.elapsedRealtime()
             main.postDelayed(ticker, OBD_TICK_MS)
+            startPhoneGps()
         }
         refreshPermission()
         if (!listening && permitted) listen()
@@ -231,6 +256,7 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
         if (was > 0) {
             main.removeCallbacks(ticker)
             bus.unwant(Signal.SPEED)
+            stopPhoneGps()
         }
         if (listening) {
             manager.removeUpdates(listener)
@@ -247,6 +273,40 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
         leg = TripLeg()
         maxKmh = 0f
         last = null
+    }
+
+    /**
+     * El GPS del teléfono (la tableta no trae): la app "GPS a la tableta" lo manda por UDP al hotspot y aquí se recibe
+     * como si fuera el GPS de la tableta. Escucha mientras alguien pida el GPS; sin la app del teléfono, no pasa nada.
+     */
+    @Volatile private var phoneSocket: DatagramSocket? = null
+
+    private fun startPhoneGps() {
+        if (phoneSocket != null) return
+        thread(name = "phone-gps") {
+            val socket = try {
+                DatagramSocket(null).apply { reuseAddress = true; bind(InetSocketAddress(PHONE_GPS_PORT)) }
+            } catch (e: Exception) {
+                failure = "GPS del teléfono: ${e.message}"
+                return@thread
+            }
+            phoneSocket = socket
+            val buffer = ByteArray(256)
+            while (!socket.isClosed) {
+                try {
+                    val packet = DatagramPacket(buffer, buffer.size)
+                    socket.receive(packet)
+                    parsePhoneFix(String(packet.data, 0, packet.length))?.let { main.post { update(it) } }
+                } catch (e: Exception) {
+                    if (socket.isClosed) break
+                }
+            }
+        }
+    }
+
+    private fun stopPhoneGps() {
+        phoneSocket?.close()
+        phoneSocket = null
     }
 
     /** Para el reporte técnico: qué proveedores escuchan y la última falla al registrarlos. */
