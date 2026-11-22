@@ -479,8 +479,13 @@ private class Glow(private val center: Offset, private val radius: Float, privat
 private fun Readout(number: String, unit: String, tag: String, size: Float, color: Color, showTag: Boolean, modifier: Modifier = Modifier, dashito: Boolean = false) {
     val c = LocalColors.current
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Label(number, Typography.clock.copy(fontSize = size.sp), maxLines = 1)
-        Label(unit, if (dashito) Typography.title else Typography.small, c.textMuted, maxLines = 1)
+        Label(
+            number,
+            if (dashito) Typography.clock.copy(fontSize = size.sp, fontWeight = FontWeight.Bold, shadow = androidx.compose.ui.graphics.Shadow(color.copy(alpha = 0.55f), blurRadius = 28f))
+            else Typography.clock.copy(fontSize = size.sp),
+            maxLines = 1,
+        )
+        Label(unit, if (dashito) Typography.title.copy(fontSize = 26.sp, fontWeight = FontWeight.Normal) else Typography.small, c.textMuted, maxLines = 1)
         if (showTag && tag.isNotEmpty()) Box(Modifier.padding(top = 6.dp)) {
             if (dashito) Label(tag.uppercase(), Typography.label.copy(letterSpacing = 5.sp), c.textMuted, maxLines = 1)
             else Label(tag, Typography.label, color, maxLines = 1)
@@ -489,8 +494,13 @@ private fun Readout(number: String, unit: String, tag: String, size: Float, colo
 }
 
 /** El estilo de los números de las marcas, del tamaño del medidor. */
-private fun tickText(side: Dp, color: Color) =
-    TextStyle(fontFamily = com.irvingguerra.litedash.core.ui.InterFamily, fontSize = (side.value * 0.055f).coerceIn(10f, 20f).sp, fontWeight = FontWeight.Medium, color = color)
+private fun tickText(side: Dp, color: Color, ring: Boolean = false) =
+    TextStyle(
+        fontFamily = com.irvingguerra.litedash.core.ui.InterFamily,
+        fontSize = (side.value * (if (ring) 0.042f else 0.055f)).coerceIn(10f, if (ring) 18f else 20f).sp,
+        fontWeight = if (ring) FontWeight.SemiBold else FontWeight.Medium,
+        color = color,
+    )
 
 @Composable
 private fun NeedleGauge(number: String, unit: String, tag: String, p: GaugeParts, side: Dp) {
@@ -607,7 +617,7 @@ private fun GaugeParts.showTag(fits: Boolean) = fits && frontSpace == 0.dp
 private fun GaugeParts.centerNumberSize(side: Dp): Float {
     val front = if (frontSpace > 0.dp) 0.9f else 1f
     val rim = if (look.style == GaugeStyle.DIAL && look.rim != GaugeRim.SMOOTH) 0.9f else 1f
-    val big = if (look.ring) 1.3f else 1f
+    val big = if (look.ring) 1.2f else 1f
     return (side.value * 0.235f).coerceIn(28f, 140f) * front * rim * big
 }
 
@@ -684,7 +694,7 @@ private fun GradientGauge(number: String, unit: String, tag: String, p: GaugePar
 private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, side: Dp) {
     val c = LocalColors.current
     val measurer = rememberTextMeasurer()
-    val tickStyle = tickText(side, c.text.copy(alpha = 0.8f))
+    val tickStyle = tickText(side, c.text.copy(alpha = 0.8f), p.look.ring)
     // Lo que no cambia con el valor (círculo, grosores, trazos, degradados y números) se arma una vez por
     // tamaño y lectura; en cada cuadro de la animación solo se dibuja.
     Spacer(Modifier.fillMaxSize().drawWithCache {
@@ -709,7 +719,8 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
             GaugeRim.BLOCKS -> Dial(size, cell * 0.6f)
         }
         val outer = d.radius - when (p.look.rim) {
-            GaugeRim.SMOOTH -> base * 2.2f
+            // Con ring (Dashito): las marcas pegadas al aro, no hacia adentro.
+            GaugeRim.SMOOTH -> base * (if (p.look.ring) 1.0f else 2.2f)
             GaugeRim.NEON -> neon * 1.6f
             GaugeRim.BLOCKS -> cell * 1.35f
         }
@@ -718,7 +729,7 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
         val neonRim = if (p.look.rim == GaugeRim.NEON) NeonRim(shades, d, neon, glow) else null
         val steps = p.ticks * 2
         val long = mark * 2.6f
-        val numbers = if (!p.look.numbers) emptyList() else (0..steps step 4).map { i ->
+        val numbers = if (!p.look.numbers) emptyList() else (0..steps step (if (p.look.ring) 2 else 4)).map { i ->
             place(measurer, p.label(i / 2), d.at(START_ANGLE + SWEEP * i / steps, outer - long - tickStyle.fontSize.toPx() * 1.1f), tickStyle)
         }
         // El brillo de la esfera y el halo detrás del número (degradados, sin desenfoque).
@@ -767,7 +778,7 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
                     else -> c.textMuted.copy(alpha = 0.5f)
                 }
                 drawLine(tick, d.at(angle, outer), d.at(angle, outer - if (major) long else long * 0.5f),
-                    strokeWidth = mark * (if (major) 0.45f else 0.3f), cap = StrokeCap.Round)
+                    strokeWidth = mark * (if (major) 0.45f else 0.3f) * (if (p.look.ring) 0.7f else 1f), cap = StrokeCap.Round)
             }
             numbers.forEach { draw(it) }
             drawCircle(haloGlow.of(color), halo, haloAt)
