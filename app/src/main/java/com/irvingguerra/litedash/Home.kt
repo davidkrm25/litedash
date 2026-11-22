@@ -333,7 +333,14 @@ fun TileContent(d: Dependencies, p: Tile, apps: List<App>, car: CarPackage?, rev
             } else Box(hero) { content(null) }
         }
         // Aunque sean grandes, sin biblioteca ni estaciones: eso vive en la pantalla Música (un toque la abre).
-        TileTypes.MUSIC -> MusicTile(
+        TileTypes.MUSIC -> if (d.music.radio.song?.playing == true && d.music.song?.playing != true) {
+            // Suena la radio y la música no: la tarjeta de Música muestra la radio (si no, parecería que no suena nada).
+            RadioTile(
+                d.music, revision, onIdle = { actions.onMedia(MediaTab.RADIO) }, modifier = Modifier.expandable(p, actions),
+                artwork = p.flag(WidgetFlags.ART), skip = p.flag(WidgetFlags.SKIP),
+                onOpen = remember(p.id) { { actions.onExpand(Expanded.MEDIA, p) } },
+            )
+        } else MusicTile(
             d.music, revision, Modifier.expandable(p, actions), artwork = p.flag(WidgetFlags.ART), skip = p.flag(WidgetFlags.SKIP),
             onOpen = remember(p.id) { { actions.onExpand(Expanded.MEDIA, p) } },
         )
