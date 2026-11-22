@@ -256,7 +256,7 @@ internal fun PlaceSearchBox(
         if (q.isNotEmpty() && packs.onlineSearch && search.onlineState != OnlineState.LOADING) {
             search.onlineState = OnlineState.LOADING
             scope.launch {
-                val found = withContext(Dispatchers.IO) { OnlineSearch.search(context, q, here?.latitude, here?.longitude, language) }
+                val found = withContext(Dispatchers.IO) { OnlineSearch.search(context, q, here?.latitude, here?.longitude, language, tomtomKey = BuildConfig.TOMTOM_KEY) }
                 // Si en el inter se escribió otra cosa, esto ya no sirve.
                 if (search.query.trim() != q) return@launch
                 if (found == null) search.onlineState = OnlineState.FAILED

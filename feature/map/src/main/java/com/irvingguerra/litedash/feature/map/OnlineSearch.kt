@@ -31,13 +31,16 @@ object OnlineSearch {
      * Busca [query] cerca de ([nearLat], [nearLon]) si se sabe. Bloqueante: llamar fuera del hilo principal.
      * null = no hubo red o falló; lista vacía = no encontró nada.
      */
-    fun search(context: Context, query: String, nearLat: Double?, nearLon: Double?, language: String, limit: Int = 10): List<SearchHit>? {
+    fun search(
+        context: Context, query: String, nearLat: Double?, nearLon: Double?, language: String, limit: Int = 10,
+        tomtomKey: String = "",
+    ): List<SearchHit>? {
         val q = query.trim().replace(Regex("\\s+"), " ")
         if (q.isEmpty()) return emptyList()
         val lang = language.lowercase(Locale.ROOT).takeIf { it in LANGUAGES }
         // Privacidad: la posición va redondeada a 2 decimales (~1 km), nunca la exacta.
         val near = if (nearLat != null && nearLon != null) round2(nearLat) to round2(nearLon) else null
-        val key = "${q.lowercase(Locale.ROOT)}|$lang|${near?.first}|${near?.second}|$limit"
+        val key = "${q.lowercase(Locale.ROOT)}|${tomtomKey.isNotEmpty()}|$lang|${near?.first}|${near?.second}|$limit"
         val now = System.currentTimeMillis()
         synchronized(cache) {
             cache[key]?.let { if (now - it.atMs < CACHE_MS) return it.hits }
@@ -57,9 +60,41 @@ object OnlineSearch {
         } catch (e: IOException) {
             return null
         }
-        val hits = parsePhoton(body, nearLat, nearLon) ?: return null
+        val photon = parsePhoton(body, nearLat, nearLon)
+        // Con la clave de TomTom, sus negocios van primero (cubre mucho más que OpenStreetMap); luego los de Photon que no repitan.
+        val tomtom = if (tomtomKey.isNotEmpty()) searchTomTom(context, q, near, language, limit, tomtomKey, nearLat, nearLon) else null
+        if (photon == null && tomtom == null) return null
+        val hits = mergeHits(tomtom.orEmpty(), photon.orEmpty(), limit)
         synchronized(cache) { cache[key] = Entry(now, hits) }
         return hits
+    }
+
+    private fun searchTomTom(
+        context: Context, q: String, near: Pair<Double, Double>?, language: String, limit: Int, key: String,
+        nearLat: Double?, nearLon: Double?,
+    ): List<SearchHit>? {
+        val tag = when (language.lowercase(Locale.ROOT)) {
+            "es" -> "es-MX"
+            "en" -> "en-US"
+            else -> null
+        }
+        val url = buildString {
+            append("https://api.tomtom.com/search/2/search/").append(URLEncoder.encode(q, "UTF-8").replace("+", "%20")).append(".json")
+            append("?key=").append(key).append("&limit=").append(limit)
+            tag?.let { append("&language=").append(it) }
+            near?.let { append("&lat=").append(it.first).append("&lon=").append(it.second) }
+        }
+        val body = try {
+            val connection = Https.get(context, url, "application/json")
+            try {
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } finally {
+                connection.disconnect()
+            }
+        } catch (e: IOException) {
+            return null
+        }
+        return parseTomTom(body, nearLat, nearLon)
     }
 
     private fun round2(value: Double) = Math.round(value * 100) / 100.0
@@ -126,6 +161,76 @@ internal fun parsePhoton(json: String, nearLat: Double?, nearLon: Double?): List
             address = address,
             kind = kind,
             category = CATEGORIES[osmValue] ?: PlaceCategory.OTHER,
+            lat = lat,
+            lon = lon,
+            distanceKm = if (nearLat != null && nearLon != null) distanceKm(nearLat, nearLon, lat, lon) else null,
+            online = true,
+        )
+    }
+    return hits
+}
+
+/** Junta [first] y luego los de [second] que no estén ya (mismo nombre a menos de 150 m), hasta [limit]. */
+internal fun mergeHits(first: List<SearchHit>, second: List<SearchHit>, limit: Int): List<SearchHit> {
+    val out = ArrayList<SearchHit>(first)
+    for (h in second) {
+        if (out.size >= limit * 2) break
+        if (out.none { it.name.equals(h.name, ignoreCase = true) && distanceKm(it.lat, it.lon, h.lat, h.lon) < 0.15 }) out += h
+    }
+    return out
+}
+
+/** Qué es un lugar de TomTom según el nombre en inglés de su categoría (por partes: "petrol station", "restaurant"...). */
+private val TOMTOM_CATEGORIES = listOf(
+    "petrol" to PlaceCategory.FUEL, "gas station" to PlaceCategory.FUEL, "hospital" to PlaceCategory.HEALTH,
+    "clinic" to PlaceCategory.HEALTH, "doctor" to PlaceCategory.HEALTH, "pharmacy" to PlaceCategory.PHARMACY,
+    "restaurant" to PlaceCategory.FOOD, "cafe" to PlaceCategory.FOOD, "coffee" to PlaceCategory.FOOD, "bar" to PlaceCategory.FOOD,
+    "school" to PlaceCategory.SCHOOL, "universit" to PlaceCategory.SCHOOL, "college" to PlaceCategory.SCHOOL,
+    "shop" to PlaceCategory.SHOP, "market" to PlaceCategory.SHOP, "store" to PlaceCategory.SHOP, "mall" to PlaceCategory.SHOP,
+    "hotel" to PlaceCategory.HOTEL, "motel" to PlaceCategory.HOTEL, "bank" to PlaceCategory.BANK, "atm" to PlaceCategory.BANK,
+    "parking" to PlaceCategory.PARKING, "police" to PlaceCategory.POLICE, "worship" to PlaceCategory.WORSHIP,
+    "church" to PlaceCategory.WORSHIP, "station" to PlaceCategory.STATION, "airport" to PlaceCategory.AIRPORT,
+    "museum" to PlaceCategory.SIGHT, "tourist" to PlaceCategory.SIGHT, "park" to PlaceCategory.PARK,
+)
+
+/** Convierte la respuesta de TomTom Search en resultados, en su orden; null si no es el JSON esperado. */
+internal fun parseTomTom(json: String, nearLat: Double?, nearLon: Double?): List<SearchHit>? {
+    val results = try {
+        JSONObject(json).getJSONArray("results")
+    } catch (e: JSONException) {
+        return null
+    }
+    val hits = ArrayList<SearchHit>(results.length())
+    for (i in 0 until results.length()) {
+        val r = results.optJSONObject(i) ?: continue
+        val pos = r.optJSONObject("position") ?: continue
+        val lat = pos.optDouble("lat")
+        val lon = pos.optDouble("lon")
+        if (lat.isNaN() || lon.isNaN()) continue
+        val poi = r.optJSONObject("poi")
+        val a = r.optJSONObject("address")
+        fun text(o: JSONObject?, key: String) = o?.optString(key)?.trim()?.takeIf { it.isNotEmpty() }
+        val freeform = text(a, "freeformAddress")
+        val name = text(poi, "name") ?: text(a, "streetName") ?: freeform ?: continue
+        val kind = when (r.optString("type")) {
+            "Street", "Cross Street" -> PlaceKind.STREET
+            "Geography" -> when (text(r, "entityType")) {
+                "Municipality" -> PlaceKind.CITY
+                "MunicipalitySubdivision", "Neighbourhood" -> PlaceKind.NEIGHBOURHOOD
+                else -> PlaceKind.PLACE
+            }
+            else -> PlaceKind.PLACE
+        }
+        val categories = poi?.optJSONArray("categories")
+        val label = (0 until (categories?.length() ?: 0)).joinToString(" ") { categories!!.optString(it) }.lowercase(Locale.ROOT)
+        val category = TOMTOM_CATEGORIES.firstOrNull { label.contains(it.first) }?.second ?: PlaceCategory.OTHER
+        hits += SearchHit(
+            name = name,
+            alt = null,
+            locality = text(a, "municipalitySubdivision") ?: text(a, "municipality"),
+            address = freeform?.takeIf { it != name },
+            kind = kind,
+            category = category,
             lat = lat,
             lon = lon,
             distanceKm = if (nearLat != null && nearLon != null) distanceKm(nearLat, nearLon, lat, lon) else null,
