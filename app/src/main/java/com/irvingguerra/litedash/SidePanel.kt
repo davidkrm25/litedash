@@ -1,6 +1,11 @@
 package com.irvingguerra.litedash
 
 import android.content.Context
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.app.ActivityOptionsCompat
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.net.Uri
@@ -74,7 +79,7 @@ object SidePanel {
             setContent {
                 val look = remember(d.prefs.cardStyle, d.prefs.cardOpacity) { CardLook(d.prefs.cardStyle, d.prefs.cardOpacity) }
                 LiteDashTheme(dark = d.prefs.theme != ThemeMode.LIGHT, scale = d.prefs.scale, accent = d.prefs.accentColor, cards = d.prefs.cardColor) {
-                    CompositionLocalProvider(LocalCardLook provides look) { PanelContent(d, onBack = { backToHome(app) }) }
+                    CompositionLocalProvider(LocalCardLook provides look, LocalActivityResultRegistryOwner provides NoResults) { PanelContent(d, onBack = { backToHome(app) }) }
                 }
             }
         }
@@ -108,6 +113,16 @@ object SidePanel {
     private fun backToHome(context: Context) {
         hide(context)
         context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+    }
+}
+
+/**
+ * Los medidores piden permisos con rememberLauncherForActivityResult, que falla (y cierra la app) fuera de una actividad.
+ * El panel no pide nada: este registro no hace nada al lanzar.
+ */
+private val NoResults = object : ActivityResultRegistryOwner {
+    override val activityResultRegistry = object : ActivityResultRegistry() {
+        override fun <I, O> onLaunch(requestCode: Int, contract: ActivityResultContract<I, O>, input: I, options: ActivityOptionsCompat?) = Unit
     }
 }
 
