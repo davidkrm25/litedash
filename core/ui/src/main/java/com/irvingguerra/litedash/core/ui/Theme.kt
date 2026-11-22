@@ -199,7 +199,7 @@ val TilePadding = 10.dp
 /** Esquinas: moderadas (Irving pidió menos redondeado que la propuesta). */
 object Radius {
     /** Tarjetas del tablero y de Ajustes. */
-    val card = 14.dp
+    val card = 18.dp
     /** Cosas dentro de una tarjeta: portadas, botones, campos, filas. */
     val inner = 10.dp
     /** Detalles chicos (barras, indicadores). */

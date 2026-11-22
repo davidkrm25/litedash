@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -874,6 +875,32 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                             if (barBelow) bar(false)
                         }
                         if (barShown && railRight) bar(true)
+                    }
+                    // Oculta, un deslizamiento desde la orilla del lado de la barra la trae unos segundos (como el toque a un hueco).
+                    if (!barShown && !editing) {
+                        val edge = when {
+                            !rail -> Modifier.align(Alignment.BottomCenter).fillMaxWidth().height(28.dp)
+                            railRight -> Modifier.align(Alignment.CenterEnd).fillMaxHeight().width(28.dp)
+                            else -> Modifier.align(Alignment.CenterStart).fillMaxHeight().width(28.dp)
+                        }
+                        Box(
+                            edge.pointerInput(rail) {
+                                awaitEachGesture {
+                                    val down = awaitFirstDown(requireUnconsumed = false)
+                                    var shown = false
+                                    while (!shown) {
+                                        val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                                        if (!change.pressed) break
+                                        val move = change.position - down.position
+                                        if ((if (rail) kotlin.math.abs(move.x) else kotlin.math.abs(move.y)) > viewConfiguration.touchSlop) {
+                                            change.consume()
+                                            barPeek++
+                                            shown = true
+                                        }
+                                    }
+                                }
+                            },
+                        )
                     }
                     // La barra oculta asomándose: encima del tablero en su lugar de siempre, sin reacomodar nada. Al
                     // costado lleva el fondo del inicio (ahí no tiene tarjeta propia).

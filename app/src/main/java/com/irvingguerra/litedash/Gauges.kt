@@ -110,10 +110,12 @@ private fun MovingFloor(kmh: Float, color: Color, modifier: Modifier, car: @Comp
             val top = size.height * 0.36f
             val base = size.height * 0.80f
             // Elipse de luz bajo las ruedas.
-            drawOval(
-                Brush.radialGradient(listOf(color.copy(alpha = 0.40f), Color.Transparent), Offset(cx, base - size.height * 0.07f), size.width * 0.22f),
-                Offset(cx - size.width * 0.24f, base - size.height * 0.16f), Size(size.width * 0.48f, size.height * 0.18f),
-            )
+            val ovalAt = Offset(cx - size.width * 0.24f, base - size.height * 0.16f)
+            val ovalSize = Size(size.width * 0.48f, size.height * 0.18f)
+            drawOval(Brush.radialGradient(listOf(color.copy(alpha = 0.16f), Color.Transparent), Offset(cx, base - size.height * 0.07f), size.width * 0.22f), ovalAt, ovalSize)
+            // Un contorno con brillo (como Dashito), en el degradado de azul claro a acento.
+            drawOval(Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart.copy(alpha = 0.25f), color.copy(alpha = 0.25f)), ovalAt.x, ovalAt.x + ovalSize.width), ovalAt, ovalSize, style = androidx.compose.ui.graphics.drawscope.Stroke(9f))
+            drawOval(Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, color), ovalAt.x, ovalAt.x + ovalSize.width), ovalAt, ovalSize, style = androidx.compose.ui.graphics.drawscope.Stroke(3f))
             val fade = listOf(Color.Transparent, color.copy(alpha = 0.45f))
             // Rayos que salen del punto de fuga.
             for (i in -4..4) {

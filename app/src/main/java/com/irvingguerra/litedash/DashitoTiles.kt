@@ -132,9 +132,9 @@ internal fun StatBox(
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
             val size = fitFont(sizeFrom ?: value, maxWidth * 0.55f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 28.dp) }
+                Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 26.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                    Label(name.uppercase(currentLocale()), Typography.label, c.textMuted, 1)
+                    Label(name.uppercase(currentLocale()), Typography.label.copy(fontSize = 11.sp, letterSpacing = 0.4.sp), c.textMuted, 1)
                     Row(verticalAlignment = Alignment.Bottom) {
                         Label(value, Typography.clock.copy(fontSize = size.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
                         if (unit.isNotEmpty()) Label(unit, Typography.body, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 4.dp))

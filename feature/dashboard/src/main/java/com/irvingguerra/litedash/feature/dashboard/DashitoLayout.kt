@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 11
+const val FACTORY_VERSION = 12
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -162,20 +162,20 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
             bands(
                 listOf(
                     Band(
-                        0.22,
+                        0.25,
                         listOf(
-                            Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1;arrow=1", keep = 1),
-                            Item(TileTypes.TRIP_STAT, data = TripStatKinds.NOW, keep = 0),
-                            Item(TileTypes.GAUGE, data = "${Gauge.VOLTAGE};card=1;arrow=1", keep = 3),
-                            Item(TileTypes.GAUGE, data = "${Gauge.CONSUMPTION};card=1;arrow=1", keep = 2),
+                            Item(TileTypes.GAUGE, data = "${Gauge.COOLANT};card=1;arrow=1", keep = 1, minH = 2),
+                            Item(TileTypes.TRIP_STAT, data = TripStatKinds.NOW, keep = 0, minH = 2),
+                            Item(TileTypes.GAUGE, data = "${Gauge.VOLTAGE};card=1;arrow=1", keep = 3, minH = 2),
+                            Item(TileTypes.GAUGE, data = "${Gauge.CONSUMPTION};card=1;arrow=1", keep = 2, minH = 2),
                         ),
                         keep = 1,
                     ),
-                    Band(0.46, listOf(Item(TileTypes.SPEEDOMETER, data = car, plain = true)), keep = 0),
+                    Band(0.43, listOf(Item(TileTypes.SPEEDOMETER, data = car, plain = true)), keep = 0),
                     Band(
                         0.32,
                         listOf(
-                            Item(TileTypes.MUSIC, weight = 3.0),
+                            Item(TileTypes.MUSIC, weight = 5.0),
                             Item(TileTypes.WEATHER, keep = 1),
                             Item(TileTypes.PROJECTION, keep = 2),
                         ),

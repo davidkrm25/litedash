@@ -476,8 +476,8 @@
     <string name="logo_remove">Remove image</string>
     <string name="logo_intro">Intro animation</string>
     <string name="bar_title">Apps bar</string>
-    <string name="bar_hide">Hide the bar</string>
-    <string name="bar_hide_help">Tap an empty spot on the home screen to see it for a few seconds; to arrange and get to Settings, long-press it.</string>
+    <string name="bar_hide">Hide the bar automatically</string>
+    <string name="bar_hide_help">Swipe from the edge on the bar side (or tap an empty spot on the home screen) to see it for a few seconds; it hides again by itself. To arrange and get to Settings, press and hold.</string>
     <string name="bar_buttons">Buttons</string>
     <string name="bar_arrange">Arrange the bar</string>
     <string name="bar_position_help">Automatic: on the left when the screen is landscape, at the bottom when it\'s portrait.</string>

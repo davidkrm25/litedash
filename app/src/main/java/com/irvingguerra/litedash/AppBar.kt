@@ -105,7 +105,7 @@ fun AppBar(
     val k = prefs.barSize.scale
     val short = isShortScreen()
     val small = isSmallScreen() && !short
-    val sizes = if (vertical) BarSizes(button = (if (small) 52.dp else 56.dp) * k, icon = (if (small) 40.dp else 44.dp) * k, volume = (if (small) 40.dp else 44.dp) * k)
+    val sizes = if (vertical) BarSizes(button = (if (small) 44.dp else 46.dp) * k, icon = (if (small) 32.dp else 34.dp) * k, volume = (if (small) 32.dp else 34.dp) * k)
     else BarSizes(
         button = (if (small) 64.dp else if (short) 46.dp else 56.dp) * k,
         icon = (if (small) 56.dp else if (short) 36.dp else 44.dp) * k,
@@ -228,7 +228,7 @@ internal fun BarPreview(repo: AppRepository, favorites: List<App>, items: List<B
 fun barThickness(prefs: Preferences, vertical: Boolean): Dp {
     val short = isShortScreen()
     val small = isSmallScreen() && !short
-    return (if (vertical) (if (small) 60.dp else 68.dp) else if (small) 96.dp else if (short) 64.dp else 84.dp) * prefs.barSize.scale
+    return (if (vertical) (if (small) 50.dp else 54.dp) else if (small) 96.dp else if (short) 64.dp else 84.dp) * prefs.barSize.scale
 }
 
 /** De vidrio, lo menos que se ve la barra de abajo. */
