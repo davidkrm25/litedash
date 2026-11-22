@@ -84,6 +84,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.irvingguerra.litedash.core.ui.Button
 import com.irvingguerra.litedash.core.ui.CardLook
 import com.irvingguerra.litedash.core.ui.CardStyle
+import com.irvingguerra.litedash.core.ui.IconButton
 import com.irvingguerra.litedash.core.ui.Icons
 import com.irvingguerra.litedash.core.ui.Label
 import com.irvingguerra.litedash.core.ui.LiteDashTheme
@@ -131,7 +132,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Lo que se ve en grande sobre el tablero, a pantalla completa (la barra de apps se queda): crece desde su widget
  * (o desde el centro, si se abrió con la barra o el volante).
  */
-enum class Expanded { MEDIA, MAP }
+enum class Expanded { MEDIA, MAP, WEATHER }
 
 /** Qué panel está abierto encima del inicio (uno a la vez). */
 sealed interface Panel {
@@ -359,7 +360,7 @@ fun TileContent(d: Dependencies, p: Tile, apps: List<App>, car: CarPackage?, rev
             onOpen = remember(p.id) { { actions.onExpand(Expanded.MEDIA, p) } },
         )
         TileTypes.CLOCK -> ClockTile(d.prefs.driverName.takeIf { p.flag(WidgetFlags.GREETING) }, clockWeather(d, p.data), date = p.flag(WidgetFlags.DATE))
-        TileTypes.WEATHER -> WeatherTile(d.weather, days = p.flag(WidgetFlags.DAYS), range = p.flag(WidgetFlags.RANGE))
+        TileTypes.WEATHER -> WeatherTile(d.weather, days = p.flag(WidgetFlags.DAYS), range = p.flag(WidgetFlags.RANGE), onOpen = remember(p.id) { { actions.onExpand(Expanded.WEATHER, p) } })
         TileTypes.TRIP -> TripTile(d, time = p.flag(WidgetFlags.TIME), average = p.flag(WidgetFlags.AVERAGE), heading = p.flag(WidgetFlags.HEADING))
         TileTypes.SPEEDOMETER -> SpeedometerTile(d, remember(p.data) { GaugeLook.parse(p.data) }, dashito = "title=1" in p.data, legend = "legend=1" in p.data)
         TileTypes.GAUGE -> GaugeTile(
@@ -634,7 +635,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                 // En la vista previa de las opciones del widget no: ahí se está personalizando.
                 if (panel == null && !editing) {
                     if (what == Expanded.MEDIA) openMedia(if (tile.type == TileTypes.RADIO) MediaTab.RADIO else MediaTab.MUSIC, from = tile)
-                    else expand(Expanded.MAP, tile)
+                    else expand(what, tile)
                 }
             },
         )
@@ -851,6 +852,11 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                                             modifier = Modifier.padding(6.dp),
                                             browse = mediaBrowse,
                                         )
+                                        Expanded.WEATHER -> Box(Modifier.fillMaxSize().padding(6.dp)) {
+                                            // El mismo widget, pero a pantalla grande: sale con horas, detalles y días.
+                                            WeatherTile(d.weather)
+                                            IconButton(Icons.close, close, Modifier.align(Alignment.TopEnd).padding(8.dp), background = LocalColors.current.surfaceHigh)
+                                        }
                                         Expanded.MAP -> {
                                             val app = externalMapApp(d, apps)
                                             // Como el widget Mapa que se tocó (o el primero que haya; sin widget, el aspecto de Ajustes). Si

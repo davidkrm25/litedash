@@ -58,6 +58,8 @@ import com.irvingguerra.litedash.core.ui.Icons
 import com.irvingguerra.litedash.core.ui.Label
 import com.irvingguerra.litedash.core.ui.LocalColors
 import com.irvingguerra.litedash.core.ui.LocalPlainCard
+import androidx.compose.foundation.border
+import androidx.compose.ui.graphics.Brush
 import com.irvingguerra.litedash.core.ui.Radius
 import com.irvingguerra.litedash.core.ui.TilePadding
 import com.irvingguerra.litedash.core.ui.Typography
@@ -204,7 +206,15 @@ fun ClockTile(driverName: String? = null, weather: WeatherRepository? = null, da
     // Solo si ya hay temperatura vigente (con permiso y ya bajada): si no, ni esquina ni píldora vacía.
     val current = if (weather != null && weather.active) rememberWeather(weather) else null
     val fontScale = LocalDensity.current.fontScale
-    BoxWithConstraints(Modifier.fillMaxSize().padding(8.dp), contentAlignment = Alignment.CenterStart) {
+    // Un fondo con brillo suave y borde del acento, como un dial: la hora y la fecha se encuentran de un vistazo.
+    val dial = RoundedCornerShape(Radius.card)
+    BoxWithConstraints(
+        Modifier.fillMaxSize().padding(6.dp).clip(dial)
+            .background(Brush.linearGradient(listOf(c.accent.copy(alpha = 0.22f), c.surfaceHigh.copy(alpha = 0.6f), c.accent.copy(alpha = 0.08f))))
+            .border(1.dp, c.accent.copy(alpha = 0.6f), dial)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        contentAlignment = Alignment.CenterStart,
+    ) {
         // El reloj crece con la pieza: en 1 fila es discreto, en 2 o más es protagonista; lo limita lo que
         // quepa a lo ancho (con la a.m./p.m.) y a lo alto (con la fecha y el clima), para que nunca se corte.
         val tall = maxHeight > 120.dp

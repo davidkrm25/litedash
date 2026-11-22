@@ -223,7 +223,7 @@ fun WeatherChip(w: Weather) {
  * grande va lo pronosticado para hoy; sin nada vigente, como si aún no llegara.
  */
 @Composable
-fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = true) {
+fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = true, onOpen: (() -> Unit)? = null) {
     val c = LocalColors.current
     val enable = rememberEnableWeather(repo)
     val w = if (repo.active) rememberWeather(repo) else null
@@ -250,7 +250,7 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
     val scope = rememberCoroutineScope()
     BoxWithConstraints(Modifier.fillMaxSize()) {
     val rich = w.more != null && maxHeight > 300.dp && maxWidth > 280.dp
-    Card(Modifier.fillMaxSize()) {
+    Card(Modifier.fillMaxSize(), onClick = onOpen) {
         // Un tinte suave del color del cielo desde la esquina (como el clima de iOS); nada se anima.
         // (Sin tarjeta no: sería un rectángulo de color sobre el fondo.) Hasta la esquina contraria, en cualquier pantalla.
         // En la vista completa va tarjeta limpia, como Dashito.
