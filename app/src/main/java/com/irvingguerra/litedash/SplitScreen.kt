@@ -122,10 +122,14 @@ object SplitScreen {
         val width = screen.widthPixels * d.prefs.freeformWidth.coerceIn(30, 70) / 100
         val rect = if (d.prefs.splitCarLeft) Rect(screen.widthPixels - width, 0, screen.widthPixels, screen.heightPixels) else Rect(0, 0, width, screen.heightPixels)
         return try {
-            val options = ActivityOptions.makeBasic().setLaunchBounds(rect)
-            // En Android 10 el tamaño solo vale si además se pide el modo ventana libre (5); método oculto: si no existe, se sigue sin él.
-            runCatching { ActivityOptions::class.java.getMethod("setLaunchWindowingMode", Int::class.javaPrimitiveType).invoke(options, WINDOWING_MODE_FREEFORM) }
-                .onFailure { Log.w(TAG, "sin modo ventana libre: ${it.message}") }
+            val options = ActivityOptions.makeBasic()
+            // Método oculto: con la división real (4 = mitad secundaria) el sistema acomoda LiteDash en la otra mitad y las
+            // dos quedan fijas; con la libre (5) es una ventana flotante del tamaño pedido. Si no existe, se sigue sin él.
+            val dock = d.prefs.freeformDock
+            if (!dock) options.setLaunchBounds(rect)
+            runCatching { ActivityOptions::class.java.getMethod("setLaunchWindowingMode", Int::class.javaPrimitiveType).invoke(options, if (dock) WINDOWING_MODE_SPLIT_SECONDARY else WINDOWING_MODE_FREEFORM) }
+                .onFailure { Log.w(TAG, "sin modo de ventana: ${it.message}") }
+            if (dock) intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT)
             context.startActivity(intent, options.toBundle())
             true
         } catch (e: Exception) {
@@ -148,6 +152,7 @@ object SplitScreen {
 
     private const val TAG = "SplitScreen"
     private const val WINDOWING_MODE_FREEFORM = 5
+    private const val WINDOWING_MODE_SPLIT_SECONDARY = 4
 
     internal fun appOf(intent: Intent): Intent? = IntentCompat.getParcelableExtra(intent, EXTRA_APP, Intent::class.java)
 
@@ -300,6 +305,11 @@ fun SplitSettings(d: Dependencies) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             SwitchRow(stringResource(R.string.freeform_title), d.prefs.freeformMaps, { d.prefs.freeformMaps = it }, stringResource(R.string.freeform_help))
             if (d.prefs.freeformMaps) {
+                Segmented(
+                    listOf(true to stringResource(R.string.freeform_dock), false to stringResource(R.string.freeform_float)),
+                    d.prefs.freeformDock,
+                    { d.prefs.freeformDock = it },
+                )
                 Label(stringResource(R.string.freeform_width), Typography.label, c.textMuted)
                 Segmented(listOf(40 to "40 %", 50 to "50 %", 60 to "60 %"), d.prefs.freeformWidth, { d.prefs.freeformWidth = it })
                 Label(stringResource(R.string.split_side), Typography.label, c.textMuted)

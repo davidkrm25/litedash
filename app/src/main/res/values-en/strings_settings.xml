@@ -25,4 +25,6 @@
     <string name="freeform_title">Maps and music in a half window</string>
     <string name="freeform_help">Opens Maps, Waze or music in a free-form window on one side and keeps LiteDash visible on the rest. First turn on, in Android Settings → Developer options: "Force activities to be resizable" and "Enable freeform windows", then restart the tablet. If the system does not allow it, the app opens normally.</string>
     <string name="freeform_width">Window width</string>
+    <string name="freeform_dock">Split (fixed)</string>
+    <string name="freeform_float">Floating</string>
 </resources>

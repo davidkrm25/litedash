@@ -26,4 +26,6 @@
     <string name="freeform_title">Mapas y música en media ventana</string>
     <string name="freeform_help">Abre Mapas, Waze o la música en una ventana libre de un lado y deja LiteDash visible en el resto. Antes activa en Ajustes de Android → Opciones de desarrollador: «Forzar que las actividades cambien de tamaño» y «Activar ventanas de forma libre», y reinicia la tableta. Si el sistema no las deja, la app se abre normal.</string>
     <string name="freeform_width">Ancho de la ventana</string>
+    <string name="freeform_dock">Dividida (fija)</string>
+    <string name="freeform_float">Flotante</string>
 </resources>

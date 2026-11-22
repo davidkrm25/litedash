@@ -89,6 +89,7 @@ internal object PrefKeys {
     const val SPLIT_ROAD = "split_road"
     const val FREEFORM_MAPS = "freeform_maps"
     const val FREEFORM_WIDTH = "freeform_width"
+    const val FREEFORM_DOCK = "freeform_dock"
     const val TRIP_LOG = "trip_log"
     const val BEST_ACCEL = "best_0_100"
     const val STATS = "anonymous_stats"
@@ -540,6 +541,8 @@ class Preferences(context: Context) {
      */
     var freeformMaps by bool(PrefKeys.FREEFORM_MAPS, false)
     var freeformWidth by int(PrefKeys.FREEFORM_WIDTH, 50)
+    /** Pedirle al sistema la división real (fija, sin barra flotante); si no, ventana libre. */
+    var freeformDock by bool(PrefKeys.FREEFORM_DOCK, true)
 
     /** En pantalla dividida, al lado del mapa va la carretera (si no, el auto 3D). */
     var splitRoad by bool(PrefKeys.SPLIT_ROAD, false)
