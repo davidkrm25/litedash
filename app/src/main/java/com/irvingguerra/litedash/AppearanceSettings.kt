@@ -319,6 +319,7 @@ private fun HomeSettings(d: Dependencies, revision: Int, onEdit: () -> Unit, onT
         // Al pedirlo a mano se vuelve a preguntar al abrir si no queda como inicio.
         MakeHome(revision, big = false) { prefs.dontAskHome = false }
         OpenOnBootSettings(prefs)
+        CarPowerSettings(prefs)
     }
 }
 
@@ -343,6 +344,25 @@ private fun OpenOnBootSettings(prefs: Preferences) {
     if (prefs.openOnBoot && !allowed) {
         Label(stringResource(R.string.open_on_boot_permission), Typography.small, LocalColors.current.danger)
         Button(stringResource(R.string.open_on_boot_grant), { openSystemScreen(context, BootLaunch.permissionIntent(context)) })
+    }
+}
+
+/** "Encender y apagar con el auto": la pantalla sigue a la corriente de la llave; apagar pide permiso de administrador. */
+@Composable
+private fun CarPowerSettings(prefs: Preferences) {
+    val context = LocalContext.current
+    var admin by remember { mutableStateOf(CarPower.adminActive(context)) }
+    LifecycleResumeEffect(Unit) {
+        admin = CarPower.adminActive(context)
+        onPauseOrDispose {}
+    }
+    SwitchRow(stringResource(R.string.car_power), prefs.followCarPower, { on ->
+        prefs.followCarPower = on
+        if (on && !CarPower.adminActive(context)) openSystemScreen(context, CarPower.adminIntent(context))
+    }, stringResource(R.string.car_power_help))
+    if (prefs.followCarPower && !admin) {
+        Label(stringResource(R.string.car_power_admin_missing), Typography.small, LocalColors.current.danger)
+        Button(stringResource(R.string.open_on_boot_grant), { openSystemScreen(context, CarPower.adminIntent(context)) })
     }
 }
 

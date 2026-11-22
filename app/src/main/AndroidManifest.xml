@@ -61,6 +61,7 @@
     <!-- "Abrir LiteDash al encender" (apagado de fábrica): saber que la pantalla encendió y, desde
          Android 10, poder ponerse al frente sola ("Mostrar sobre otras apps", lo da el usuario). -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- Catálogo de autos, actualizaciones (GitHub), clima, mapa, radio por internet, carátulas,
          estadísticas anónimas (apagables), "Enviar un reporte" y el escáner OBD por Wi-Fi. -->
@@ -147,6 +148,19 @@
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/usb_devices" />
         </activity>
+
+        <!-- Administrador solo para bloquear la pantalla al apagar el auto (Encender y apagar con el auto). -->
+        <receiver
+            android:name=".CarPowerAdmin"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/car_power_admin" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Apagado: solo se prende con "Abrir LiteDash al encender" (BootLaunch.sync). -->
         <receiver

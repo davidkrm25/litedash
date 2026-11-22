@@ -837,6 +837,10 @@
     <string name="open_on_boot">Open LiteDash on startup</string>
     <string name="open_on_boot_help">For head units that bring back their factory launcher when the car turns off and on: LiteDash comes to the front by itself. If your head unit has a “Default launcher” option in its settings, choose LiteDash there too.</string>
     <string name="open_on_boot_permission">The “Display over other apps” permission is missing: without it Android won\'t let LiteDash open by itself.</string>
+    <string name="car_power">Turn on and off with the car</string>
+    <string name="car_power_help">If the tablet only gets power with the key, the screen turns on and LiteDash opens when the car starts; when the car turns off, the screen turns off after 30 seconds (it stays in standby). Needs device administrator permission, only to lock the screen.</string>
+    <string name="car_power_admin_missing">Administrator permission is missing: without it the screen won\'t turn off by itself.</string>
+    <string name="car_power_admin_desc">LiteDash only uses this to turn the screen off when the car turns off.</string>
     <string name="open_on_boot_grant">Grant permission</string>
     <string name="bar_right">Right</string>
     <string name="bar_size">Size</string>

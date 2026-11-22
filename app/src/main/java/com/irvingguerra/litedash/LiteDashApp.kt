@@ -114,6 +114,7 @@ class LiteDashApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CarPower.start(this)
         // Los autos instalados se leen en otro hilo mientras Android arma la pantalla.
         CarRepository.prefetch(this)
         // Los avisos llegan aquí solo si el usuario dio acceso a notificaciones (el mismo de la música).

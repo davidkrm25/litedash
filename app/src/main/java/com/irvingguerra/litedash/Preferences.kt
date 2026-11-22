@@ -41,6 +41,7 @@ internal object PrefKeys {
     const val WELCOME_STEP = "welcome_step"
     const val DONT_ASK_HOME = "dont_ask_home"
     const val OPEN_ON_BOOT = "open_on_boot"
+    const val FOLLOW_CAR_POWER = "follow_car_power"
     const val LANGUAGE = "language"
     const val HIDDEN = "hidden_apps"
     const val DOCK = "dock"
@@ -413,6 +414,7 @@ class Preferences(context: Context) {
 
     /** Abrir LiteDash al encender la pantalla ([BootLaunch]); apagado de fábrica. */
     var openOnBoot by bool(PrefKeys.OPEN_ON_BOOT, false)
+    var followCarPower by bool(PrefKeys.FOLLOW_CAR_POWER, false)
 
     /** "" (sistema), "es", "en" o un idioma bajado ("tr", [LanguagePacks]). Cambiarlo reabre la actividad: se escribe al instante (commit). */
     var language by Stored(p.getString(PrefKeys.LANGUAGE, "") ?: "") {
