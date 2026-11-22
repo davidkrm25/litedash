@@ -251,6 +251,9 @@ internal fun PlaceSearchBox(
         }
         delay(TYPE_PAUSE_MS)
         search.local = withContext(Dispatchers.Default) { packs.searchLocal(q, here?.latitude, here?.longitude) }
+        // Tus lugares (empresa, autolavado…) siempre salen primero, aunque el mapa de tu estado ya haya contestado.
+        val own = withContext(Dispatchers.IO) { OnlineSearch.mine(context, q, BuildConfig.TOMTOM_KEY, MY_PLACES, here?.latitude, here?.longitude) }
+        if (own.isNotEmpty() && search.query.trim() == q) search.local = own + search.local.filterNot { l -> own.any { samePlace(it, l) } }
     }
     val askOnline: () -> Unit = {
         val q = search.query.trim()

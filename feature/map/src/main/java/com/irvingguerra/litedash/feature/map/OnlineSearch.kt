@@ -74,22 +74,28 @@ object OnlineSearch {
 
     private val geocoded = HashMap<String, SearchHit>()
 
+    /** Tus lugares de [mine] que coinciden con [query], ya ubicados (sin pasar por la búsqueda en línea). Bloqueante. */
+    fun mine(context: Context, query: String, key: String, mine: List<MyPlace>, nearLat: Double?, nearLon: Double?): List<SearchHit> =
+        if (key.isEmpty()) emptyList() else mine.filter { it.matches(query) }.mapNotNull { geocode(context, it, key, nearLat, nearLon) }
+
     /** La ubicación de [place] por su dirección (TomTom); se recuerda mientras la app siga abierta. */
     private fun geocode(context: Context, place: MyPlace, key: String, nearLat: Double?, nearLon: Double?): SearchHit? {
         val hit = synchronized(geocoded) { geocoded[place.name] } ?: run {
-            val url = "https://api.tomtom.com/search/2/geocode/" + URLEncoder.encode(place.address, "UTF-8").replace("+", "%20") +
-                ".json?key=$key&limit=1&countrySet=MX"
-            val body = try {
-                val connection = Https.get(context, url, "application/json")
-                try {
-                    connection.inputStream.bufferedReader().use { it.readText() }
-                } finally {
-                    connection.disconnect()
+            val q = URLEncoder.encode(place.address, "UTF-8").replace("+", "%20")
+            // Primero como dirección; si no la encuentra (p. ej. una avenida sin número), como búsqueda libre.
+            val first = listOf("geocode", "search").firstNotNullOfOrNull { kind ->
+                val body = try {
+                    val connection = Https.get(context, "https://api.tomtom.com/search/2/$kind/$q.json?key=$key&limit=1&countrySet=MX", "application/json")
+                    try {
+                        connection.inputStream.bufferedReader().use { it.readText() }
+                    } finally {
+                        connection.disconnect()
+                    }
+                } catch (e: IOException) {
+                    null
                 }
-            } catch (e: IOException) {
-                return null
-            }
-            val first = parseTomTom(body, null, null)?.firstOrNull() ?: return null
+                body?.let { parseTomTom(it, null, null)?.firstOrNull() }
+            } ?: return null
             first.copy(name = place.name, address = place.address).also { synchronized(geocoded) { geocoded[place.name] = it } }
         }
         return if (nearLat != null && nearLon != null) hit.copy(distanceKm = distanceKm(nearLat, nearLon, hit.lat, hit.lon)) else hit
