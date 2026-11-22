@@ -631,7 +631,9 @@ private fun GaugeParts.centerOffset(side: Dp): Dp = side * 0.04f - frontSpace * 
 @Composable
 private fun CenterReadout(number: String, unit: String, tag: String, p: GaugeParts, side: Dp) {
     val c = LocalColors.current
-    Readout(number, unit, tag, p.centerNumberSize(side), p.readoutColor(c), p.showTag(side > 220.dp), Modifier.offset(y = p.centerOffset(side)), dashito = p.look.ring)
+    // Con ring (Dashito): el número se achica según sus cifras para que quepa dentro de los números del aro.
+    val digits = if (p.look.ring) when { number.length <= 1 -> 1f; number.length == 2 -> 0.85f; else -> 0.62f } else 1f
+    Readout(number, unit, tag, p.centerNumberSize(side) * digits, p.readoutColor(c), p.showTag(side > 220.dp), Modifier.offset(y = p.centerOffset(side)), dashito = p.look.ring)
 }
 
 @Composable
@@ -754,10 +756,14 @@ private fun DialGauge(number: String, unit: String, tag: String, p: GaugeParts, 
                         val ends = if (p.warning) listOf(c.danger, c.danger) else listOf(shades.first(), shades.last())
                         val brush = Brush.sweepGradient(0f to ends[0], (SWEEP / 360f) to ends[1], 1f to ends[1], center = d.center)
                         rotate(START_ANGLE, d.center) {
-                            drawArc(ends[1].copy(alpha = 0.10f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 2.6f, cap = StrokeCap.Round))
-                            drawArc(ends[1].copy(alpha = 0.18f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 1.7f, cap = StrokeCap.Round))
+                            drawArc(ends[1].copy(alpha = 0.16f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 2.6f, cap = StrokeCap.Round))
+                            drawArc(ends[1].copy(alpha = 0.28f), 0f, SWEEP * f, false, d.topLeft, d.box, style = Stroke(rimStroke.width * 1.7f, cap = StrokeCap.Round))
                             drawArc(brush, 0f, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
                         }
+                        // La punta del arco: un punto claro con su brillo, como en Dashito.
+                        val tip = d.at(START_ANGLE + SWEEP * f, d.radius)
+                        drawCircle(ends[1].copy(alpha = 0.25f), rimStroke.width * 1.1f, tip)
+                        drawCircle(Color.White.copy(alpha = 0.95f), rimStroke.width * 0.42f, tip)
                     } else if (f > 0.002f) drawArc(color, START_ANGLE, SWEEP * f, false, d.topLeft, d.box, style = rimStroke)
                 }
                 GaugeRim.NEON -> {

@@ -49,6 +49,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.irvingguerra.litedash.core.ui.fitFont
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.irvingguerra.litedash.core.ui.Button
@@ -275,10 +276,12 @@ private fun StatCard(
     Card(modifier.fillMaxWidth(), onClick = onClick) {
         Row(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 26.dp) }
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+            BoxWithConstraints(Modifier.weight(1f)) {
+                val size = fitFont(value, maxWidth - (unit.length * 8).dp, maxHeight, 0.4f, min = 18f, max = 30f, extraChars = 2.5f)
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.Center) {
                 Label(label.uppercase(currentLocale()), Typography.label, c.textMuted, 1)
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Label(value, Typography.title.copy(fontSize = 30.sp, fontWeight = FontWeight.Bold), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                    Label(value, Typography.title.copy(fontSize = size.sp, fontWeight = FontWeight.Bold), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
                     if (unit.isNotEmpty()) Label(unit, Typography.body, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 3.dp))
                 }
                 if (detail != null) Label(detail, Typography.small, c.textMuted, 2)
@@ -291,6 +294,7 @@ private fun StatCard(
                         Label(scale, Typography.label, c.textMuted, 1)
                     }
                 }
+            }
             }
             if (onClick != null) Icon(Icons.chevron, c.textMuted.copy(alpha = 0.6f), 20.dp)
         }
@@ -384,7 +388,7 @@ private fun StationRow(near: NearStation, grade: FuelGrade, highlight: Boolean, 
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Label(s.name.lowercase(locale).split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.titlecase(locale) } }, Typography.subtitle.copy(fontSize = 17.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+            Label(s.name.lowercase(locale).split(' ').joinToString(" ") { w -> w.replaceFirstChar { it.titlecase(locale) } }, Typography.subtitle.copy(fontSize = 16.sp, fontWeight = FontWeight.Bold), maxLines = 1)
             Label(detail, Typography.small, c.textMuted, 1)
         }
         val price = String.format(locale, "$%.2f", s.prices[grade] ?: 0.0)
