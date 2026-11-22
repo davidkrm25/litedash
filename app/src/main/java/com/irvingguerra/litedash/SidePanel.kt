@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import com.irvingguerra.litedash.core.ui.Segmented
 import com.irvingguerra.litedash.feature.music.RadioTile
 import com.irvingguerra.litedash.feature.dashboard.TripStatKinds
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -118,9 +119,16 @@ object SidePanel {
         runCatching { context.applicationContext.getSystemService(WindowManager::class.java).removeView(v) }
     }
 
+    /**
+     * La X: quita el panel y regresa a LiteDash a pantalla completa. Las ventanas libres de Mapas o Spotify se quedan atrás
+     * (la música no se corta); LiteDash pide el modo de pantalla completa (1) para no heredar el tamaño de la ventana de al lado.
+     */
     private fun backToHome(context: Context) {
         hide(context)
-        context.startActivity(Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT))
+        val intent = Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        val options = android.app.ActivityOptions.makeBasic()
+        runCatching { android.app.ActivityOptions::class.java.getMethod("setLaunchWindowingMode", Int::class.javaPrimitiveType).invoke(options, 1) }
+        context.startActivity(intent, options.toBundle())
     }
 }
 
@@ -159,20 +167,27 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
     val look = remember { GaugeLook() }
     val rpm = remember { GaugeLook() }
     // Lo que suena manda al empezar: si es la radio, arranca en Radio.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val apps = com.irvingguerra.litedash.feature.apps.rememberApps(d.apps).orEmpty()
+    fun appOf(pkg: String?) = pkg?.let { p -> apps.firstOrNull { it.pkg == p } }
+    // Los accesos del panel: la música abre su app (Spotify u otra) y el tiempo de manejo, la de mapas; cada una en su ventana de al lado.
+    val musicApp = appOf(d.music.preferred) ?: d.apps.firstOf(apps, *MUSIC_PACKAGES)
+    val radioApp = appOf(d.music.radioApp) ?: musicApp
+    fun open(app: com.irvingguerra.litedash.feature.apps.App?) { app?.let { d.apps.open(context, it) } }
     var radio by remember { mutableStateOf(d.music.radio.song?.playing == true && d.music.song?.playing != true) }
     Box(Modifier.fillMaxSize().background(c.background).padding(10.dp)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(Modifier.weight(1.3f)) { SpeedometerTile(d, look) }
             Box(Modifier.weight(0.9f)) { GaugeTile(d, com.irvingguerra.litedash.core.vehicle.Signal.RPM, rpm, card = true, onPick = {}, onWorkshop = {}) }
             Row(Modifier.weight(0.6f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.weight(1f)) { TripStatTile(d, TripStatKinds.TIME) }
+                Box(Modifier.weight(1f).clickable { open(mapApp(d, apps)) }) { TripStatTile(d, TripStatKinds.TIME) }
                 Box(Modifier.weight(1f)) { WeatherTile(d.weather, days = false, range = false) }
             }
             Box(Modifier.weight(0.7f)) { FuelTile(d) {} }
             Column(Modifier.weight(1.1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Segmented(listOf(false to stringResource(R.string.music), true to stringResource(R.string.tile_radio)), radio, { radio = it })
                 Box(Modifier.weight(1f)) {
-                    if (radio) RadioTile(d.music, 0, onIdle = {}) else MusicTile(d.music, 0)
+                    if (radio) RadioTile(d.music, 0, onIdle = {}, onOpen = { open(radioApp) }) else MusicTile(d.music, 0, onOpen = { open(musicApp) })
                 }
             }
         }
