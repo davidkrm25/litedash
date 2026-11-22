@@ -163,4 +163,5 @@
     <string name="guide_voice_in">En %1$d metros, %2$s</string>
     <string name="traffic_live">Tráfico en vivo</string>
     <string name="traffic_live_help">Colorea las calles de la guía según el tráfico (verde fluye, rojo detenido). Datos de TomTom; usa internet.</string>
+    <string name="traffic_reroute">Ruta más rápida por tráfico. Ahorras %1$d minutos.</string>
 </resources>

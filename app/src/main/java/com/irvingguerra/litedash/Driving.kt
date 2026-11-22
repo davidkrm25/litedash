@@ -1,5 +1,7 @@
 package com.irvingguerra.litedash
 
+import android.content.Context
+import com.irvingguerra.litedash.feature.map.TrafficRoute
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -190,6 +192,20 @@ internal fun DrivingScreen(d: Dependencies, session: DriveSession, revision: Int
         spoken[0] = level
         // Casi encima (último nivel): solo la maniobra, sin la distancia.
         voice.speak(if (level == VoiceRules.LEVELS_M.lastIndex) turnText else sayIn)
+    }
+    // Recálculo por tráfico: cada pocos minutos compara tu ruta con la mejor de TomTom y, si ahorra de verdad, cambia sola.
+    val trafficOn = d.prefs.traffic && BuildConfig.TOMTOM_KEY.isNotEmpty()
+    LaunchedEffect(session, trafficOn) {
+        if (!trafficOn) return@LaunchedEffect
+        while (true) {
+            delay(TrafficRoute.CHECK_MS)
+            val p = d.trip.position ?: continue
+            val st = session.state ?: continue
+            if (st.offRoute || st.arrived || session.recalculating) continue
+            val found = withContext(Dispatchers.IO) { fasterRoute(context, packs, session, p.latitude, p.longitude, st.point) } ?: continue
+            session.replace(found.first)
+            if (d.prefs.guideVoice) voice.speak(context.getString(R.string.traffic_reroute, found.second))
+        }
     }
     val recalculatingNow = session.recalculating
     val recalculatingText = stringResource(R.string.guide_recalculating).removeSuffix("…")
@@ -517,3 +533,21 @@ private const val CLOCK_TICK_MS = 60_000L
 /** El almacén de teselas de cada vista de la guía (no se mezcla con los widgets). */
 private const val DRIVE_CAR_KEY = "drive-car"
 private const val DRIVE_MAP_KEY = "drive-map"
+
+/**
+ * Una ruta más rápida con el tráfico de ahora y los minutos que ahorra, o null (no hay, no hay red o no vale la pena).
+ * Bloqueante: fuera del hilo principal.
+ */
+private fun fasterRoute(context: Context, packs: MapPacks, session: DriveSession, lat: Double, lon: Double, point: Int): Pair<Route, Int>? {
+    val key = BuildConfig.TOMTOM_KEY
+    val mine = session.route
+    val ours = TrafficRoute.trip(context, key, lat, lon, TrafficRoute.waypoints(mine, point)) ?: return null
+    val best = TrafficRoute.trip(context, key, lat, lon, listOf(doubleArrayOf(session.to.lat, session.to.lon))) ?: return null
+    if (!TrafficRoute.worthSwitching(ours.seconds, best.seconds)) return null
+    val via = TrafficRoute.pickVia(best.points, mine.points.copyOfRange(2 * point, mine.points.size)) ?: return null
+    val first = (packs.planRoute(lat, lon, via[0], via[1]) as? RoutePlan.Found)?.route ?: return null
+    val second = (packs.planRoute(via[0], via[1], session.to.lat, session.to.lon) as? RoutePlan.Found)?.route ?: return null
+    val joined = TrafficRoute.join(first, second)
+    if (joined.distanceM > best.meters * TrafficRoute.MAX_LONGER) return null
+    return joined to ((ours.seconds - best.seconds) / 60).coerceAtLeast(1)
+}

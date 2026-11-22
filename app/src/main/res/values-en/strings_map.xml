@@ -163,4 +163,5 @@
     <string name="guide_voice_in">In %1$d meters, %2$s</string>
     <string name="traffic_live">Live traffic</string>
     <string name="traffic_live_help">Colors the guidance map streets by traffic (green flowing, red stopped). TomTom data; uses internet.</string>
+    <string name="traffic_reroute">Faster route because of traffic. You save %1$d minutes.</string>
 </resources>
