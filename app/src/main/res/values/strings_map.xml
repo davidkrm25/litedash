@@ -164,4 +164,8 @@
     <string name="traffic_live">Tráfico en vivo</string>
     <string name="traffic_live_help">Colorea las calles de la guía según el tráfico (verde fluye, rojo detenido). Datos de TomTom; usa internet.</string>
     <string name="traffic_reroute">Ruta más rápida por tráfico. Ahorras %1$d minutos.</string>
+    <string name="phone_gps_title">GPS del teléfono para toda la tableta</string>
+    <string name="phone_gps_help">Da la ubicación que manda la app del teléfono (hotspot) a Maps, Waze y todas las apps. Requiere elegir KalEl Auto como «app de ubicación simulada» en Opciones de desarrollador.</string>
+    <string name="phone_gps_notification">Recibiendo el GPS del teléfono</string>
+    <string name="phone_gps_channel">GPS del teléfono</string>
 </resources>

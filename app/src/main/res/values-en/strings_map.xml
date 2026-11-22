@@ -164,4 +164,8 @@
     <string name="traffic_live">Live traffic</string>
     <string name="traffic_live_help">Colors the guidance map streets by traffic (green flowing, red stopped). TomTom data; uses internet.</string>
     <string name="traffic_reroute">Faster route because of traffic. You save %1$d minutes.</string>
+    <string name="phone_gps_title">Phone GPS for the whole tablet</string>
+    <string name="phone_gps_help">Gives the location sent by the phone app (hotspot) to Maps, Waze and every app. Requires choosing KalEl Auto as the "mock location app" in Developer options.</string>
+    <string name="phone_gps_notification">Receiving the phone GPS</string>
+    <string name="phone_gps_channel">Phone GPS</string>
 </resources>

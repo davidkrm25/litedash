@@ -49,6 +49,7 @@ internal object PrefKeys {
     const val MAP_EXTERNAL = "map_external"
     const val GUIDE_VOICE = "guide_voice"
     const val TRAFFIC = "traffic"
+    const val PHONE_LOCATION = "phone_location"
     /** En el mapa de fondo del inicio: tu auto en vez de la flecha. */
     const val MAP_BACKDROP_CAR = "map_backdrop_car"
     const val MAP_LOOK = "map_look"
@@ -444,6 +445,9 @@ class Preferences(context: Context) {
 
     /** El tráfico en vivo (TomTom) sobre el mapa de la guía. */
     var traffic by bool(PrefKeys.TRAFFIC, true)
+
+    /** El GPS del teléfono (hotspot) se le da a toda la tableta como ubicación simulada. */
+    var phoneLocation by bool(PrefKeys.PHONE_LOCATION, true)
 
     /** El mapa de la guía (el de la derecha) gira hacia donde vas en vez de quedarse al norte (botón de la brújula). */
     var guideMapHeading by bool(PrefKeys.GUIDE_MAP_HEADING, false)

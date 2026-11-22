@@ -232,6 +232,12 @@ fun MapSettings(d: Dependencies) {
         LocalColors.current.textMuted,
     )
     if (BuildConfig.TOMTOM_KEY.isNotEmpty()) SwitchRow(stringResource(R.string.traffic_live), d.prefs.traffic, { d.prefs.traffic = it }, stringResource(R.string.traffic_live_help))
+    val appContext = LocalContext.current.applicationContext
+    SwitchRow(
+        stringResource(R.string.phone_gps_title), d.prefs.phoneLocation,
+        { d.prefs.phoneLocation = it; if (it) PhoneLocationService.start(appContext) else PhoneLocationService.stop(appContext) },
+        stringResource(R.string.phone_gps_help),
+    )
     SwitchRow(stringResource(R.string.guide_voice), d.prefs.guideVoice, { d.prefs.guideVoice = it }, stringResource(R.string.guide_voice_help))
 }
 

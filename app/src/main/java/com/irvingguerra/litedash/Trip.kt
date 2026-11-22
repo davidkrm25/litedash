@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.location.Criteria
 import java.net.InetSocketAddress
 import java.net.DatagramSocket
 import java.net.DatagramPacket
@@ -120,7 +121,69 @@ internal fun parsePhoneFix(text: String): Location? {
     }
 }
 
-private const val PHONE_GPS_PORT = 8765
+internal const val PHONE_GPS_PORT = 8765
+
+/**
+ * Le da a TODA la tableta la ubicación del teléfono: la pone como proveedores de prueba (GPS y red). Solo funciona si
+ * KalEl Auto es la «app de ubicación simulada» en Opciones de desarrollador; si no, [state] lo dice.
+ */
+internal class PhoneLocationFeed(private val manager: LocationManager) {
+    /** null = sin intentar; "" = funcionando; otro texto = por qué no. */
+    @Volatile var state: String? = null
+        private set
+    @Volatile var lastPushAt = 0L
+        private set
+    private var ready = false
+
+    @SuppressLint("MissingPermission")
+    private fun prepare(): Boolean {
+        if (ready) return true
+        return try {
+            for (name in PROVIDERS) {
+                try { manager.removeTestProvider(name) } catch (_: Exception) {}
+                manager.addTestProvider(name, false, false, false, false, true, true, true, Criteria.POWER_LOW, Criteria.ACCURACY_FINE)
+                manager.setTestProviderEnabled(name, true)
+            }
+            ready = true
+            state = ""
+            true
+        } catch (e: SecurityException) {
+            state = "elige KalEl Auto como app de ubicación simulada (Opciones de desarrollador)"
+            false
+        } catch (e: Exception) {
+            state = e.message ?: "falló"
+            false
+        }
+    }
+
+    fun push(fix: Location) {
+        if (!prepare()) return
+        try {
+            for (name in PROVIDERS) {
+                val l = Location(fix)
+                l.provider = name
+                l.time = System.currentTimeMillis()
+                l.elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
+                if (!l.hasAccuracy()) l.accuracy = 10f
+                manager.setTestProviderLocation(name, l)
+            }
+            lastPushAt = SystemClock.elapsedRealtime()
+        } catch (e: Exception) {
+            ready = false
+            state = e.message ?: "falló"
+        }
+    }
+
+    fun stop() {
+        if (!ready) return
+        for (name in PROVIDERS) try { manager.removeTestProvider(name) } catch (_: Exception) {}
+        ready = false
+    }
+
+    private companion object {
+        val PROVIDERS = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
+    }
+}
 
 internal fun LocationManager.newestLastKnown(providers: List<String>): Location? =
     providers.mapNotNull { p ->
@@ -312,7 +375,7 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
     /** Para el reporte técnico: qué proveedores escuchan y la última falla al registrarlos. */
     fun describe(): String =
         "GPS: " + (if (listening) "escucha ${registered.ifEmpty { listOf("ninguno") }.joinToString()}" else "sin escuchar") +
-            (failure?.let { " · falló $it" } ?: "")
+            (failure?.let { " · falló $it" } ?: "") + (PhoneLocationService.state?.takeIf { it.isNotEmpty() }?.let { " · ubicación simulada: $it" } ?: "")
 
     /** Reloj de arranque del último punto del GPS: mientras llega, la red (menos precisa) no lo pisa. */
     private var lastGpsAt = 0L
@@ -334,6 +397,8 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
     }
 
     private fun update(l: Location) {
+        // Lo que nosotros mismos pusimos como ubicación simulada vuelve por el sistema: ya se contó con el paquete directo.
+        if (SystemClock.elapsedRealtime() - PhoneLocationService.lastPushAt < 5_000L && isMockFix(l)) return
         // Sin señal, algunas pantallas mandan 0,0 como si fuera un punto (el mapa se iba al mar): se ignora.
         if (l.latitude == 0.0 && l.longitude == 0.0) return
         val now = SystemClock.elapsedRealtime()
@@ -550,3 +615,6 @@ private const val COURSE_METERS = 8f
 
 /** Más imprecisión que esto (grados) y el rumbo del GPS no se usa. */
 private const val MAX_BEARING_ERROR = 20f
+
+@Suppress("DEPRECATION")
+private fun isMockFix(l: Location) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) l.isMock else l.isFromMockProvider

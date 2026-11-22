@@ -38,6 +38,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // El GPS del teléfono para toda la tableta (ubicación simulada): corre aunque otra app esté al frente.
+        if (dependencies.prefs.phoneLocation) PhoneLocationService.start(this)
         // Abierta desde otra app con un lugar (geo:): el mapa en grande lo enseña.
         if (savedInstanceState == null && intent?.action == Intent.ACTION_VIEW) PlaceRequests.fromGeo(intent.data)
         // Es la pantalla de inicio: "atrás" no la cierra (los paneles sí se cierran con atrás).
