@@ -99,6 +99,14 @@ class FuelTankTest {
     }
 
     @Test
+    fun sensorAtZeroDoesNotOverrideTheFill() {
+        val t = FuelTank(capacityL = 45.0, assumedKmPerL = 15.4).filledUp(0.0, 0L)
+        val r = t.reading(km(100.0), sensorPercent = 0f)!!
+        assertEquals(LevelSource.ESTIMATE, r.source)
+        assertTrue(r.levelL > 30.0)
+    }
+
+    @Test
     fun sensorWorksEvenWithoutAFill() {
         val r = FuelTank(capacityL = 40.0, assumedKmPerL = 10.0).reading(0.0, sensorPercent = 25f)
         assertNotNull(r)

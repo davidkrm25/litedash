@@ -121,7 +121,8 @@ data class FuelTank(
      */
     fun reading(odoMeters: Double, sensorPercent: Float? = null, engineKmPerL: Double? = null): FuelReading? {
         val perL = kmPerL(engineKmPerL)
-        val sensor = sensorPercent?.takeIf { it in 0f..100f }
+        // Un 0 % exacto casi siempre es un sensor que no da dato (muchos autos/adaptadores responden 0): no manda sobre lo anotado.
+        val sensor = sensorPercent?.takeIf { it > 0.5f && it <= 100f }
         val level = if (sensor != null) capacityL * sensor / 100.0 else levelAt(odoMeters, perL) ?: return null
         val since = lastFullOdo?.let { ((odoMeters - it) / 1000.0).coerceAtLeast(0.0) }
         return FuelReading(
