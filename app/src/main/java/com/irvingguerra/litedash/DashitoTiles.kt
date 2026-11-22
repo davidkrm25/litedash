@@ -233,15 +233,29 @@ fun DiagTile(d: Dependencies, part: String, onWorkshop: () -> Unit) {
         DiagParts.SPACE -> Unit
         DiagParts.CONNECT -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                Box(
-                    Modifier.fillMaxWidth().height(52.dp).clip(CircleShape)
-                        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent)))
-                        .clickable(onClick = onWorkshop),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Icon(Icons.bluetooth, androidx.compose.ui.graphics.Color.White, 22.dp)
-                        Label(stringResource(R.string.dashito_connect_adapter), Typography.body.copy(fontWeight = FontWeight.SemiBold), androidx.compose.ui.graphics.Color.White, 1)
+                if (on || connecting) {
+                    // Conectado (o conectando): el botón pasa a Desconectar, con contorno, como en Dashito.
+                    Box(
+                        Modifier.fillMaxWidth().height(52.dp).clip(CircleShape).border(1.dp, c.accent.copy(alpha = 0.6f), CircleShape)
+                            .clickable { obd?.disconnect() },
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Icon(Icons.bluetooth, c.accent, 22.dp)
+                            Label(stringResource(R.string.dashito_disconnect_adapter), Typography.body.copy(fontWeight = FontWeight.SemiBold), c.accent, 1)
+                        }
+                    }
+                } else {
+                    Box(
+                        Modifier.fillMaxWidth().height(52.dp).clip(CircleShape)
+                            .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent)))
+                            .clickable(onClick = onWorkshop),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Icon(Icons.bluetooth, androidx.compose.ui.graphics.Color.White, 22.dp)
+                            Label(stringResource(R.string.dashito_connect_adapter), Typography.body.copy(fontWeight = FontWeight.SemiBold), androidx.compose.ui.graphics.Color.White, 1)
+                        }
                     }
                 }
             }

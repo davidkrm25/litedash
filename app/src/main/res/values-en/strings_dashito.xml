@@ -23,6 +23,7 @@
     <string name="dashito_check_engine">Check engine</string>
     <string name="dashito_codes_unread">Codes not read</string>
     <string name="dashito_codes_found">Fault codes stored</string>
+    <string name="dashito_disconnect_adapter">Disconnect adapter</string>
     <string name="dashito_connect_adapter">Connect adapter</string>
     <string name="dashito_engine_values">Live engine values</string>
     <string name="dashito_fault_codes">Car fault codes</string>
