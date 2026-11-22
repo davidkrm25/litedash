@@ -165,7 +165,7 @@ private fun About(d: Dependencies) {
             }
             Column(Modifier.padding(22.dp).fillMaxWidth(if (pkg != null && wide) 0.56f else 1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 // Versión propia de esta edición; la interna (BuildConfig.VERSION_NAME) se queda como está para que Android actualice encima sin borrar datos.
-                Label("LiteDash $EDITION_VERSION", Typography.title.copy(fontSize = 30.sp), maxLines = 1)
+                Label("KalEl Auto $EDITION_VERSION", Typography.title.copy(fontSize = 30.sp), maxLines = 1)
                 Label(stringResource(if (BuildConfig.CHANNEL == "play") R.string.channel_play else R.string.channel_github), Typography.small, c.textMuted)
                 val notes = localReleaseNotes(BuildConfig.RELEASE_NOTES, BuildConfig.RELEASE_NOTES_EN)
                 if (notes.isNotBlank()) {
