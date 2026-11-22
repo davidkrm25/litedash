@@ -94,6 +94,7 @@ import com.irvingguerra.litedash.feature.map.OfflineMaps
 import com.irvingguerra.litedash.feature.map.OsmTiles
 import com.irvingguerra.litedash.feature.map.SearchHit
 import com.irvingguerra.litedash.feature.map.TileStore
+import com.irvingguerra.litedash.feature.map.TrafficTiles
 import com.irvingguerra.litedash.feature.map.VectorTiles
 import com.irvingguerra.litedash.feature.map.rememberFreeMapCamera
 import com.irvingguerra.litedash.feature.map.rememberMapCamera
@@ -558,6 +559,20 @@ internal fun rememberTileStore(look: MapLook, themeDark: Boolean, shareKey: Stri
         // El almacén cuenta quién lo ve: solo lo suelta quien lo tomó.
         if (!covered) store.resume()
         onStopOrDispose { if (!covered) store.pause() }
+    }
+    return store
+}
+
+/** El tráfico en vivo de TomTom (null = apagado o sin clave en esta compilación). */
+@Composable
+internal fun rememberTrafficStore(enabled: Boolean): TileStore? {
+    val context = LocalContext.current
+    val store = remember(enabled) {
+        if (enabled && BuildConfig.TOMTOM_KEY.isNotEmpty()) TileStore(context, MAP_USER_AGENT, TrafficTiles(BuildConfig.TOMTOM_KEY)) else null
+    }
+    LifecycleStartEffect(store) {
+        store?.resume()
+        onStopOrDispose { store?.pause() }
     }
     return store
 }

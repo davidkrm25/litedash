@@ -231,6 +231,7 @@ fun MapSettings(d: Dependencies) {
         Typography.small,
         LocalColors.current.textMuted,
     )
+    if (BuildConfig.TOMTOM_KEY.isNotEmpty()) SwitchRow(stringResource(R.string.traffic_live), d.prefs.traffic, { d.prefs.traffic = it }, stringResource(R.string.traffic_live_help))
     SwitchRow(stringResource(R.string.guide_voice), d.prefs.guideVoice, { d.prefs.guideVoice = it }, stringResource(R.string.guide_voice_help))
 }
 

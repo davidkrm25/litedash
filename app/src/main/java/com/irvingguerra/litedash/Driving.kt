@@ -248,6 +248,7 @@ private fun CarView(d: Dependencies, session: DriveSession, modifier: Modifier) 
         // Tu auto mide lo mismo que en el mapa de fondo (22 % del lado corto, 140–240 dp): las calles y la ruta, a su escala.
         val carDp = (minOf(maxWidth, maxHeight).value * 0.22f).coerceIn(140f, 240f)
         val store = rememberTileStore(look, c.dark, DRIVE_CAR_KEY, realRoadDp = carDp)
+        val traffic = rememberTrafficStore(d.prefs.traffic)
         if (position != null) {
             // Sobre la ruta, tu auto va en ella y mirando hacia donde sigue (como Waze); fuera, como diga el GPS.
             val onRoute = s != null && !s.offRoute
@@ -256,6 +257,7 @@ private fun CarView(d: Dependencies, session: DriveSession, modifier: Modifier) 
                 (if (onRoute) s!!.heading else null) ?: d.trip.bearing, kmh, look, Modifier.fillMaxSize(), camera,
                 navigating = true, interactive = false, marker = marker,
                 route = session.route.points, routeDone = s?.let { it.point + it.fraction } ?: 0f, routeWidth = carDp.dp,
+                traffic = traffic,
             )
         }
         // La velocidad, grande, arriba a la izquierda (como la maqueta).
@@ -281,6 +283,7 @@ private fun MapView(d: Dependencies, session: DriveSession, end: () -> Unit, mod
         MapLook.parse(d.prefs.mapLook.orEmpty()).copy(orientation = if (heading) MapOrientation.HEADING else MapOrientation.NORTH)
     }
     val store = rememberTileStore(look, c.dark, DRIVE_MAP_KEY)
+    val traffic = rememberTrafficStore(d.prefs.traffic)
     val camera = rememberMapCamera()
     val position = d.trip.position
     val s = session.state
@@ -297,6 +300,7 @@ private fun MapView(d: Dependencies, session: DriveSession, end: () -> Unit, mod
                 (if (onRoute) s!!.heading else null) ?: d.trip.bearing, null, look, Modifier.fillMaxSize(), camera,
                 fixedZoom = fit?.whole ?: CLOSE_ZOOM, interactive = false,
                 route = session.route.points, routeDone = s?.let { it.point + it.fraction } ?: 0f,
+                traffic = traffic,
             )
         }
         // En la vista ancha el mapa llega hasta arriba: lo de arriba, bajo la barra de estado de Android.

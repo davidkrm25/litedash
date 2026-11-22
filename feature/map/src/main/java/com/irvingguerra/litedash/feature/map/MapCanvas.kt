@@ -423,6 +423,8 @@ fun MapCanvas(
      * null = una línea del mismo grosor en toda la pantalla.
      */
     routeWidth: Dp? = null,
+    /** El tráfico en vivo encima de las calles (null = sin él). */
+    traffic: TileStore? = null,
 ) {
     // La ruta en coordenadas del mundo (zoom 0), una vez: cada cuadro solo la multiplica por su zoom.
     val routeWorld = remember(route) {
@@ -491,6 +493,14 @@ fun MapCanvas(
             snapshotFlow { frame.wanted }.collect { store.request(frame, it) }
         } finally {
             store.forget(frame)
+        }
+    }
+    LaunchedEffect(traffic, active) {
+        if (!active || traffic == null) return@LaunchedEffect
+        try {
+            snapshotFlow { frame.wanted }.collect { traffic.request(frame, it) }
+        } finally {
+            traffic.forget(frame)
         }
     }
     val onPan by rememberUpdatedState { at: Offset, delta: Offset ->
@@ -596,7 +606,10 @@ fun MapCanvas(
                         store.source.takeIf { routeWidth != null },
                     )
                 }
-                onDrawBehind { frame.draw(this, store, filter, accent, marker) }
+                onDrawBehind {
+                    traffic?.loaded // cada tesela de tráfico que llega repinta
+                    frame.draw(this, store, filter, accent, marker, traffic)
+                }
             },
         )
         val credits = if (short) store.source.attributionShort else store.source.attribution

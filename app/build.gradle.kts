@@ -18,6 +18,10 @@ fun changelogSection(file: String): String = rootProject.file(file).takeIf { it.
     .substringAfter("\n").substringBefore("\n## [").trim()
 val releaseNotes: String = changelogSection("CHANGELOG.md")
 val releaseNotesEn: String = changelogSection("CHANGELOG.en.md")
+// La clave gratis de TomTom (tráfico en vivo): solo en local.properties (que no se sube a GitHub); sin ella, la capa no se ofrece.
+val tomtomKey: String = rootProject.file("local.properties").takeIf { it.exists() }?.let { f ->
+    Properties().also { p -> f.inputStream().use { p.load(it) } }.getProperty("tomtom.key")
+}.orEmpty().trim()
 fun buildConfigText(text: String) = "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\""
 
 /**
@@ -61,6 +65,7 @@ android {
         versionName = appVersionName
         buildConfigField("String", "CATALOG_URL", "\"$CATALOG_URL\"")
         buildConfigField("String", "LANGUAGES_URL", "\"$LANGUAGES_URL\"")
+        buildConfigField("String", "TOMTOM_KEY", buildConfigText(tomtomKey))
         buildConfigField("String", "RELEASE_NOTES", buildConfigText(releaseNotes))
         buildConfigField("String", "RELEASE_NOTES_EN", buildConfigText(releaseNotesEn))
     }

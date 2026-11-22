@@ -392,11 +392,13 @@ internal class MapFrame : ScreenPoint {
         return true
     }
 
-    fun draw(scope: DrawScope, store: TileStore, filter: ColorFilter?, accent: Color, marker: ImageBitmap? = null) = with(scope) {
+    fun draw(scope: DrawScope, store: TileStore, filter: ColorFilter?, accent: Color, marker: ImageBitmap? = null, traffic: TileStore? = null) = with(scope) {
         drawIntoCanvas { canvas ->
             canvas.save()
             canvas.nativeCanvas.concat(matrix)
             drawTiles(store, plan, filter)
+            // El tráfico encima de las calles (y debajo de la ruta).
+            if (traffic != null) drawTiles(traffic, plan, null)
             canvas.restore()
             // A escala real la ruta va acostada como una calle más: una franja azul lisa, como Tesla, debajo de los edificios.
             if (routeWide > 0f && !ribbonX.isNaN()) {

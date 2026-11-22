@@ -163,4 +163,6 @@
     <string name="guide_voice">Voice guidance</string>
     <string name="guide_voice_help">Says the turns out loud in the LiteDash map guidance ("In 150 meters, turn right"). Uses the Android voice; lowers the music while it speaks.</string>
     <string name="guide_voice_in">In %1$d meters, %2$s</string>
+    <string name="traffic_live">Live traffic</string>
+    <string name="traffic_live_help">Colors the guidance map streets by traffic (green flowing, red stopped). TomTom data; uses internet.</string>
 </resources>

@@ -161,4 +161,6 @@
     <string name="guide_voice">Guía por voz</string>
     <string name="guide_voice_help">Dice las vueltas en voz alta en la guía del mapa de LiteDash («En 150 metros, gira a la derecha»). Usa la voz de Android; baja la música un momento mientras habla.</string>
     <string name="guide_voice_in">En %1$d metros, %2$s</string>
+    <string name="traffic_live">Tráfico en vivo</string>
+    <string name="traffic_live_help">Colorea las calles de la guía según el tráfico (verde fluye, rojo detenido). Datos de TomTom; usa internet.</string>
 </resources>
