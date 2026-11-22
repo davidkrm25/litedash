@@ -138,7 +138,12 @@ object SplitScreen {
             context.startActivity(intent, options.toBundle())
             // Con la ventana libre, el panel fijo del otro lado (si ya hay permiso de mostrar sobre otras apps).
             if (!dock) {
-                if (SidePanel.allowed(context)) SidePanel.show(context, screen.widthPixels - width, left = d.prefs.splitCarLeft) else SidePanel.askPermission(context)
+                if (SidePanel.allowed(context)) {
+                    // Después de que Mapas ya está al frente: si no, el panel nace antes y queda tapado.
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                        { SidePanel.show(context, screen.widthPixels - width, left = d.prefs.splitCarLeft) }, 800L,
+                    )
+                } else SidePanel.askPermission(context)
             }
             true
         } catch (e: Exception) {

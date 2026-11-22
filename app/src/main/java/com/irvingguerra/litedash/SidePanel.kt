@@ -91,7 +91,10 @@ object SidePanel {
             owner.start()
             view = compose
             true
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Que se vea por qué no salió el panel (en la prueba en la tableta).
+            android.util.Log.w("SidePanel", "no salió el panel", e)
+            android.widget.Toast.makeText(app, "Panel: ${e.javaClass.simpleName} ${e.message.orEmpty().take(120)}", android.widget.Toast.LENGTH_LONG).show()
             false
         }
     }
