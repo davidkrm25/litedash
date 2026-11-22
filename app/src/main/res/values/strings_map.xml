@@ -168,4 +168,8 @@
     <string name="phone_gps_help">Da la ubicación que manda la app del teléfono (hotspot) a Maps, Waze y todas las apps. Requiere elegir KalEl Auto como «app de ubicación simulada» en Opciones de desarrollador.</string>
     <string name="phone_gps_notification">Recibiendo el GPS del teléfono</string>
     <string name="phone_gps_channel">GPS del teléfono</string>
+    <string name="phone_gps_stopped">Estado: el servicio no está escuchando.</string>
+    <string name="phone_gps_nodata">Estado: no llegan datos del teléfono (revisa el hotspot y que su app esté enviando).</string>
+    <string name="phone_gps_failed">Estado: llega el GPS pero falló la ubicación simulada: %1$s</string>
+    <string name="phone_gps_ok">Estado: funcionando, último punto hace %1$d s.</string>
 </resources>

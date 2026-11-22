@@ -51,12 +51,14 @@ class PhoneLocationService : Service() {
                 return@thread
             }
             socket = s
+            running = true
             val buffer = ByteArray(256)
             while (!s.isClosed) {
                 try {
                     val packet = DatagramPacket(buffer, buffer.size)
                     s.receive(packet)
                     parsePhoneFix(String(packet.data, 0, packet.length))?.let {
+                        lastReceivedAt = android.os.SystemClock.elapsedRealtime()
                         feed.push(it)
                         lastPushAt = feed.lastPushAt
                         state = feed.state
@@ -65,6 +67,7 @@ class PhoneLocationService : Service() {
                     if (s.isClosed) break
                 }
             }
+            running = false
             feed.stop()
         }
     }
@@ -82,6 +85,10 @@ class PhoneLocationService : Service() {
         /** Reloj de arranque del último punto que se le dio a la tableta, y cómo va (null = sin intentar; "" = bien; otro = por qué no). */
         @Volatile var lastPushAt = 0L
         @Volatile var state: String? = null
+
+        /** El servicio ya escucha el puerto, y cuándo llegó el último punto del teléfono (reloj de arranque; 0 = ninguno). */
+        @Volatile var running = false
+        @Volatile var lastReceivedAt = 0L
 
         fun start(context: Context) {
             val intent = Intent(context, PhoneLocationService::class.java)
