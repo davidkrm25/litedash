@@ -61,6 +61,12 @@ internal const val TRIP_IDLE_MS = 3 * 3_600_000L
 /** Más lento que esto (km/h) entre dos puntos es estar parado: ese rato no cuenta para el tiempo ni el promedio. */
 private const val MOVING_KMH = 3.0
 
+/** Cada cuánto el viaje cuenta con la velocidad del OBD cuando el GPS no está dando puntos buenos. */
+private const val OBD_TICK_MS = 1_000L
+
+/** Metros que se avanzan a [kmh] durante [dtMs] (con un tope de 3 s por tick, para que una pausa no sume de más). */
+internal fun obdStepMeters(kmh: Float, dtMs: Long): Double = kmh / 3.6 * dtMs.coerceIn(0L, 3_000L) / 1_000.0
+
 /**
  * El viaje en curso, sin Android: metros, tiempo en movimiento y los relojes de arranque del primer y
  * del último punto en movimiento ([startedAt] y [lastAt]; 0 = aún no empieza).
@@ -179,6 +185,12 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
      */
     fun acquire() {
         users++
+        if (users == 1) {
+            // Sin GPS bueno, el viaje cuenta con la velocidad del OBD: hay que pedírsela al adaptador.
+            bus.want(Signal.SPEED)
+            lastTickAt = SystemClock.elapsedRealtime()
+            main.postDelayed(ticker, OBD_TICK_MS)
+        }
         refreshPermission()
         if (!listening && permitted) listen()
     }
@@ -209,8 +221,13 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
     }
 
     fun release() {
+        val was = users
         users = (users - 1).coerceAtLeast(0)
         if (users > 0) return
+        if (was > 0) {
+            main.removeCallbacks(ticker)
+            bus.unwant(Signal.SPEED)
+        }
         if (listening) {
             manager.removeUpdates(listener)
             listening = false
@@ -273,8 +290,39 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
             leg = leg.moved(now, step)
             speedKmh?.let { if (it > maxKmh && it < MAX_PLAUSIBLE_KMH) maxKmh = it }
             onStep?.invoke(step)
+            lastGpsStepAt = now
             last = l
         }
+    }
+
+    /** Reloj del último punto de GPS que contó para el viaje y del último tick con el OBD. */
+    private var lastGpsStepAt = 0L
+    private var lastTickAt = 0L
+
+    private val ticker = object : Runnable {
+        override fun run() {
+            obdStep()
+            if (users > 0) main.postDelayed(this, OBD_TICK_MS)
+        }
+    }
+
+    /**
+     * Si el GPS no está dando puntos buenos (la tableta no lo capta) y el OBD sí da velocidad, el viaje cuenta con
+     * ella: distancia, tiempo en movimiento y velocidad máxima. Con GPS bueno no hace nada (no se cuenta doble).
+     */
+    private fun obdStep() {
+        val now = SystemClock.elapsedRealtime()
+        val dt = now - lastTickAt
+        lastTickAt = now
+        if (lastGpsStepAt != 0L && now - lastGpsStepAt < GPS_FRESH_MS) return
+        val source = bus.source(Signal.SPEED)
+        if (source != Source.OBD && source != Source.CAN) return
+        val kmh = bus.value(Signal.SPEED) ?: return
+        if (kmh <= MOVING_KMH || kmh >= MAX_PLAUSIBLE_KMH) return
+        val step = obdStepMeters(kmh, dt)
+        leg = leg.moved(now, step)
+        if (kmh > maxKmh) maxKmh = kmh
+        onStep?.invoke(step)
     }
 }
 

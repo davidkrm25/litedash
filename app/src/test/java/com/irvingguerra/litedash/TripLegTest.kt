@@ -85,4 +85,13 @@ class TripLegTest {
         assertEquals(6, compassIndex(-90f))
         assertEquals(2, compassIndex(450f))
     }
+
+    @Test
+    fun obdCuentaLosMetrosDeLaVelocidad() {
+        // 36 km/h = 10 m/s.
+        assertEquals(10.0, obdStepMeters(36f, 1_000L), 1e-6)
+        // Una pausa larga no suma de más: tope de 3 s.
+        assertEquals(30.0, obdStepMeters(36f, 60_000L), 1e-6)
+        assertEquals(0.0, obdStepMeters(36f, -5L), 1e-6)
+    }
 }
