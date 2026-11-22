@@ -164,7 +164,8 @@ private fun About(d: Dependencies) {
                 CarStill(d.cars, pkg, d.prefs.carPaint, Modifier.fillMaxWidth(0.46f).aspectRatio(CAR_ASPECT))
             }
             Column(Modifier.padding(22.dp).fillMaxWidth(if (pkg != null && wide) 0.56f else 1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Label("LiteDash ${BuildConfig.VERSION_NAME}", Typography.title.copy(fontSize = 30.sp), maxLines = 1)
+                // Versión propia de esta edición; la interna (BuildConfig.VERSION_NAME) se queda como está para que Android actualice encima sin borrar datos.
+                Label("LiteDash $EDITION_VERSION", Typography.title.copy(fontSize = 30.sp), maxLines = 1)
                 Label(stringResource(if (BuildConfig.CHANNEL == "play") R.string.channel_play else R.string.channel_github), Typography.small, c.textMuted)
                 val notes = localReleaseNotes(BuildConfig.RELEASE_NOTES, BuildConfig.RELEASE_NOTES_EN)
                 if (notes.isNotBlank()) {
@@ -369,3 +370,6 @@ private fun ModuleRow(
 
 /** Menos ancho que esto (celular de pie), el renglón de un módulo se aprieta. */
 private val MODULE_NARROW = 420.dp
+
+/** La versión que se muestra en Acerca de. */
+private const val EDITION_VERSION = "1.0"
