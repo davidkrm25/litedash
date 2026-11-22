@@ -554,4 +554,5 @@ internal fun openPlace(context: Context, app: App?, hit: SearchHit) = navigateTo
 /** Tus lugares que siempre salen en la búsqueda (se ubican por su dirección). */
 private val MY_PLACES = listOf(
     MyPlace("SERINYCO", "Av. 5 de Mayo 58, El Chamizalito, 55404 Ecatepec de Morelos, México", listOf("empresa", "mi empresa", "trabajo")),
+    MyPlace("Autolavado", "Av. Canal de Desagüe, 55796 Ciudad de México, México", listOf("lavado", "lavar", "carwash")),
 )
