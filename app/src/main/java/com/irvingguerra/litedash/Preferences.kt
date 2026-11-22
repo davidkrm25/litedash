@@ -87,6 +87,8 @@ internal object PrefKeys {
     const val SPLIT_SCREEN = "split_screen"
     const val SPLIT_CAR_LEFT = "split_car_left"
     const val SPLIT_ROAD = "split_road"
+    const val FREEFORM_MAPS = "freeform_maps"
+    const val FREEFORM_WIDTH = "freeform_width"
     const val TRIP_LOG = "trip_log"
     const val BEST_ACCEL = "best_0_100"
     const val STATS = "anonymous_stats"
@@ -531,6 +533,13 @@ class Preferences(context: Context) {
 
     /** En pantalla dividida, el auto va a la izquierda (si no, a la derecha). */
     var splitCarLeft by bool(PrefKeys.SPLIT_CAR_LEFT, true)
+
+    /**
+     * Android 7–12 con la división bloqueada: abrir Mapas, Waze o la música en una ventana libre que ocupa [freeformWidth] % de
+     * la pantalla (del lado contrario al auto), con LiteDash visible en el resto. Pide activar las ventanas libres en opciones de desarrollador.
+     */
+    var freeformMaps by bool(PrefKeys.FREEFORM_MAPS, false)
+    var freeformWidth by int(PrefKeys.FREEFORM_WIDTH, 50)
 
     /** En pantalla dividida, al lado del mapa va la carretera (si no, el auto 3D). */
     var splitRoad by bool(PrefKeys.SPLIT_ROAD, false)

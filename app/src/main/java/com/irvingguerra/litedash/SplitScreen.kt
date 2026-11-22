@@ -1,6 +1,7 @@
 package com.irvingguerra.litedash
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -8,6 +9,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -65,10 +67,10 @@ object SplitScreen {
     }
 
     /** Las apps que se abren divididas: las de mapa y de música (las conocidas, la elegida o por su categoría). */
-    @RequiresApi(Build.VERSION_CODES.S_V2)
     private fun isMapOrMusic(context: Context, d: Dependencies, pkg: String): Boolean {
         if (pkg in NAVIGATION_PACKAGES || pkg in MUSIC_PACKAGES || pkg == d.music.preferred) return true
         if (d.prefs.mapApp?.substringBefore('/') == pkg) return true
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
         val category = try {
             context.packageManager.getApplicationInfo(pkg, 0).category
         } catch (_: PackageManager.NameNotFoundException) {
@@ -80,6 +82,7 @@ object SplitScreen {
     /** Abre [intent] dividida si toca; false = que se abra normal. */
     fun open(context: Context, intent: Intent, pkg: String): Boolean {
         val d = (context.applicationContext as LiteDashApp).dependencies
+        if (d.prefs.freeformMaps && !supported() && openFreeform(context, d, intent, pkg)) return true
         // Android solo divide la pantalla así desde la 12L: antes, la app se abre normal.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2 || !d.prefs.splitScreen || !supported()) return false
         if (context.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
@@ -104,6 +107,27 @@ object SplitScreen {
             .putExtra(EXTRA_LEFT, carLeft)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         launch(context, intent)
+    }
+
+    /**
+     * Sin pantalla dividida (Android 7–12 o fabricante que la bloquea): la app de mapa o música en una ventana libre
+     * de [Preferences.freeformWidth] % de la pantalla, del lado contrario al auto. Solo se pide el tamaño: si el sistema
+     * no tiene las ventanas libres activas, la app se abre normal (a pantalla completa).
+     */
+    private fun openFreeform(context: Context, d: Dependencies, intent: Intent, pkg: String): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return false
+        if (context.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
+        if (!isMapOrMusic(context, d, pkg)) return false
+        val screen = context.resources.displayMetrics
+        val width = screen.widthPixels * d.prefs.freeformWidth.coerceIn(30, 70) / 100
+        val rect = if (d.prefs.splitCarLeft) Rect(screen.widthPixels - width, 0, screen.widthPixels, screen.heightPixels) else Rect(0, 0, width, screen.heightPixels)
+        return try {
+            context.startActivity(intent, ActivityOptions.makeBasic().setLaunchBounds(rect).toBundle())
+            true
+        } catch (e: Exception) {
+            Log.w(TAG, "ventana libre: ${e.message}", e)
+            false
+        }
     }
 
     /** Abre [intent]; si Android no deja, queda anotado en el registro y regresa false. */
@@ -266,8 +290,21 @@ private fun SplitBoard(d: Dependencies, onSwap: () -> Unit, onExit: () -> Unit) 
 fun SplitSettings(d: Dependencies) {
     val c = LocalColors.current
     val supported = remember { SplitScreen.supported() }
-    // Sin pantalla dividida en este Android: solo se dice por qué no está disponible.
+    // Sin pantalla dividida en este Android: se dice por qué y, desde Android 7, se ofrece la ventana libre.
     if (!supported) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            SwitchRow(stringResource(R.string.freeform_title), d.prefs.freeformMaps, { d.prefs.freeformMaps = it }, stringResource(R.string.freeform_help))
+            if (d.prefs.freeformMaps) {
+                Label(stringResource(R.string.freeform_width), Typography.label, c.textMuted)
+                Segmented(listOf(40 to "40 %", 50 to "50 %", 60 to "60 %"), d.prefs.freeformWidth, { d.prefs.freeformWidth = it })
+                Label(stringResource(R.string.split_side), Typography.label, c.textMuted)
+                Segmented(
+                    listOf(true to stringResource(R.string.split_left), false to stringResource(R.string.split_right)),
+                    d.prefs.splitCarLeft,
+                    { d.prefs.splitCarLeft = it },
+                )
+            }
+        }
         Label(stringResource(R.string.split_title), Typography.subtitle)
         // Dos razones distintas: Android viejo, o un Android nuevo cuya pantalla no deja dividir.
         val reason = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2) stringResource(R.string.split_unsupported, Build.VERSION.RELEASE)
