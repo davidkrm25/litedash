@@ -47,6 +47,7 @@ internal object PrefKeys {
     const val DOCK = "dock"
     const val MAP_APP = "map_app"
     const val MAP_EXTERNAL = "map_external"
+    const val GUIDE_VOICE = "guide_voice"
     /** En el mapa de fondo del inicio: tu auto en vez de la flecha. */
     const val MAP_BACKDROP_CAR = "map_backdrop_car"
     const val MAP_LOOK = "map_look"
@@ -436,6 +437,9 @@ class Preferences(context: Context) {
 
     /** Usar tu app de mapas: el toque al widget Mapa, Casa/Trabajo, la barra y el volante la abren (apagado de fábrica: el mapa de LiteDash). */
     var mapExternal by bool(PrefKeys.MAP_EXTERNAL, false)
+
+    /** La guía del mapa de LiteDash dice las vueltas en voz alta. */
+    var guideVoice by bool(PrefKeys.GUIDE_VOICE, true)
 
     /** El mapa de la guía (el de la derecha) gira hacia donde vas en vez de quedarse al norte (botón de la brújula). */
     var guideMapHeading by bool(PrefKeys.GUIDE_MAP_HEADING, false)

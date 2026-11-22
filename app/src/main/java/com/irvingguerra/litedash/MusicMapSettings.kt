@@ -231,6 +231,7 @@ fun MapSettings(d: Dependencies) {
         Typography.small,
         LocalColors.current.textMuted,
     )
+    SwitchRow(stringResource(R.string.guide_voice), d.prefs.guideVoice, { d.prefs.guideVoice = it }, stringResource(R.string.guide_voice_help))
 }
 
 /** Las apps instaladas que abren una dirección ("geo:") o son de mapas. Consulta a Android: fuera del hilo principal. */

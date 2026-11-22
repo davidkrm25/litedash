@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -173,6 +174,29 @@ internal fun DrivingScreen(d: Dependencies, session: DriveSession, revision: Int
             }
         }
     }
+    // La guía por voz: avisa la vuelta a 500 m, a 150 m y casi encima; también "recalculando" y "llegaste".
+    val voice = remember { VoiceGuide(context) }
+    DisposableEffect(voice) { onDispose { voice.shutdown() } }
+    val guide = session.state
+    val turn = guide?.takeIf { !it.arrived && !it.offRoute }?.let { session.route.maneuvers.getOrNull(it.next) }
+    val turnText = turn?.let { maneuverText(it, session.to) }
+    val level = guide?.takeIf { turn != null }?.let { VoiceRules.level(it.toNextM) } ?: -1
+    val spoken = remember(session, guide?.next) { intArrayOf(-1) }
+    val voiceOn = d.prefs.guideVoice
+    val inMeters = if (level >= 0) VoiceRules.LEVELS_M[level].toInt() else 0
+    val sayIn = stringResource(R.string.guide_voice_in, inMeters, turnText.orEmpty())
+    LaunchedEffect(session, guide?.next, level, voiceOn) {
+        if (!voiceOn || turnText == null || !VoiceRules.shouldSpeak(level, spoken[0])) return@LaunchedEffect
+        spoken[0] = level
+        // Casi encima (último nivel): solo la maniobra, sin la distancia.
+        voice.speak(if (level == VoiceRules.LEVELS_M.lastIndex) turnText else sayIn)
+    }
+    val recalculatingNow = session.recalculating
+    val recalculatingText = stringResource(R.string.guide_recalculating).removeSuffix("…")
+    LaunchedEffect(recalculatingNow, voiceOn) { if (voiceOn && recalculatingNow) voice.speak(recalculatingText) }
+    val arrivedNow = guide?.arrived == true
+    val arrivedText = stringResource(R.string.guide_arrived)
+    LaunchedEffect(arrivedNow, voiceOn) { if (voiceOn && arrivedNow) voice.speak(arrivedText) }
     // Lo de abajo no se dibuja ni trabaja: esta pantalla lo tapa todo.
     CompositionLocalProvider(LocalHomeCovered provides false) {
         BoxWithConstraints(Modifier.fillMaxSize().background(c.background)) {
