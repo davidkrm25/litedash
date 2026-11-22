@@ -1,5 +1,6 @@
 package com.irvingguerra.litedash
 
+import com.irvingguerra.litedash.feature.map.MyPlace
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -256,7 +257,7 @@ internal fun PlaceSearchBox(
         if (q.isNotEmpty() && packs.onlineSearch && search.onlineState != OnlineState.LOADING) {
             search.onlineState = OnlineState.LOADING
             scope.launch {
-                val found = withContext(Dispatchers.IO) { OnlineSearch.search(context, q, here?.latitude, here?.longitude, language, tomtomKey = BuildConfig.TOMTOM_KEY) }
+                val found = withContext(Dispatchers.IO) { OnlineSearch.search(context, q, here?.latitude, here?.longitude, language, tomtomKey = BuildConfig.TOMTOM_KEY, mine = MY_PLACES) }
                 // Si en el inter se escribió otra cosa, esto ya no sirve.
                 if (search.query.trim() != q) return@launch
                 if (found == null) search.onlineState = OnlineState.FAILED
@@ -549,3 +550,8 @@ internal fun PlaceCard(
 
 /** Abre el lugar en tu app de mapas (con sus coordenadas: cualquier app las entiende). */
 internal fun openPlace(context: Context, app: App?, hit: SearchHit) = navigateTo(context, app, coordinates(hit))
+
+/** Tus lugares que siempre salen en la búsqueda (se ubican por su dirección). */
+private val MY_PLACES = listOf(
+    MyPlace("SERINYCO", "Av. 5 de Mayo 58, El Chamizalito, 55404 Ecatepec de Morelos, México", listOf("empresa", "mi empresa", "trabajo")),
+)

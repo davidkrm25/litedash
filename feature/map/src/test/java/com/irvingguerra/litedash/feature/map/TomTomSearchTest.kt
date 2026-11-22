@@ -28,3 +28,15 @@ class TomTomSearchTest {
         assertEquals(2, merged.size)
     }
 }
+
+class MyPlaceTest {
+    private val p = MyPlace("SERINYCO", "Av. 5 de Mayo 58", listOf("empresa"))
+
+    @Test fun matchesNameAliasAndPartial() {
+        org.junit.Assert.assertTrue(p.matches("serinyco"))
+        org.junit.Assert.assertTrue(p.matches("serin"))
+        org.junit.Assert.assertTrue(p.matches("mi empresa"))
+        org.junit.Assert.assertFalse(p.matches("ab"))
+        org.junit.Assert.assertFalse(p.matches("gasolinera"))
+    }
+}

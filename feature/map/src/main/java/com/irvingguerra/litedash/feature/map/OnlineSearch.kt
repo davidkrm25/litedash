@@ -34,6 +34,7 @@ object OnlineSearch {
     fun search(
         context: Context, query: String, nearLat: Double?, nearLon: Double?, language: String, limit: Int = 10,
         tomtomKey: String = "",
+        mine: List<MyPlace> = emptyList(),
     ): List<SearchHit>? {
         val q = query.trim().replace(Regex("\\s+"), " ")
         if (q.isEmpty()) return emptyList()
@@ -63,10 +64,35 @@ object OnlineSearch {
         val photon = parsePhoton(body, nearLat, nearLon)
         // Con la clave de TomTom, sus negocios van primero (cubre mucho más que OpenStreetMap); luego los de Photon que no repitan.
         val tomtom = if (tomtomKey.isNotEmpty()) searchTomTom(context, q, near, language, limit, tomtomKey, nearLat, nearLon) else null
-        if (photon == null && tomtom == null) return null
-        val hits = mergeHits(tomtom.orEmpty(), photon.orEmpty(), limit)
+        // Tus lugares (p. ej. tu empresa) que coinciden con lo buscado van primero: su dirección se ubica con TomTom.
+        val own = if (tomtomKey.isNotEmpty()) mine.filter { it.matches(q) }.mapNotNull { geocode(context, it, tomtomKey, nearLat, nearLon) } else emptyList()
+        if (photon == null && tomtom == null && own.isEmpty()) return null
+        val hits = mergeHits(own, mergeHits(tomtom.orEmpty(), photon.orEmpty(), limit), limit)
         synchronized(cache) { cache[key] = Entry(now, hits) }
         return hits
+    }
+
+    private val geocoded = HashMap<String, SearchHit>()
+
+    /** La ubicación de [place] por su dirección (TomTom); se recuerda mientras la app siga abierta. */
+    private fun geocode(context: Context, place: MyPlace, key: String, nearLat: Double?, nearLon: Double?): SearchHit? {
+        val hit = synchronized(geocoded) { geocoded[place.name] } ?: run {
+            val url = "https://api.tomtom.com/search/2/geocode/" + URLEncoder.encode(place.address, "UTF-8").replace("+", "%20") +
+                ".json?key=$key&limit=1&countrySet=MX"
+            val body = try {
+                val connection = Https.get(context, url, "application/json")
+                try {
+                    connection.inputStream.bufferedReader().use { it.readText() }
+                } finally {
+                    connection.disconnect()
+                }
+            } catch (e: IOException) {
+                return null
+            }
+            val first = parseTomTom(body, null, null)?.firstOrNull() ?: return null
+            first.copy(name = place.name, address = place.address).also { synchronized(geocoded) { geocoded[place.name] = it } }
+        }
+        return if (nearLat != null && nearLon != null) hit.copy(distanceKm = distanceKm(nearLat, nearLon, hit.lat, hit.lon)) else hit
     }
 
     private fun searchTomTom(
@@ -98,6 +124,15 @@ object OnlineSearch {
     }
 
     private fun round2(value: Double) = Math.round(value * 100) / 100.0
+}
+
+/** Un lugar tuyo (empresa, casa…): se encuentra por su [name] o cualquiera de sus [aliases] y se ubica por su [address]. */
+class MyPlace(val name: String, val address: String, val aliases: List<String> = emptyList()) {
+    fun matches(query: String): Boolean {
+        val q = query.trim().lowercase(Locale.ROOT)
+        if (q.length < 3) return false
+        return (listOf(name) + aliases).any { it.lowercase(Locale.ROOT).let { n -> n.contains(q) || q.contains(n) } }
+    }
 }
 
 private val PLACE_KINDS = mapOf(
