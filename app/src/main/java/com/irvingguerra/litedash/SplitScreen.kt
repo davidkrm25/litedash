@@ -118,6 +118,11 @@ object SplitScreen {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return false
         if (context.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
         if (!isMapOrMusic(context, d, pkg)) return false
+        // Sin el permiso de mostrar sobre otras apps el panel no sale: se pide primero (y Mapas no se abre encima de esa pantalla).
+        if (!d.prefs.freeformDock && !SidePanel.allowed(context)) {
+            SidePanel.askPermission(context)
+            return true
+        }
         val screen = context.resources.displayMetrics
         val width = screen.widthPixels * d.prefs.freeformWidth.coerceIn(30, 70) / 100
         val rect = if (d.prefs.splitCarLeft) Rect(screen.widthPixels - width, 0, screen.widthPixels, screen.heightPixels) else Rect(0, 0, width, screen.heightPixels)
