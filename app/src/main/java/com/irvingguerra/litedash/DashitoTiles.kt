@@ -81,7 +81,7 @@ fun TripStatTile(d: Dependencies, kind: String) {
     if (kind == TripStatKinds.RESET) {
         Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
             Box(
-                Modifier.height(48.dp).fillMaxWidth().clip(CircleShape).border(1.dp, c.accent.copy(alpha = 0.7f), CircleShape).clickable { trip.reset() }.padding(horizontal = 20.dp),
+                Modifier.height(48.dp).clip(CircleShape).border(1.dp, c.accent.copy(alpha = 0.7f), CircleShape).clickable { trip.reset() }.padding(horizontal = 20.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -130,7 +130,7 @@ internal fun StatBox(
     val c = LocalColors.current
     Card(Modifier.fillMaxSize(), onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 10.dp)) {
-            val size = fitFont(sizeFrom ?: value, maxWidth * 0.55f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
+            val size = fitFont(sizeFrom ?: value, (maxWidth - 54.dp) * 0.93f, maxHeight, 0.34f, min = 22f, max = 56f, extraChars = 1.5f)
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 26.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {

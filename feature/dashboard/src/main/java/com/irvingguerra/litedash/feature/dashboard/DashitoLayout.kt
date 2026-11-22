@@ -4,7 +4,7 @@ package com.irvingguerra.litedash.feature.dashboard
 const val FACTORY_PAGES = 6
 
 /** Sube cuando cambia el diseño de fábrica: al abrir la app con un número menor se pone una vez. */
-const val FACTORY_VERSION = 14
+const val FACTORY_VERSION = 15
 
 /** Qué trae cada tarjeta del viaje (van en [Tile.data] de [TileTypes.TRIP_STAT]). */
 object TripStatKinds {
@@ -210,16 +210,16 @@ fun factoryPages(c: Grid, limits: (String) -> SizeLimits = { SizeLimits(1, 1) },
             bands(
                 listOf(
                     Band(
-                        0.26,
+                        0.245,
                         listOf(stat(TripStatKinds.DISTANCE, 0), stat(TripStatKinds.AVERAGE, 2), stat(TripStatKinds.CONSUMPTION, 4), note),
                         keep = 1,
                     ),
                     Band(
-                        0.26,
+                        0.245,
                         listOf(stat(TripStatKinds.TIME, 1), stat(TripStatKinds.MAX, 3), stat(TripStatKinds.FUEL_USED, 5), reset),
                         keep = 1,
                     ),
-                    Band(0.48, listOf(Item(TileTypes.MAP, data = "dashito=1")), keep = 0),
+                    Band(0.51, listOf(Item(TileTypes.MAP, data = "dashito=1")), keep = 0),
                 ),
             )
         },
