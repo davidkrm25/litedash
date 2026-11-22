@@ -56,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
@@ -834,7 +835,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                                 // Las pestañas de arriba ya dicen en qué página estás: sin puntitos abajo (más alto para los widgets).
                                 // La pantalla Música o el mapa en grande: llenan el tablero (la barra se queda para cambiar entre ellos).
                                 val shownBig = expandedShown
-                                if (shownBig != null) ExpandedLayer(expandedFrom?.let { tileBounds[it.id] }, { expandProgress.value }) {
+                                if (shownBig != null) ExpandedLayer(expandedFrom?.let { tileBounds[it.id] }, { expandProgress.value }, onOutside = { expanded = null }) {
                                     val close = { expanded = null }
                                     when (shownBig) {
                                         Expanded.MEDIA -> MediaScreen(
@@ -1265,9 +1266,11 @@ private const val SHRINK_MS = 260
  * toques: nada de lo de abajo se toca por accidente.
  */
 @Composable
-private fun ExpandedLayer(from: Rect?, progress: () -> Float, content: @Composable () -> Unit) {
+private fun ExpandedLayer(from: Rect?, progress: () -> Float, onOutside: () -> Unit, content: @Composable () -> Unit) {
     var area by remember { mutableStateOf(Rect.Zero) }
     val shape = RoundedCornerShape(Radius.card)
+    // Un borde oscuro alrededor de la tarjeta: tocarlo la cierra (con el auto en marcha no hay que buscar la X).
+    val margin = if (isShortScreen()) 16.dp else 32.dp
     Box(
         Modifier
             .fillMaxSize()
@@ -1287,10 +1290,12 @@ private fun ExpandedLayer(from: Rect?, progress: () -> Float, content: @Composab
                     scaleY = scale
                 }
                 alpha = (t * 2.5f).coerceAtMost(1f)
-                this.shape = shape
-                clip = true
             }
-            .canvas()
-            .blockTouches(),
-    ) { CompositionLocalProvider(LocalCardLook provides globalLook(LocalCardLook.current)) { FitShort(SHORT_EXPANDED_HEIGHT, content) } }
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable(interactionSource = null, indication = null, onClick = onOutside),
+    ) {
+        Box(Modifier.fillMaxSize().padding(margin).clip(shape).canvas().blockTouches()) {
+            CompositionLocalProvider(LocalCardLook provides globalLook(LocalCardLook.current)) { FitShort(SHORT_EXPANDED_HEIGHT, content) }
+        }
+    }
 }

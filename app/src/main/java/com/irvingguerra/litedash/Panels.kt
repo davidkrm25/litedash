@@ -101,7 +101,8 @@ internal fun PanelScaffold(
             .safeDrawingPadding()
             .padding(horizontal = 24.dp),
     ) {
-        Row(Modifier.fillMaxWidth().height(72.dp), verticalAlignment = Alignment.CenterVertically) {
+        // Tocar el espacio vacío de la barra de título también cierra (la X queda lejos con el auto en marcha).
+        Row(Modifier.fillMaxWidth().height(72.dp).clickable(interactionSource = null, indication = null, onClick = close), verticalAlignment = Alignment.CenterVertically) {
             if (header == null) Label(title, Typography.title, maxLines = 1, modifier = Modifier.weight(1f))
             else {
                 Label(title, Typography.title, maxLines = 1)
