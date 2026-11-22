@@ -407,7 +407,12 @@ private fun NoPermission(repo: MusicRepository, icon: ImageVector, title: String
                         .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(com.irvingguerra.litedash.core.ui.AccentStart, c.accent)))
                         .clickable { repo.requestPermission() },
                     contentAlignment = Alignment.Center,
-                ) { Label(stringResource(R.string.music_enable_control), Typography.subtitle, Color.White, maxLines = 1) }
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Icon(Icons.gear, Color.White, 22.dp)
+                        Label(stringResource(R.string.music_enable_control), Typography.subtitle, Color.White, maxLines = 1)
+                    }
+                }
             }
         }
     }

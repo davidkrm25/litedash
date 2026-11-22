@@ -69,7 +69,7 @@ fun SpeedometerTile(d: Dependencies, look: GaugeLook, dashito: Boolean = false, 
     val floorFront: (@Composable (Modifier) -> Unit)? = front?.let { car -> { m -> MovingFloor(kmh ?: 0f, c.accent, m, car) } }
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         Box(Modifier.weight(1f).fillMaxWidth()) {
-            SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, floorFront, frontScale = 0.9f)
+            SpeedGaugeCard((kmh ?: 0f).toMiles(miles), miles, tag, look, d.prefs.carColor, floorFront, frontScale = 0.68f)
             Label(
                 stringResource(R.string.dashito_title).uppercase(), Typography.subtitle.copy(letterSpacing = 9.sp), c.text.copy(alpha = 0.85f), 1,
                 Modifier.align(Alignment.TopCenter).padding(top = 8.dp),

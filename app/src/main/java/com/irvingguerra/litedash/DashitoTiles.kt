@@ -134,7 +134,7 @@ internal fun StatBox(
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 26.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
-                    Label(name.uppercase(currentLocale()), Typography.label.copy(fontSize = 11.sp, letterSpacing = 0.4.sp), c.textMuted, 1)
+                    Label(name.uppercase(currentLocale()), Typography.label.copy(fontSize = 10.5.sp, letterSpacing = 0.2.sp), c.textMuted, 1)
                     Row(verticalAlignment = Alignment.Bottom) {
                         Label(value, Typography.clock.copy(fontSize = size.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), maxLines = 1, modifier = Modifier.weight(1f, fill = false))
                         if (unit.isNotEmpty()) Label(unit, Typography.body, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 4.dp))
