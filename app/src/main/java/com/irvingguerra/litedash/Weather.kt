@@ -134,6 +134,36 @@ fun skyOf(code: Int) = when (code) {
     else -> Sky.CLOUDY
 }
 
+/** El tiempo con todo su detalle (código WMO de Open-Meteo): cada uno trae su propio icono, color y texto. */
+enum class Kind {
+    CLEAR, MOSTLY_CLEAR, PARTLY, CLOUDY, FOG, DRIZZLE, FREEZING_DRIZZLE, LIGHT_RAIN, RAIN, HEAVY_RAIN, FREEZING_RAIN,
+    SHOWERS, HEAVY_SHOWERS, LIGHT_SNOW, SNOW, HEAVY_SNOW, SNOW_GRAINS, SNOW_SHOWERS, STORM, HAIL,
+}
+
+fun kindOf(code: Int) = when (code) {
+    0 -> Kind.CLEAR
+    1 -> Kind.MOSTLY_CLEAR
+    2 -> Kind.PARTLY
+    3 -> Kind.CLOUDY
+    45, 48 -> Kind.FOG
+    51, 53, 55 -> Kind.DRIZZLE
+    56, 57 -> Kind.FREEZING_DRIZZLE
+    61 -> Kind.LIGHT_RAIN
+    63 -> Kind.RAIN
+    65 -> Kind.HEAVY_RAIN
+    66, 67 -> Kind.FREEZING_RAIN
+    80, 81 -> Kind.SHOWERS
+    82 -> Kind.HEAVY_SHOWERS
+    71 -> Kind.LIGHT_SNOW
+    73 -> Kind.SNOW
+    75 -> Kind.HEAVY_SNOW
+    77 -> Kind.SNOW_GRAINS
+    85, 86 -> Kind.SNOW_SHOWERS
+    95 -> Kind.STORM
+    96, 99 -> Kind.HAIL
+    else -> Kind.CLOUDY
+}
+
 /**
  * Clima con Open-Meteo: gratis, sin clave ni anuncios, y solo con la ubicación
  * aproximada. Nada corre en segundo plano: mientras se ve el inicio se pide si el

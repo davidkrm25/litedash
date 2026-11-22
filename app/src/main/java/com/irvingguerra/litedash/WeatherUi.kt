@@ -11,6 +11,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -60,8 +62,56 @@ fun iconOf(sky: Sky, day: Boolean) = when (sky) {
     Sky.SNOW -> Icons.snow
 }
 
+/** El icono que dice lo que de verdad hay en el cielo (llovizna, lluvia fuerte, nieve, granizo…), de día o de noche. */
+fun iconOf(code: Int, day: Boolean) = when (kindOf(code)) {
+    Kind.CLEAR -> if (day) Icons.sun else Icons.moon
+    Kind.MOSTLY_CLEAR -> if (day) Icons.mostlySunny else Icons.moon
+    Kind.PARTLY -> if (day) Icons.partlyCloudy else Icons.moonCloud
+    Kind.CLOUDY -> Icons.cloud
+    Kind.FOG -> Icons.fog
+    Kind.DRIZZLE -> Icons.drizzle
+    Kind.FREEZING_DRIZZLE, Kind.FREEZING_RAIN -> Icons.sleet
+    Kind.LIGHT_RAIN -> Icons.lightRain
+    Kind.RAIN, Kind.SHOWERS -> Icons.rain
+    Kind.HEAVY_RAIN, Kind.HEAVY_SHOWERS -> Icons.heavyRain
+    Kind.LIGHT_SNOW, Kind.SNOW_GRAINS -> Icons.snowGrains
+    Kind.SNOW, Kind.HEAVY_SNOW, Kind.SNOW_SHOWERS -> Icons.snow
+    Kind.STORM -> Icons.storm
+    Kind.HAIL -> Icons.hail
+}
+
+/** El color de ese icono: sol ámbar, lluvia azul, nieve celeste, tormenta violeta; de noche, tenue. */
+fun weatherColor(code: Int, day: Boolean, c: Colors): Color = when (kindOf(code)) {
+    Kind.CLEAR, Kind.MOSTLY_CLEAR, Kind.PARTLY -> if (day) Color(0xFFFFC83D) else Color(0xFFB8C4E8)
+    Kind.CLOUDY, Kind.FOG -> c.textMuted
+    Kind.DRIZZLE, Kind.FREEZING_DRIZZLE, Kind.LIGHT_RAIN, Kind.RAIN, Kind.HEAVY_RAIN, Kind.FREEZING_RAIN, Kind.SHOWERS, Kind.HEAVY_SHOWERS -> Color(0xFF4FC3F7)
+    Kind.LIGHT_SNOW, Kind.SNOW, Kind.HEAVY_SNOW, Kind.SNOW_GRAINS, Kind.SNOW_SHOWERS -> Color(0xFF9FD8FF)
+    Kind.STORM, Kind.HAIL -> Color(0xFF7E8CFF)
+}
+
 /** La descripción más fina (por el código del cielo): despejado, mayormente despejado, parcialmente nublado, nublado… */
-fun textOfCode(code: Int) = if (code == 1) R.string.weather_mostly_clear else textOf(skyOf(code))
+fun textOfCode(code: Int, day: Boolean = true) = when (kindOf(code)) {
+    Kind.CLEAR -> R.string.weather_clear
+    Kind.MOSTLY_CLEAR -> if (day) R.string.weather_mostly_clear else R.string.weather_mostly_clear_night
+    Kind.PARTLY -> R.string.weather_partly
+    Kind.CLOUDY -> R.string.weather_cloudy
+    Kind.FOG -> R.string.weather_fog
+    Kind.DRIZZLE -> R.string.weather_drizzle
+    Kind.FREEZING_DRIZZLE -> R.string.weather_freezing_drizzle
+    Kind.LIGHT_RAIN -> R.string.weather_light_rain
+    Kind.RAIN -> R.string.weather_rain
+    Kind.HEAVY_RAIN -> R.string.weather_heavy_rain
+    Kind.FREEZING_RAIN -> R.string.weather_freezing_rain
+    Kind.SHOWERS -> R.string.weather_showers
+    Kind.HEAVY_SHOWERS -> R.string.weather_heavy_showers
+    Kind.LIGHT_SNOW -> R.string.weather_light_snow
+    Kind.SNOW -> R.string.weather_snow
+    Kind.HEAVY_SNOW -> R.string.weather_heavy_snow
+    Kind.SNOW_GRAINS -> R.string.weather_snow_grains
+    Kind.SNOW_SHOWERS -> R.string.weather_snow_showers
+    Kind.STORM -> R.string.weather_storm
+    Kind.HAIL -> R.string.weather_hail
+}
 
 /** El color propio de cada cielo (sol amarillo, lluvia azul…) para la vista completa. */
 fun skyColor(sky: Sky, day: Boolean, c: Colors): Color = when (sky) {
@@ -162,7 +212,7 @@ fun WeatherChip(w: Weather) {
     val temperature = w.temperature ?: return
     val c = LocalColors.current
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(iconOf(skyOf(w.code), w.day), c.accent, 22.dp)
+        Icon(iconOf(w.code, w.day), c.accent, 22.dp)
         Label(stringResource(R.string.weather_degrees, temperature), Typography.subtitle, maxLines = 1, modifier = Modifier.padding(start = 6.dp))
     }
 }
@@ -184,7 +234,7 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
     val today = w.today
     val big = w.temperature?.let { stringResource(R.string.weather_degrees, it) }
         ?: stringResource(R.string.weather_range, today!!.max, today.min)
-    val skyText = stringResource(textOfCode(w.code))
+    val skyText = stringResource(textOfCode(w.code, w.day))
     // La máxima y la mínima van abajo solo si arriba va la temperatura de ahora (si no, ya están en grande).
     val detail = if (range && today != null && w.temperature != null) {
         stringResource(R.string.two_parts, skyText, stringResource(R.string.weather_range, today.max, today.min))
@@ -219,13 +269,13 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
             if (!tall) {
                 // Una fila: ícono, temperatura y cómo está; si es ancha, los próximos días.
                 Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Icon(iconOf(sky, w.day), c.accent, 34.dp)
+                    Icon(iconOf(w.code, w.day), c.accent, 34.dp)
                     Column(Modifier.weight(1f)) {
                         Label(big, Typography.clock.copy(fontSize = fitFont(big, width / 3, height, 0.5f, max = 40f).sp), maxLines = 1)
                         Label(detail, Typography.small, c.textMuted, maxLines = 1)
                     }
                     // Los días solo si caben a lo alto (si no, salían cortados).
-                    if (width > 340.dp && height > 64.dp) for (d in nextDays) DayColumn(dayName(d.date), iconOf(skyOf(d.code), true), stringResource(R.string.weather_degrees, d.max))
+                    if (width > 340.dp && height > 64.dp) for (d in nextDays) DayColumn(dayName(d.date), iconOf(d.code, true), stringResource(R.string.weather_degrees, d.max))
                 }
                 return@BoxWithConstraints
             }
@@ -235,7 +285,7 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
                         Label(stringResource(R.string.tile_weather).uppercase(locale), Typography.label, c.textMuted, maxLines = 1)
                         Label(big, Typography.clock.copy(fontSize = fitFont(big, width * 0.6f, height, 0.32f, min = 28f, max = 72f).sp), maxLines = 1)
                     }
-                    Icon(iconOf(sky, w.day), c.accent, (height * 0.22f).coerceIn(32.dp, 56.dp))
+                    Icon(iconOf(w.code, w.day), c.accent, (height * 0.22f).coerceIn(32.dp, 56.dp))
                 }
                 // La leyenda del cielo ("Mayormente soleado") siempre a la vista, en su propia línea.
                 Label(skyText, Typography.body, c.text, maxLines = 1)
@@ -247,7 +297,7 @@ fun WeatherTile(repo: WeatherRepository, days: Boolean = true, range: Boolean = 
                 if (fit > 0 && height > 150.dp) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     for (d in nextDays.take(fit)) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Label(dayName(d.date), Typography.small, c.textMuted, maxLines = 1)
-                        Icon(iconOf(skyOf(d.code), true), c.text, 18.dp)
+                        Icon(iconOf(d.code, true), c.text, 18.dp)
                         Label(stringResource(R.string.weather_degrees, d.max), Typography.small, maxLines = 1)
                     }
                 }
@@ -300,7 +350,7 @@ private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean,
         val days = w.next.isNotEmpty() && h > 380.dp
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(if (h > 520.dp) 10.dp else 4.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Icon(iconOf(sky, w.day), skyColor(sky, w.day, c), if (tight) 48.dp else 64.dp)
+                Icon(iconOf(w.code, w.day), weatherColor(w.code, w.day, c), if (tight) 48.dp else 64.dp)
                 Label(big, Typography.clock.copy(fontSize = if (tight) 48.sp else 64.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Light), maxLines = 1, modifier = Modifier.weight(1f))
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp)).clickable(onClick = onRefresh).padding(8.dp)) {
                     Icon(Icons.refresh, c.textMuted.copy(alpha = 0.7f), 24.dp)
@@ -349,8 +399,7 @@ private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean,
                         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         Label(x.time, Typography.label, c.textMuted, maxLines = 1)
-                        val s = skyOf(x.code)
-                        Icon(iconOf(s, x.day), skyColor(s, x.day, c), 26.dp)
+                        Icon(iconOf(x.code, x.day), weatherColor(x.code, x.day, c), 26.dp)
                         Label(stringResource(R.string.weather_degrees, x.temp), Typography.subtitle, maxLines = 1)
                     }
                 }
@@ -360,11 +409,10 @@ private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean,
                 val low = w.next.minOf { it.min }
                 val high = w.next.maxOf { it.max }
                 val span = (high - low).coerceAtLeast(1).toFloat()
-                for (d in w.next.take(3)) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Label(dayName(d.date).trimEnd('.'), Typography.subtitle, maxLines = 1, modifier = Modifier.width(54.dp))
-                    val s = skyOf(d.code)
-                    Icon(iconOf(s, true), skyColor(s, true, c), 26.dp)
-                    Label(d.rain?.let { stringResource(R.string.weather_percent_spaced, it) }.orEmpty(), Typography.body, skyColor(Sky.RAIN, true, c), maxLines = 1, modifier = Modifier.width(52.dp))
+                for (d in w.next.take(3)) Row(Modifier.fillMaxWidth().weight(1f, fill = true).heightIn(max = 64.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Label(dayName(d.date).trimEnd('.'), Typography.subtitle.copy(fontWeight = FontWeight.Bold), maxLines = 1, modifier = Modifier.width(54.dp))
+                    Icon(iconOf(d.code, true), weatherColor(d.code, true, c), 26.dp)
+                    Label(d.rain?.let { stringResource(R.string.weather_percent_spaced, it) }.orEmpty(), Typography.small, skyColor(Sky.RAIN, true, c), maxLines = 1, modifier = Modifier.width(52.dp))
                     Label(stringResource(R.string.weather_degrees, d.min), Typography.body, c.textMuted, maxLines = 1)
                     Box(Modifier.weight(1f).height(8.dp).clip(androidx.compose.foundation.shape.CircleShape).background(c.text.copy(alpha = 0.08f))) {
                         val from = (d.min - low) / span
@@ -378,7 +426,7 @@ private fun RichWeather(w: Weather, m: WeatherMore, big: String, miles: Boolean,
                             Spacer(Modifier.weight((1f - to).coerceAtLeast(0.0001f)))
                         }
                     }
-                    Label(stringResource(R.string.weather_degrees, d.max), Typography.subtitle, maxLines = 1)
+                    Label(stringResource(R.string.weather_degrees, d.max), Typography.subtitle.copy(fontWeight = FontWeight.Bold), maxLines = 1)
                 }
             }
         }
