@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.LaunchedEffect
 import com.irvingguerra.litedash.feature.dashboard.FuelParts
 import androidx.compose.runtime.getValue
@@ -483,8 +484,8 @@ internal fun FuelDialogs(d: Dependencies, which: FuelDialog, onClose: () -> Unit
             confirmEnabled = liters.isBlank() || litersValue != null,
             onConfirm = { fuel.fillUp(litersValue, number(price)); saveStation(); onClose() }, onCancel = onClose,
         ) {
-            NumberField(liters, { liters = it }, stringResource(R.string.fuel_liters_optional), stringResource(R.string.fuel_unit_l))
-            NumberField(price, { price = it }, stringResource(R.string.fuel_price_optional), "$/L")
+            NumberField(liters, { liters = it }, stringResource(R.string.fuel_liters_optional), stringResource(R.string.fuel_unit_l), focus = true)
+            NumberField(price, { price = it }, stringResource(R.string.fuel_price_optional), "$/L", last = true)
             RegisterStation()
         }
         FuelDialog.ADD -> FuelDialogFrame(
@@ -492,8 +493,8 @@ internal fun FuelDialogs(d: Dependencies, which: FuelDialog, onClose: () -> Unit
             confirmEnabled = litersValue != null,
             onConfirm = { fuel.addLiters(litersValue ?: return@FuelDialogFrame, number(price)); saveStation(); onClose() }, onCancel = onClose,
         ) {
-            NumberField(liters, { liters = it }, stringResource(R.string.fuel_liters), stringResource(R.string.fuel_unit_l))
-            NumberField(price, { price = it }, stringResource(R.string.fuel_price_optional), "$/L")
+            NumberField(liters, { liters = it }, stringResource(R.string.fuel_liters), stringResource(R.string.fuel_unit_l), focus = true)
+            NumberField(price, { price = it }, stringResource(R.string.fuel_price_optional), "$/L", last = true)
             RegisterStation()
         }
         FuelDialog.TANK -> FuelDialogFrame(
@@ -501,8 +502,8 @@ internal fun FuelDialogs(d: Dependencies, which: FuelDialog, onClose: () -> Unit
             confirmEnabled = number(capacity) != null && number(assumed) != null,
             onConfirm = { fuel.setTank(number(capacity) ?: return@FuelDialogFrame, number(assumed) ?: return@FuelDialogFrame); onClose() }, onCancel = onClose,
         ) {
-            NumberField(capacity, { capacity = it }, stringResource(R.string.fuel_capacity), stringResource(R.string.fuel_unit_l))
-            NumberField(assumed, { assumed = it }, stringResource(R.string.fuel_assumed_kml), stringResource(R.string.fuel_unit_kml))
+            NumberField(capacity, { capacity = it }, stringResource(R.string.fuel_capacity), stringResource(R.string.fuel_unit_l), focus = true)
+            NumberField(assumed, { assumed = it }, stringResource(R.string.fuel_assumed_kml), stringResource(R.string.fuel_unit_kml), last = true)
         }
     }
 }
@@ -514,12 +515,23 @@ private fun trim(v: Double) = if (v % 1.0 == 0.0) v.toInt().toString() else Stri
 private fun number(text: String): Double? = text.trim().replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 && it.isFinite() }
 
 @Composable
-private fun NumberField(value: String, onChange: (String) -> Unit, label: String, unit: String) {
+private fun NumberField(value: String, onChange: (String) -> Unit, label: String, unit: String, last: Boolean = false, focus: Boolean = false) {
     val c = LocalColors.current
+    val requester = remember { androidx.compose.ui.focus.FocusRequester() }
+    if (focus) LaunchedEffect(Unit) { runCatching { requester.requestFocus() } }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Label(label, Typography.small, c.textMuted, 1)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            TextInput(value, { onChange(it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' }.take(8)) }, "0", Modifier.weight(1f))
+            TextInput(
+                value, { onChange(it.filter { ch -> ch.isDigit() || ch == '.' || ch == ',' }.take(8)) }, "0", Modifier.weight(1f),
+                keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                    keyboardType = androidx.compose.ui.text.input.KeyboardType.Decimal,
+                    imeAction = if (last) androidx.compose.ui.text.input.ImeAction.Done else androidx.compose.ui.text.input.ImeAction.Next,
+                ),
+                fieldModifier = Modifier.focusRequester(requester),
+                textStyle = Typography.title.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+                height = 60.dp,
+            )
             Label(unit, Typography.body, c.textMuted, 1, Modifier.padding(start = 12.dp).widthIn(min = 28.dp))
         }
     }
@@ -539,15 +551,16 @@ private fun FuelDialogFrame(
     BackHandler(onBack = onCancel)
     Box(
         Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.55f)).pointerInput(Unit) { detectTapGestures { } },
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.TopCenter,
     ) {
+        // Arriba y compacto: con el teclado abierto (tapa la mitad de abajo) los campos y Guardar quedan a la vista.
         Column(
-            Modifier.widthIn(max = 460.dp).fillMaxWidth().padding(24.dp).clip(RoundedCornerShape(24.dp)).background(c.surface)
-                .verticalScroll(rememberScrollState()).padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            Modifier.widthIn(max = 460.dp).fillMaxWidth().padding(8.dp).clip(RoundedCornerShape(24.dp)).background(c.surface)
+                .verticalScroll(rememberScrollState()).padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Label(title, Typography.title)
-            Label(help, Typography.body, c.textMuted)
+            Label(help, Typography.small, c.textMuted)
             content()
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
                 Button(stringResource(R.string.cancel), onCancel)

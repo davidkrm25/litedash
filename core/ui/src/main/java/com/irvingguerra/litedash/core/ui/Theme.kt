@@ -386,11 +386,22 @@ fun Switch(checked: Boolean, modifier: Modifier = Modifier) {
  * de un panel (#28: así la lista de abajo gana un renglón).
  */
 @Composable
-fun TextInput(value: String, onChange: (String) -> Unit, hint: String, modifier: Modifier = Modifier, icon: Boolean = false, compact: Boolean = false) {
+fun TextInput(
+    value: String,
+    onChange: (String) -> Unit,
+    hint: String,
+    modifier: Modifier = Modifier,
+    icon: Boolean = false,
+    compact: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+    fieldModifier: Modifier = Modifier,
+    textStyle: TextStyle = Typography.body,
+    height: androidx.compose.ui.unit.Dp = if (compact) 44.dp else 56.dp,
+) {
     val c = LocalColors.current
     val shape = if (compact) CircleShape else RoundedCornerShape(Radius.card)
     Row(
-        modifier.height(if (compact) 44.dp else 56.dp).clip(shape).background(c.surface).border(1.dp, c.line, shape)
+        modifier.height(height).clip(shape).background(c.surface).border(1.dp, c.line, shape)
             .padding(horizontal = if (compact) 16.dp else 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -399,15 +410,15 @@ fun TextInput(value: String, onChange: (String) -> Unit, hint: String, modifier:
             Spacer(Modifier.width(if (compact) 10.dp else 12.dp))
         }
         Box(Modifier.weight(1f)) {
-            if (value.isEmpty()) Label(hint, Typography.body, c.textMuted, maxLines = 1)
+            if (value.isEmpty()) Label(hint, textStyle, c.textMuted, maxLines = 1)
             BasicTextField(
                 value,
                 onChange,
-                Modifier.fillMaxWidth(),
-                textStyle = Typography.body.copy(color = c.text),
+                Modifier.fillMaxWidth().then(fieldModifier),
+                textStyle = textStyle.copy(color = c.text),
                 singleLine = true,
                 cursorBrush = SolidColor(c.accent),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardOptions = keyboardOptions,
             )
         }
     }
