@@ -782,6 +782,7 @@ fun Home(d: Dependencies, revision: Int, homePressed: Int) {
                                 pages = d.dashboard,
                                 obdOn = d.obdIfCreated()?.state == ObdState.ON,
                                 obdDemo = d.obdIfCreated()?.simulated == true,
+                                trip = d.trip,
                                 onSettings = { panel = Panel.Settings },
                             )
                             // Sin barra abajo (va al costado o está oculta) el tablero lleva su propio aire inferior
@@ -1136,6 +1137,7 @@ private fun TopBar(
     pages: DashboardState,
     obdOn: Boolean = false,
     obdDemo: Boolean = false,
+    trip: TripRepository? = null,
     onSettings: () -> Unit = {},
 ) {
     val c = LocalColors.current
@@ -1183,7 +1185,7 @@ private fun TopBar(
             // Con varias páginas: el encabezado con las pestañas (OBD a la izquierda, hora y fecha a la derecha).
             val clock = rememberClock()
             ObdPill(obdOn, obdDemo)
-            StatusIcons()
+            StatusIcons(trip)
             PageTabs(pages, onSettings, Modifier.weight(1f))
             val short = isShortScreen()
             Column(horizontalAlignment = Alignment.End) {
@@ -1199,7 +1201,7 @@ private fun TopBar(
                 Label(clock.date, Typography.body, c.textMuted, maxLines = 1)
             }
             WeatherChip(weather)
-            StatusIcons()
+            StatusIcons(trip)
             Label(clock.full, Typography.subtitle, maxLines = 1)
         }
     }

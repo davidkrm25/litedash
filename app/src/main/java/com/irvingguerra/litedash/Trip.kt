@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -121,6 +122,9 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
         private set
     /** La última posición (la lee el mapa); se queda aunque el GPS se apague. */
     var position by mutableStateOf<Location?>(null)
+        private set
+    /** Cuándo (reloj de arranque) llegó el último punto del GPS de verdad (no de la red); 0 = ninguno. Lo lee el ícono de GPS. */
+    var gpsFixAt by mutableLongStateOf(0L)
         private set
     /** La velocidad más alta (km/h) del viaje en curso; vuelve a cero con [reset]. */
     var maxKmh by mutableStateOf(0f)
@@ -280,6 +284,7 @@ class TripRepository(private val context: Context, private val bus: VehicleBus) 
             return
         }
         lastGpsAt = now
+        gpsFixAt = now
         position = l
         speedKmh = if (l.hasSpeed()) l.speed * 3.6f else null
         bus.publish(Signal.SPEED, speedKmh, Source.GPS)

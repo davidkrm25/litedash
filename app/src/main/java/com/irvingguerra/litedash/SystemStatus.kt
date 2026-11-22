@@ -15,6 +15,10 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.SystemClock
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.runtime.mutableLongStateOf
 import android.view.KeyEvent
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.shadow
@@ -336,17 +340,17 @@ internal fun volumeKey(direction: Int, byKey: Boolean, before: Int, after: Int):
 private const val VOLUME_CHANGED = "android.media.VOLUME_CHANGED_ACTION"
 
 /**
- * Wi-Fi o datos, audio Bluetooth conectado y ubicación encendida, en la barra de arriba.
- * Escucha al sistema solo mientras se ve (nada de revisar cada rato) y sin
- * permisos: el Bluetooth se nota por el audio conectado (tu celular, el estéreo).
+ * Bluetooth, GPS y Wi-Fi (o datos) en la barra de arriba: siempre a la vista; encendidos en el color de acento y
+ * apagados atenuados y con una raya. Bluetooth = hay audio conectado (tu celular, el estéreo); GPS = llegó un punto
+ * del GPS hace poco (no basta con tener la ubicación activada); Wi-Fi = hay red. Escucha al sistema solo mientras
+ * se ve y sin permisos de más.
  */
 @Composable
-fun StatusIcons() {
+fun StatusIcons(trip: TripRepository? = null) {
     val c = LocalColors.current
     val context = LocalContext.current
     var network by remember { mutableStateOf<Boolean?>(null) } // true Wi-Fi, false datos, null nada
     var bluetooth by remember { mutableStateOf(false) }
-    var location by remember { mutableStateOf(false) }
     // Con el inicio tapado (estacionado, el auto en grande) no escucha: al destaparse lee todo de nuevo.
     val covered = LocalHomeCovered.current
     LifecycleStartEffect(covered) {
@@ -389,30 +393,44 @@ fun StatusIcons() {
         audio.registerAudioDeviceCallback(audioCallback, null)
         checkAudio()
 
-        val locations = context.getSystemService(LocationManager::class.java)
-        fun checkLocation() {
-            location = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) locations.isLocationEnabled
-            else locations.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        }
-        val locationReceiver = object : BroadcastReceiver() {
-            override fun onReceive(c: Context, i: Intent) = checkLocation()
-        }
-        context.listen(locationReceiver, LocationManager.PROVIDERS_CHANGED_ACTION)
-        checkLocation()
-
         onStopOrDispose {
             runCatching { connectivity.unregisterNetworkCallback(netCallback) }
             audio.unregisterAudioDeviceCallback(audioCallback)
-            context.unregisterReceiver(locationReceiver)
         }
     }
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (bluetooth) Icon(Icons.bluetooth, c.textMuted, 20.dp)
-        if (location) Icon(Icons.location, c.textMuted, 20.dp)
-        when (network) {
-            true -> Icon(Icons.wifi, c.textMuted, 20.dp)
-            false -> Icon(Icons.signal, c.textMuted, 20.dp)
-            null -> Unit
+    // El GPS cuenta la señal mientras el encabezado se ve; "ahora" se actualiza solo para que se apague al perderla.
+    DisposableEffect(trip) {
+        trip?.acquire()
+        onDispose { trip?.release() }
+    }
+    var now by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    LaunchedEffect(covered) {
+        while (!covered) {
+            now = SystemClock.elapsedRealtime()
+            delay(2_000)
         }
     }
+    val gps = trip != null && trip.gpsFixAt != 0L && now - trip.gpsFixAt < GPS_SIGNAL_MS
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        StatusIcon(Icons.bluetooth, bluetooth)
+        StatusIcon(Icons.location, gps)
+        StatusIcon(if (network == false) Icons.signal else Icons.wifi, network != null)
+    }
+}
+
+/** Cuánto tiempo sin puntos del GPS para dejar de decir que hay señal. */
+private const val GPS_SIGNAL_MS = 10_000L
+
+/** Un ícono del estado: encendido con el acento; apagado atenuado y con una raya cruzada. */
+@Composable
+private fun StatusIcon(icon: ImageVector, on: Boolean) {
+    val c = LocalColors.current
+    val tint = if (on) c.accent else c.textMuted.copy(alpha = 0.45f)
+    Box(
+        Modifier.size(22.dp).drawWithContent {
+            drawContent()
+            if (!on) drawLine(tint, Offset(size.width * 0.12f, size.height * 0.88f), Offset(size.width * 0.88f, size.height * 0.12f), 2.dp.toPx(), StrokeCap.Round)
+        },
+        contentAlignment = Alignment.Center,
+    ) { Icon(icon, tint, 20.dp) }
 }
