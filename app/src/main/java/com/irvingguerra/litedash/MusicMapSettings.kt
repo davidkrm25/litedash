@@ -242,7 +242,7 @@ fun MapSettings(d: Dependencies) {
     val seen = PhoneLocationService.lastReceivedAt
     val failed = PhoneLocationService.state?.takeIf { it.isNotEmpty() }
     val status = when {
-        !PhoneLocationService.running -> stringResource(R.string.phone_gps_stopped)
+        !PhoneLocationService.running -> stringResource(R.string.phone_gps_stopped) + (failed?.let { " ($it)" } ?: " (sin datos del sistema)")
         seen == 0L || tick - seen > 15_000L -> stringResource(R.string.phone_gps_nodata)
         failed != null -> stringResource(R.string.phone_gps_failed, failed)
         else -> stringResource(R.string.phone_gps_ok, ((tick - seen) / 1000).toInt())

@@ -25,7 +25,13 @@ class PhoneLocationService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        goForeground()
+        state = "arrancando"
+        try {
+            goForeground()
+        } catch (e: Exception) {
+            // Sin la notificación fija el sistema lo cierra, pero se intenta escuchar de todos modos y se avisa por qué.
+            state = "notificación: ${e.javaClass.simpleName} ${e.message}"
+        }
         if (socket == null) listen()
         return START_STICKY
     }
@@ -47,11 +53,12 @@ class PhoneLocationService : Service() {
             val s = try {
                 DatagramSocket(null).apply { reuseAddress = true; bind(InetSocketAddress(PHONE_GPS_PORT)) }
             } catch (e: Exception) {
-                state = "puerto: ${e.message}"
+                state = "puerto ${PHONE_GPS_PORT}: ${e.javaClass.simpleName} ${e.message}"
                 return@thread
             }
             socket = s
             running = true
+            state = null
             val buffer = ByteArray(256)
             while (!s.isClosed) {
                 try {
@@ -94,8 +101,9 @@ class PhoneLocationService : Service() {
             val intent = Intent(context, PhoneLocationService::class.java)
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(intent) else context.startService(intent)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 // Sin permiso para arrancar en segundo plano: se vuelve a intentar al abrir la app.
+                state = "no arrancó: ${e.javaClass.simpleName} ${e.message}"
             }
         }
 
