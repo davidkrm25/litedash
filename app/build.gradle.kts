@@ -22,6 +22,7 @@ val releaseNotesEn: String = changelogSection("CHANGELOG.en.md")
 val tomtomKey: String = rootProject.file("local.properties").takeIf { it.exists() }?.let { f ->
     Properties().also { p -> f.inputStream().use { p.load(it) } }.getProperty("tomtom.key")
 }.orEmpty().trim()
+val kalelBuild: Int = rootProject.file("kalel-build.txt").takeIf { it.exists() }?.readText()?.trim()?.toIntOrNull() ?: 99
 fun buildConfigText(text: String) = "\"" + text.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n") + "\""
 
 /**
@@ -61,7 +62,8 @@ android {
         minSdk = 23
         ndk { abiFilters += setOf("arm64-v8a") }
         targetSdk = 37
-        versionCode = versionCodeFrom(appVersionName)
+        // KalEl Auto: cada APK que entrego sube este número (kalel-build.txt, <99) para que Android lo instale encima del anterior.
+        versionCode = versionCodeFrom(appVersionName) - 99 + kalelBuild
         versionName = appVersionName
         buildConfigField("String", "CATALOG_URL", "\"$CATALOG_URL\"")
         buildConfigField("String", "LANGUAGES_URL", "\"$LANGUAGES_URL\"")
