@@ -256,7 +256,7 @@ private fun InfoCard(icon: ImageVector, name: Int, value: String, unit: String, 
     Card(Modifier.fillMaxSize(), onClick = onClick) {
         BoxWithConstraints(Modifier.fillMaxSize().padding(horizontal = 12.dp, vertical = 8.dp)) {
             // El valor se achica a lo que quepa ("Sin conexión" completo en vez de cortado).
-            val size = fitFont(value, maxWidth * 0.55f, maxHeight, 0.34f, min = 18f, max = 30f, extraChars = 1.5f)
+            val size = fitFont(value, maxWidth - (if (chevron) 86.dp else 58.dp), maxHeight, 0.36f, min = 18f, max = 38f, extraChars = 1f)
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Box(Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(c.accent.copy(alpha = 0.14f)), contentAlignment = Alignment.Center) { Icon(icon, c.accent, 28.dp) }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
@@ -292,7 +292,7 @@ private fun DiagList(d: Dependencies, connected: Boolean, codes: List<String>?) 
                         Box(
                             Modifier.background(if (tab == i) c.accent.copy(alpha = 0.14f) else androidx.compose.ui.graphics.Color.Transparent).clickable { tab = i }.padding(horizontal = 16.dp, vertical = 8.dp),
                             contentAlignment = Alignment.Center,
-                        ) { Label(stringResource(name), Typography.small.copy(fontWeight = FontWeight.SemiBold), if (tab == i) c.accent else c.text, 1) }
+                        ) { Label(stringResource(name), Typography.body.copy(fontWeight = FontWeight.SemiBold), if (tab == i) c.accent else c.text, 1) }
                     }
                 }
             }
