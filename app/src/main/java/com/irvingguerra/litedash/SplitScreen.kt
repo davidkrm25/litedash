@@ -122,7 +122,11 @@ object SplitScreen {
         val width = screen.widthPixels * d.prefs.freeformWidth.coerceIn(30, 70) / 100
         val rect = if (d.prefs.splitCarLeft) Rect(screen.widthPixels - width, 0, screen.widthPixels, screen.heightPixels) else Rect(0, 0, width, screen.heightPixels)
         return try {
-            context.startActivity(intent, ActivityOptions.makeBasic().setLaunchBounds(rect).toBundle())
+            val options = ActivityOptions.makeBasic().setLaunchBounds(rect)
+            // En Android 10 el tamaño solo vale si además se pide el modo ventana libre (5); método oculto: si no existe, se sigue sin él.
+            runCatching { ActivityOptions::class.java.getMethod("setLaunchWindowingMode", Int::class.javaPrimitiveType).invoke(options, WINDOWING_MODE_FREEFORM) }
+                .onFailure { Log.w(TAG, "sin modo ventana libre: ${it.message}") }
+            context.startActivity(intent, options.toBundle())
             true
         } catch (e: Exception) {
             Log.w(TAG, "ventana libre: ${e.message}", e)
@@ -143,6 +147,7 @@ object SplitScreen {
     }
 
     private const val TAG = "SplitScreen"
+    private const val WINDOWING_MODE_FREEFORM = 5
 
     internal fun appOf(intent: Intent): Intent? = IntentCompat.getParcelableExtra(intent, EXTRA_APP, Intent::class.java)
 
