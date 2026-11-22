@@ -57,6 +57,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Rect
@@ -1203,17 +1207,10 @@ private fun TopBar(
             StatusIcons(trip)
             PageTabs(pages, onSettings, Modifier.weight(1f))
             val short = isShortScreen()
-            // Con fondo brillante y borde del acento, como un dial: la hora y la fecha se encuentran de un vistazo.
-            val dial = RoundedCornerShape(Radius.card)
-            Column(
-                Modifier.clip(dial)
-                    .background(Brush.linearGradient(listOf(c.accent.copy(alpha = 0.25f), c.surfaceHigh.copy(alpha = 0.6f), c.accent.copy(alpha = 0.1f))))
-                    .border(1.dp, c.accent.copy(alpha = 0.65f), dial)
-                    .padding(horizontal = 14.dp, vertical = 4.dp),
-                horizontalAlignment = Alignment.End,
-            ) {
-                Label(clock.full, Typography.clock.copy(fontSize = if (short) 32.sp else 46.sp), maxLines = 1)
-                Label(clock.date.uppercase(currentLocale()), if (short) Typography.small else Typography.body, c.text.copy(alpha = 0.85f), maxLines = 1)
+            // Letras en negritas con un halo del color principal que sigue la forma de cada letra.
+            Column(horizontalAlignment = Alignment.End) {
+                Label(clock.full, Typography.clock.copy(fontSize = if (short) 32.sp else 46.sp).glow(c.accent), maxLines = 1)
+                Label(clock.date.uppercase(currentLocale()), (if (short) Typography.small else Typography.body).glow(c.accent), c.text, maxLines = 1)
             }
         } else {
             val clock = rememberClock()
@@ -1225,13 +1222,7 @@ private fun TopBar(
             }
             WeatherChip(weather)
             StatusIcons(trip)
-            val dial = RoundedCornerShape(Radius.card)
-            Box(
-                Modifier.clip(dial)
-                    .background(Brush.linearGradient(listOf(c.accent.copy(alpha = 0.25f), c.surfaceHigh.copy(alpha = 0.6f), c.accent.copy(alpha = 0.1f))))
-                    .border(1.dp, c.accent.copy(alpha = 0.65f), dial)
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-            ) { Label(clock.full, Typography.subtitle, maxLines = 1) }
+            Label(clock.full, Typography.subtitle.glow(c.accent), maxLines = 1)
         }
     }
 }
