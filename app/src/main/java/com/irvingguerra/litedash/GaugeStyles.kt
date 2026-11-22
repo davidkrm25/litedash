@@ -490,7 +490,7 @@ private fun Readout(number: String, unit: String, tag: String, size: Float, colo
 
 /** El estilo de los números de las marcas, del tamaño del medidor. */
 private fun tickText(side: Dp, color: Color) =
-    TextStyle(fontSize = (side.value * 0.055f).coerceIn(10f, 20f).sp, fontWeight = FontWeight.Medium, color = color)
+    TextStyle(fontFamily = com.irvingguerra.litedash.core.ui.InterFamily, fontSize = (side.value * 0.055f).coerceIn(10f, 20f).sp, fontWeight = FontWeight.Medium, color = color)
 
 @Composable
 private fun NeedleGauge(number: String, unit: String, tag: String, p: GaugeParts, side: Dp) {

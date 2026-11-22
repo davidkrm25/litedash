@@ -43,6 +43,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -222,13 +224,20 @@ fun LiteDashTheme(dark: Boolean = true, scale: Float = 1f, accent: Color? = null
     )
 }
 
+val InterFamily = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_regular, FontWeight.Medium),
+    Font(R.font.inter_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_bold, FontWeight.Bold),
+)
+
 object Typography {
-    val clock = TextStyle(fontSize = 56.sp, fontWeight = FontWeight.Medium, letterSpacing = (-1).sp)
-    val title = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
-    val subtitle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium)
-    val body = TextStyle(fontSize = 16.sp)
-    val small = TextStyle(fontSize = 13.sp)
-    val label = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
+    val clock = TextStyle(fontFamily = InterFamily, fontSize = 56.sp, fontWeight = FontWeight.Medium, letterSpacing = (-1).sp)
+    val title = TextStyle(fontFamily = InterFamily, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
+    val subtitle = TextStyle(fontFamily = InterFamily, fontSize = 18.sp, fontWeight = FontWeight.Medium)
+    val body = TextStyle(fontFamily = InterFamily, fontSize = 16.sp)
+    val small = TextStyle(fontFamily = InterFamily, fontSize = 13.sp)
+    val label = TextStyle(fontFamily = InterFamily, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 1.sp)
 }
 
 // El color va tercero a propósito: así se escribe en toda la app (Label(t, estilo, c.textMuted)).
