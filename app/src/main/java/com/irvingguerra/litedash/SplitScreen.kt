@@ -82,12 +82,32 @@ object SplitScreen {
     /** Abre [intent] dividida si toca; false = que se abra normal. */
     fun open(context: Context, intent: Intent, pkg: String): Boolean {
         val d = (context.applicationContext as LiteDashApp).dependencies
+        if (d.prefs.autoPanel && isProjectionPackage(pkg) && openProjection(context, d, intent)) return true
         if (d.prefs.freeformMaps && !supported() && openFreeform(context, d, intent, pkg)) return true
         // Android solo divide la pantalla así desde la 12L: antes, la app se abre normal.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S_V2 || !d.prefs.splitScreen || !supported()) return false
         if (context.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
         if (!isMapOrMusic(context, d, pkg)) return false
         start(context, intent, d.prefs.splitCarLeft)
+        return true
+    }
+
+    /**
+     * Android Auto (Open Headunit, ZLink…): la app se abre a pantalla completa y el panel de KalEl Auto se dibuja encima,
+     * a la derecha, en [Preferences.autoPanelWidth] px. En Open Headunit el mismo número va de margen derecho, así Android
+     * Auto ocupa solo lo que queda a la izquierda.
+     */
+    private fun openProjection(context: Context, d: Dependencies, intent: Intent): Boolean {
+        if (context.resources.configuration.orientation != Configuration.ORIENTATION_LANDSCAPE) return false
+        if (!SidePanel.allowed(context)) {
+            SidePanel.askPermission(context)
+            return true
+        }
+        if (!launch(context, intent)) return false
+        // Después de que la app ya está al frente: si no, el panel nace antes y queda tapado.
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+            { SidePanel.show(context, d.prefs.autoPanelWidth, left = false) }, 900L,
+        )
         return true
     }
 
@@ -314,6 +334,11 @@ private fun SplitBoard(d: Dependencies, onSwap: () -> Unit, onExit: () -> Unit) 
 fun SplitSettings(d: Dependencies) {
     val c = LocalColors.current
     val supported = remember { SplitScreen.supported() }
+    SwitchRow(stringResource(R.string.auto_panel_title), d.prefs.autoPanel, { d.prefs.autoPanel = it }, stringResource(R.string.auto_panel_help))
+    if (d.prefs.autoPanel) {
+        Label(stringResource(R.string.auto_panel_width), Typography.label, c.textMuted)
+        Segmented(listOf(480 to "480 px", 576 to "576 px", 640 to "640 px"), d.prefs.autoPanelWidth, { d.prefs.autoPanelWidth = it })
+    }
     // Sin pantalla dividida en este Android: se dice por qué y, desde Android 7, se ofrece la ventana libre.
     if (!supported) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

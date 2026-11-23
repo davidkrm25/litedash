@@ -35,4 +35,7 @@
     <string name="readable_auto">Auto</string>
     <string name="readable_more">Más</string>
     <string name="readable_max">Máxima</string>
+    <string name="auto_panel_title">Panel junto a Android Auto</string>
+    <string name="auto_panel_help">Al abrir Android Auto (Open Headunit), KalEl Auto deja su panel a la derecha con velocidad, RPM y más. Después, en Open Headunit → Ajustes → Avanzado → Gráficos, pon el mismo número como margen derecho. Necesita el permiso de mostrar sobre otras apps.</string>
+    <string name="auto_panel_width">Ancho del panel (margen derecho en Open Headunit)</string>
 </resources>

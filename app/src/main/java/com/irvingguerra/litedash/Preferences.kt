@@ -95,6 +95,8 @@ internal object PrefKeys {
     const val FREEFORM_MAPS = "freeform_maps"
     const val FREEFORM_WIDTH = "freeform_width"
     const val FREEFORM_DOCK = "freeform_dock"
+    const val AUTO_PANEL = "auto_panel"
+    const val AUTO_PANEL_WIDTH = "auto_panel_width"
     const val TRIP_LOG = "trip_log"
     const val BEST_ACCEL = "best_0_100"
     const val STATS = "anonymous_stats"
@@ -557,6 +559,10 @@ class Preferences(context: Context) {
     var freeformWidth by int(PrefKeys.FREEFORM_WIDTH, 50)
     /** Pedirle al sistema la división real (fija, sin barra flotante); si no, ventana libre. */
     var freeformDock by bool(PrefKeys.FREEFORM_DOCK, false)
+
+    /** Al abrir Android Auto (Open Headunit…), el panel de KalEl Auto se queda a la derecha, de [autoPanelWidth] px (el mismo número va de margen derecho en Open Headunit). */
+    var autoPanel by bool(PrefKeys.AUTO_PANEL, true)
+    var autoPanelWidth by int(PrefKeys.AUTO_PANEL_WIDTH, 640)
 
     /** En pantalla dividida, al lado del mapa va la carretera (si no, el auto 3D). */
     var splitRoad by bool(PrefKeys.SPLIT_ROAD, false)
