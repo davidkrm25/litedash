@@ -37,4 +37,6 @@
     <string name="auto_panel_title">Panel next to Android Auto</string>
     <string name="auto_panel_help">When Android Auto (Open Headunit) opens, KalEl Auto keeps its panel on the right with speed, RPM and more. Then, in Open Headunit → Settings → Advanced → Graphics, set the same number as the right margin. Needs the permission to display over other apps.</string>
     <string name="auto_panel_width">Panel width (right margin in Open Headunit)</string>
+    <string name="panel_engine">Engine</string>
+    <string name="panel_battery">Battery</string>
 </resources>

@@ -36,6 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.fillMaxWidth
+import com.irvingguerra.litedash.core.vehicle.watch
+import androidx.compose.foundation.layout.height
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
@@ -166,8 +170,6 @@ private class PanelOwner : LifecycleOwner, ViewModelStoreOwner, SavedStateRegist
 @androidx.compose.runtime.Composable
 private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
     val c = LocalColors.current
-    val look = remember { GaugeLook() }
-    val rpm = remember { GaugeLook() }
     // Lo que suena manda al empezar: si es la radio, arranca en Radio.
     val context = androidx.compose.ui.platform.LocalContext.current
     val apps = com.irvingguerra.litedash.feature.apps.rememberApps(d.apps).orEmpty()
@@ -179,14 +181,19 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
     var radio by remember { mutableStateOf(d.music.radio.song?.playing == true && d.music.song?.playing != true) }
     Box(Modifier.fillMaxSize().background(c.background).padding(10.dp)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.weight(1.3f)) { SpeedometerTile(d, look) }
-            Box(Modifier.weight(0.9f)) { GaugeTile(d, com.irvingguerra.litedash.core.vehicle.Signal.RPM, rpm, card = true, onPick = {}, onWorkshop = {}) }
-            Row(Modifier.weight(0.6f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.weight(1f).clickable { open(mapApp(d, apps)) }) { TripStatTile(d, TripStatKinds.TIME) }
-                Box(Modifier.weight(1f)) { WeatherTile(d.weather, days = false, range = false) }
+            Box(Modifier.weight(0.9f)) { SpeedRpmStrip(d) }
+            Row(Modifier.weight(0.7f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val coolant = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.COOLANT)
+                val volts = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE)
+                Box(Modifier.weight(1f)) { StatBox(Icons.thermometer, stringResource(R.string.panel_engine), coolant?.let { String.format(java.util.Locale.ROOT, "%.0f", it) } ?: "--", "°C") }
+                Box(Modifier.weight(1f)) { StatBox(Icons.battery, stringResource(R.string.panel_battery), volts?.let { String.format(java.util.Locale.ROOT, "%.1f", it) } ?: "--", "V") }
             }
-            Box(Modifier.weight(0.7f)) { FuelTile(d) {} }
-            Column(Modifier.weight(1.1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Box(Modifier.weight(0.6f)) { TripStatTile(d, TripStatKinds.NOW) }
+            Row(Modifier.weight(0.7f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.weight(1f)) { WeatherTile(d.weather, days = false, range = false) }
+                Box(Modifier.weight(1f)) { FuelTile(d) {} }
+            }
+            Column(Modifier.weight(2.2f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Segmented(listOf(false to stringResource(R.string.music), true to stringResource(R.string.tile_radio)), radio, { radio = it })
                 Box(Modifier.weight(1f)) {
                     if (radio) RadioTile(d.music, 0, onIdle = {}, onOpen = { open(radioApp) }) else MusicTile(d.music, 0, onOpen = { open(musicApp) })
@@ -196,3 +203,36 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
         IconButton(Icons.close, onBack, Modifier.align(Alignment.TopEnd).padding(4.dp), background = c.surfaceHigh)
     }
 }
+
+/** Velocidad grande a la izquierda y las RPM a la derecha (número y barra): una franja en vez de dos medidores. */
+@androidx.compose.runtime.Composable
+private fun SpeedRpmStrip(d: Dependencies) {
+    val c = LocalColors.current
+    // Como el velocímetro: con un adaptador ya guardado se reconecta solo; sin OBD, el GPS publica la velocidad.
+    val obdOn = rememberObd(d)?.state == com.irvingguerra.litedash.feature.obd.ObdState.ON
+    rememberGpsPermission(d)
+    if (!obdOn) KeepTripRunning(d.trip)
+    val miles = d.prefs.units.miles
+    val kmh = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.SPEED)
+    val rpm = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.RPM)
+    com.irvingguerra.litedash.core.ui.Card(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
+                androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.Bottom) {
+                    com.irvingguerra.litedash.core.ui.Label(speedText(kmh, miles), com.irvingguerra.litedash.core.ui.Typography.clock.copy(fontSize = 52.sp), c.text, 1)
+                    com.irvingguerra.litedash.core.ui.Label(speedUnit(miles), com.irvingguerra.litedash.core.ui.Typography.small, c.textMuted, 1, Modifier.padding(start = 6.dp, bottom = 8.dp))
+                }
+                com.irvingguerra.litedash.core.ui.Label(
+                    (rpm?.let { String.format(java.util.Locale.ROOT, "%.0f", it) } ?: "--") + " rpm",
+                    com.irvingguerra.litedash.core.ui.Typography.body, c.textMuted, 1, Modifier.padding(bottom = 8.dp),
+                )
+            }
+            Box(Modifier.fillMaxWidth().height(8.dp).background(c.surfaceHigh, androidx.compose.foundation.shape.RoundedCornerShape(4.dp))) {
+                Box(Modifier.fillMaxWidth(((rpm ?: 0f) / RPM_TOP).coerceIn(0f, 1f)).fillMaxSize().background(if ((rpm ?: 0f) > RPM_RED) c.danger else c.accent, androidx.compose.foundation.shape.RoundedCornerShape(4.dp)))
+            }
+        }
+    }
+}
+
+private const val RPM_TOP = 8000f
+private const val RPM_RED = 6500f

@@ -372,4 +372,4 @@ private fun ModuleRow(
 private val MODULE_NARROW = 420.dp
 
 /** La versión que se muestra en Acerca de. */
-private const val EDITION_VERSION = "1.8"
+private const val EDITION_VERSION = "1.9"

@@ -562,7 +562,7 @@ class Preferences(context: Context) {
 
     /** Al abrir Android Auto (Open Headunit…), el panel de KalEl Auto se queda a la derecha, de [autoPanelWidth] px (el mismo número va de margen derecho en Open Headunit). */
     var autoPanel by bool(PrefKeys.AUTO_PANEL, true)
-    var autoPanelWidth by int(PrefKeys.AUTO_PANEL_WIDTH, 640)
+    var autoPanelWidth by int(PrefKeys.AUTO_PANEL_WIDTH, 430)
 
     /** En pantalla dividida, al lado del mapa va la carretera (si no, el auto 3D). */
     var splitRoad by bool(PrefKeys.SPLIT_ROAD, false)

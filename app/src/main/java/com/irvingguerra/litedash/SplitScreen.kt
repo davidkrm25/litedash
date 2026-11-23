@@ -337,7 +337,7 @@ fun SplitSettings(d: Dependencies) {
     SwitchRow(stringResource(R.string.auto_panel_title), d.prefs.autoPanel, { d.prefs.autoPanel = it }, stringResource(R.string.auto_panel_help))
     if (d.prefs.autoPanel) {
         Label(stringResource(R.string.auto_panel_width), Typography.label, c.textMuted)
-        Segmented(listOf(480 to "480 px", 576 to "576 px", 640 to "640 px"), d.prefs.autoPanelWidth, { d.prefs.autoPanelWidth = it })
+        Segmented(listOf(430 to "430 px", 480 to "480 px", 576 to "576 px", 640 to "640 px"), d.prefs.autoPanelWidth, { d.prefs.autoPanelWidth = it })
     }
     // Sin pantalla dividida en este Android: se dice por qué y, desde Android 7, se ofrece la ventana libre.
     if (!supported) {
