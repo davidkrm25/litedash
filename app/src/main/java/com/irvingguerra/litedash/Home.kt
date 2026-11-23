@@ -1209,8 +1209,8 @@ private fun TopBar(
             val short = isShortScreen()
             // Letras en negritas con un halo del color principal que sigue la forma de cada letra.
             Column(horizontalAlignment = Alignment.End) {
-                Label(clock.full, Typography.clock.copy(fontSize = if (short) 32.sp else 46.sp).glow(c.accent), maxLines = 1)
-                Label(clock.date.uppercase(currentLocale()), (if (short) Typography.small else Typography.body).glow(c.accent), c.text, maxLines = 1)
+                Label(clock.full, Typography.clock.copy(fontSize = if (short) 32.sp else 46.sp).glow(c.halo()), maxLines = 1)
+                Label(clock.date.uppercase(currentLocale()), (if (short) Typography.small else Typography.body).glow(c.halo()), c.text, maxLines = 1)
             }
         } else {
             val clock = rememberClock()
@@ -1222,7 +1222,7 @@ private fun TopBar(
             }
             WeatherChip(weather)
             StatusIcons(trip)
-            Label(clock.full, Typography.subtitle.glow(c.accent), maxLines = 1)
+            Label(clock.full, Typography.subtitle.glow(c.halo()), maxLines = 1)
         }
     }
 }

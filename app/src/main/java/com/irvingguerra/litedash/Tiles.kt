@@ -1,5 +1,6 @@
 package com.irvingguerra.litedash
 
+import com.irvingguerra.litedash.core.ui.Colors
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -562,4 +563,7 @@ internal fun TileHeader(title: String, status: String, color: Color) {
 }
 
 /** Negritas con un halo del color [glow] que sigue la forma de cada letra (sombra sin desplazar, borrosa). */
+/** El color del halo de los textos sueltos sobre el fondo: el realce en oscuro; en claro, el del fondo (resalta el texto oscuro). */
+fun Colors.halo(): Color = if (dark) accent else background
+
 fun TextStyle.glow(glow: Color): TextStyle = copy(fontWeight = FontWeight.Bold, shadow = Shadow(glow.copy(alpha = 0.9f), Offset.Zero, 22f))

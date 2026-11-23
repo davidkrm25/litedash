@@ -29,4 +29,9 @@
     <string name="freeform_float">Floating</string>
     <string name="speed_adjust">Speed adjustment</string>
     <string name="speed_adjust_help">GPS shows the real speed; a car dashboard reads high. With 7 %, 100 km/h real shows as 107, like your car.</string>
+    <string name="wallpaper_readable">Wallpaper legibility</string>
+    <string name="wallpaper_readable_help">How much the veil over your wallpaper closes so text stays readable. Auto works it out from your image and the theme.</string>
+    <string name="readable_auto">Auto</string>
+    <string name="readable_more">More</string>
+    <string name="readable_max">Max</string>
 </resources>

@@ -172,6 +172,13 @@ private fun CardSettings(prefs: Preferences) {
             }
         }
     }
+    Label(stringResource(R.string.wallpaper_readable), Typography.label, c.textMuted)
+    Segmented(
+        listOf(0 to stringResource(R.string.readable_auto), 1 to stringResource(R.string.readable_more), 2 to stringResource(R.string.readable_max)),
+        prefs.wallpaperReadable,
+        { prefs.wallpaperReadable = it },
+    )
+    Label(stringResource(R.string.wallpaper_readable_help), Typography.small, c.textMuted)
     Segmented(
         listOf(CardStyle.GLASS to stringResource(R.string.cards_glass), CardStyle.SOLID to stringResource(R.string.cards_solid)),
         prefs.cardStyle,

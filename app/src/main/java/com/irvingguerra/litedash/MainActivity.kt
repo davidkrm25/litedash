@@ -226,6 +226,7 @@ internal fun ComponentActivity.LiteDashContent(d: Dependencies, revision: Int, c
     val hideStatusBar = d.prefs.hideStatusBar
     LaunchedEffect(hideStatusBar, revision) { applyStatusBar(window, hideStatusBar) }
     ApplyBrightness(d.prefs, night, revision)
+    WallpaperVeil.floor = when (d.prefs.wallpaperReadable) { 1 -> 0.55f; 2 -> 0.7f; else -> 0f }
     // La piel de las tarjetas (lisas o de vidrio) vale para toda la app; el inicio le suma tu fondo desenfocado.
     val look = remember(d.prefs.cardStyle, d.prefs.cardOpacity) { CardLook(d.prefs.cardStyle, d.prefs.cardOpacity) }
     LiteDashTheme(dark = dark, scale = d.prefs.scale, accent = d.prefs.accentColor, cards = d.prefs.cardColor) {
@@ -235,7 +236,7 @@ internal fun ComponentActivity.LiteDashContent(d: Dependencies, revision: Int, c
 
 /** ¿Tema oscuro? Según lo elegido en Ajustes; [night] es la cuenta del sol o del sensor de luz. */
 @Composable
-private fun isDark(d: Dependencies, night: Boolean): Boolean = when (d.prefs.theme) {
+internal fun isDark(d: Dependencies, night: Boolean): Boolean = when (d.prefs.theme) {
     ThemeMode.DARK -> true
     ThemeMode.LIGHT -> false
     ThemeMode.SYSTEM -> isSystemInDarkTheme()

@@ -51,6 +51,7 @@ internal object PrefKeys {
     const val TRAFFIC = "traffic"
     const val PHONE_LOCATION = "phone_location"
     const val SPEED_ADJUST = "speed_adjust"
+    const val WALLPAPER_READABLE = "wallpaper_readable"
     /** En el mapa de fondo del inicio: tu auto en vez de la flecha. */
     const val MAP_BACKDROP_CAR = "map_backdrop_car"
     const val MAP_LOOK = "map_look"
@@ -598,6 +599,9 @@ class Preferences(context: Context) {
     /** Velocidad y distancia: automático (según idioma y región), km o millas. */
     /** % que se le suma a la velocidad para que coincida con el tablero del auto (que marca de más). */
     var speedAdjust by int(PrefKeys.SPEED_ADJUST, 7)
+
+    /** Legibilidad del fondo de pantalla: 0 = Auto, 1 = Más, 2 = Máxima (cuánto se cierra el velo sobre la imagen). */
+    var wallpaperReadable by int(PrefKeys.WALLPAPER_READABLE, 0)
 
     var speedUnits by mapped(PrefKeys.SPEED_UNITS, SpeedUnits::fromStored) { it.stored }
 

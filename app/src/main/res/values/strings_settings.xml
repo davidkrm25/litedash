@@ -30,4 +30,9 @@
     <string name="freeform_float">Flotante</string>
     <string name="speed_adjust">Ajuste de velocidad</string>
     <string name="speed_adjust_help">El GPS marca la velocidad real; el tablero del auto marca de más. Con 7 %, 100 km/h reales se muestran como 107, igual que tu auto.</string>
+    <string name="wallpaper_readable">Legibilidad del fondo</string>
+    <string name="wallpaper_readable_help">Qué tanto se cierra el velo sobre tu fondo de pantalla para que los textos se lean. Auto lo calcula según tu imagen y el tema.</string>
+    <string name="readable_auto">Auto</string>
+    <string name="readable_more">Más</string>
+    <string name="readable_max">Máxima</string>
 </resources>

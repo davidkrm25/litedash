@@ -87,7 +87,9 @@ object SidePanel {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
             setContent {
                 val look = remember(d.prefs.cardStyle, d.prefs.cardOpacity) { CardLook(d.prefs.cardStyle, d.prefs.cardOpacity) }
-                LiteDashTheme(dark = d.prefs.theme != ThemeMode.LIGHT, scale = d.prefs.scale, accent = d.prefs.accentColor, cards = d.prefs.cardColor) {
+                // El mismo tema que la app: claro, oscuro, por sol o el del sistema.
+                val night = rememberIsNight(d.prefs, needed = d.prefs.theme == ThemeMode.SUN)
+                LiteDashTheme(dark = isDark(d, night), scale = d.prefs.scale, accent = d.prefs.accentColor, cards = d.prefs.cardColor) {
                     CompositionLocalProvider(LocalCardLook provides look, LocalActivityResultRegistryOwner provides NoResults) { PanelContent(d, onBack = { backToHome(app) }) }
                 }
             }

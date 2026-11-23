@@ -1,5 +1,7 @@
 package com.irvingguerra.litedash
 
+import com.irvingguerra.litedash.core.ui.Colors
+import androidx.compose.runtime.mutableFloatStateOf
 import com.irvingguerra.litedash.core.ui.LightColors
 import com.irvingguerra.litedash.core.ui.DarkColors
 import androidx.compose.ui.unit.IntSize
@@ -514,7 +516,7 @@ fun HomeWallpaper(asInWindow: Boolean = false) {
         if (LocalCardLook.current.style == CardStyle.GLASS) Box(Modifier.fillMaxSize().glow())
         return
     }
-    val veil = c.background.copy(alpha = WALLPAPER_VEIL)
+    val veil = c.background.copy(alpha = rememberWallpaperVeil(image))
     // Una muestra ([asInWindow]): el pedazo de tu fondo que cae justo ahí, a la escala del inicio (no la imagen
     // entera en chico), para que lo de encima se vea igual que en el inicio.
     if (asInWindow) return Box(Modifier.fillMaxSize().blurredBackdrop(remember(image, veil) { CardBackdrop(image, veil) }))
@@ -542,7 +544,7 @@ fun rememberWallpaperBackdrop(wanted: Boolean, clear: Boolean = false): CardBack
     val b = blurred ?: return null
     // Detrás de un cristal el velo se cierra lo que haga falta para que el texto se lea sobre tu imagen.
     return remember(b, c, clear) {
-        val veil = if (clear) glassVeil(c, if (c.dark) b.light else b.shade, WALLPAPER_VEIL) else WALLPAPER_VEIL
+        val veil = adaptiveVeil(c, if (c.dark) b.light else b.shade)
         CardBackdrop(b.image, c.background.copy(alpha = veil))
     }
 }
@@ -553,6 +555,31 @@ private var clearWallpaper: Pair<ImageBitmap, Blurred>? = null
 
 /** Lo que oscurece (o aclara) tu fondo de pantalla para que se lean los widgets encima. */
 private const val WALLPAPER_VEIL = 0.4f
+
+/**
+ * «Legibilidad del fondo» (Ajustes): lo menos que se cierra el velo sobre tu fondo de pantalla. Auto lo calcula según
+ * qué tan clara u oscura es la imagen contra el tema; los otros dos lo suben aunque la imagen no lo pida.
+ */
+object WallpaperVeil {
+    var floor by mutableFloatStateOf(0f)
+}
+
+/** El velo con la imagen [extreme] (su parte más clara en tema oscuro, más oscura en claro), sin bajar de [WallpaperVeil.floor]. */
+private fun adaptiveVeil(c: Colors, extreme: Color, base: Float = WALLPAPER_VEIL) = maxOf(glassVeil(c, extreme, base), WallpaperVeil.floor)
+
+/** El velo que le toca a [image] con el tema de ahora: el de siempre mientras se calcula, luego el que hace que el texto se lea. */
+@Composable
+internal fun rememberWallpaperVeil(image: ImageBitmap?): Float {
+    val c = LocalColors.current
+    val blurred by produceState(blurredWallpaper?.takeIf { it.first === image }?.second, image) {
+        value = image?.let { src ->
+            blurredWallpaper?.takeIf { it.first === src }?.second
+                ?: withContext(Dispatchers.Default) { blurredCopy(src.asAndroidBitmap()) }.also { blurredWallpaper = src to it }
+        }
+    }
+    val b = blurred ?: return maxOf(WALLPAPER_VEIL, WallpaperVeil.floor)
+    return adaptiveVeil(c, if (c.dark) b.light else b.shade)
+}
 
 /** El velo del lienzo: más cerrado que el del inicio, encima van listas y textos largos. */
 private const val CANVAS_VEIL = 0.62f
@@ -573,7 +600,7 @@ internal fun Modifier.canvas(): Modifier {
     val base = background(c.background)
     if (!glass) return base
     if (blurred == null) return base.glow()
-    val veil = c.background.copy(alpha = CANVAS_VEIL)
+    val veil = c.background.copy(alpha = maxOf(CANVAS_VEIL, WallpaperVeil.floor + 0.1f))
     return base.drawBehind {
         val iw = blurred.image.width.toFloat()
         val ih = blurred.image.height.toFloat()
