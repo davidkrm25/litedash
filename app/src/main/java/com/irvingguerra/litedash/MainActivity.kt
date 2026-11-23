@@ -226,6 +226,7 @@ internal fun ComponentActivity.LiteDashContent(d: Dependencies, revision: Int, c
     val hideStatusBar = d.prefs.hideStatusBar
     LaunchedEffect(hideStatusBar, revision) { applyStatusBar(window, hideStatusBar) }
     ApplyBrightness(d.prefs, night, revision)
+    com.irvingguerra.litedash.core.ui.GlassLegibility.minFill = when (d.prefs.wallpaperReadable) { 1 -> 0.6f; 2 -> 0.8f; else -> 0.4f }
     WallpaperVeil.floor = when (d.prefs.wallpaperReadable) { 1 -> 0.55f; 2 -> 0.7f; else -> 0f }
     // La piel de las tarjetas (lisas o de vidrio) vale para toda la app; el inicio le suma tu fondo desenfocado.
     val look = remember(d.prefs.cardStyle, d.prefs.cardOpacity) { CardLook(d.prefs.cardStyle, d.prefs.cardOpacity) }

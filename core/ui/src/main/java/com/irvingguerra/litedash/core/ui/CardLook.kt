@@ -74,9 +74,15 @@ val LocalCardLook = compositionLocalOf { CardLook() }
  * [floor] (lo que flota sobre cualquier cosa: la barra, un aviso). Sobre el mapa de fondo, el relleno de siempre.
  */
 internal fun glassFill(look: CardLook, floor: Float): Float {
-    if (!look.clear) return look.opacity.coerceIn(maxOf(MIN_OPACITY, floor), 1f)
+    val least = maxOf(floor, GlassLegibility.minFill)
+    if (!look.clear) return look.opacity.coerceIn(maxOf(MIN_OPACITY, least), 1f)
     val t = ((look.opacity - MIN_OPACITY) / (1f - MIN_OPACITY)).coerceIn(0f, 1f)
-    return if (look.backdrop != null) t else maxOf(t, floor)
+    return maxOf(t, least)
+}
+
+/** Lo menos que se llena una tarjeta de vidrio, pida lo que pida «Cuánto se ven»: sin él, el texto se pierde sobre un fondo claro o con detalle. */
+object GlassLegibility {
+    @Volatile var minFill = 0.4f
 }
 
 /** La escarcha del cristal: un blanco muy leve que lo despega del fondo (se va conforme la tarjeta se llena). */
