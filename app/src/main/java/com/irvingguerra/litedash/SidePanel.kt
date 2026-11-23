@@ -181,19 +181,19 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
     var radio by remember { mutableStateOf(d.music.radio.song?.playing == true && d.music.song?.playing != true) }
     Box(Modifier.fillMaxSize().background(c.background).padding(10.dp)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.weight(0.9f)) { SpeedRpmStrip(d) }
-            Row(Modifier.weight(0.7f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(Modifier.weight(0.8f)) { SpeedRpmStrip(d) }
+            Row(Modifier.weight(0.65f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val coolant = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.COOLANT)
                 val volts = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.VOLTAGE)
-                Box(Modifier.weight(1f)) { StatBox(Icons.thermometer, stringResource(R.string.panel_engine), coolant?.let { String.format(java.util.Locale.ROOT, "%.0f", it) } ?: "--", "°C") }
-                Box(Modifier.weight(1f)) { StatBox(Icons.battery, stringResource(R.string.panel_battery), volts?.let { String.format(java.util.Locale.ROOT, "%.1f", it) } ?: "--", "V") }
+                val trip = rememberTripStats(d.trip, d.prefs.units.miles)
+                val leg = d.trip.current()
+                val ms = leg.movingMs / 1000
+                Box(Modifier.weight(1f)) { MiniStat(stringResource(R.string.panel_engine), coolant?.let { String.format(java.util.Locale.ROOT, "%.0f°", it) } ?: "--") }
+                Box(Modifier.weight(1f)) { MiniStat(stringResource(R.string.panel_battery), volts?.let { String.format(java.util.Locale.ROOT, "%.1f V", it) } ?: "--") }
+                Box(Modifier.weight(1.15f)) { MiniStat(stringResource(R.string.dashito_trip_now), trip.distance + " " + trip.unit, String.format(java.util.Locale.ROOT, "%d:%02d h", ms / 3600, ms / 60 % 60)) }
             }
-            Box(Modifier.weight(0.6f)) { TripStatTile(d, TripStatKinds.NOW) }
-            Row(Modifier.weight(0.7f), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Box(Modifier.weight(1f)) { WeatherTile(d.weather, days = false, range = false) }
-                Box(Modifier.weight(1f)) { FuelTile(d) {} }
-            }
-            Column(Modifier.weight(2.2f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Box(Modifier.weight(0.75f)) { FuelTile(d) {} }
+            Column(Modifier.weight(2.6f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Segmented(listOf(false to stringResource(R.string.music), true to stringResource(R.string.tile_radio)), radio, { radio = it })
                 Box(Modifier.weight(1f)) {
                     if (radio) RadioTile(d.music, 0, onIdle = {}, onOpen = { open(radioApp) }) else MusicTile(d.music, 0, onOpen = { open(musicApp) })
@@ -216,7 +216,7 @@ private fun SpeedRpmStrip(d: Dependencies) {
     val kmh = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.SPEED)
     val rpm = d.bus.watch(com.irvingguerra.litedash.core.vehicle.Signal.RPM)
     com.irvingguerra.litedash.core.ui.Card(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 8.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(Modifier.fillMaxSize().padding(start = 14.dp, end = 54.dp, top = 8.dp, bottom = 8.dp), verticalArrangement = Arrangement.SpaceBetween) {
             androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.SpaceBetween) {
                 androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.Bottom) {
                     com.irvingguerra.litedash.core.ui.Label(speedText(kmh, miles), com.irvingguerra.litedash.core.ui.Typography.clock.copy(fontSize = 52.sp), c.text, 1)
@@ -236,3 +236,16 @@ private fun SpeedRpmStrip(d: Dependencies) {
 
 private const val RPM_TOP = 8000f
 private const val RPM_RED = 6500f
+
+/** Mosaico chico: nombre arriba, valor al centro y, si hay, un renglón abajo. */
+@androidx.compose.runtime.Composable
+private fun MiniStat(name: String, value: String, sub: String? = null) {
+    val c = LocalColors.current
+    com.irvingguerra.litedash.core.ui.Card(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().padding(4.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+            com.irvingguerra.litedash.core.ui.Label(name, com.irvingguerra.litedash.core.ui.Typography.small, c.textMuted, 1)
+            com.irvingguerra.litedash.core.ui.Label(value, com.irvingguerra.litedash.core.ui.Typography.title.copy(fontSize = 20.sp), c.text, 1)
+            if (sub != null) com.irvingguerra.litedash.core.ui.Label(sub, com.irvingguerra.litedash.core.ui.Typography.small, c.textMuted, 1)
+        }
+    }
+}
