@@ -100,7 +100,7 @@ class FuelTankTest {
 
     @Test
     fun sensorAtZeroDoesNotOverrideTheFill() {
-        val t = FuelTank(capacityL = 45.0, assumedKmPerL = 15.4).filledUp(0.0, 0L)
+        val t = FuelTank(capacityL = 45.0, assumedKmPerL = 14.7).filledUp(0.0, 0L)
         val r = t.reading(km(100.0), sensorPercent = 0f)!!
         assertEquals(LevelSource.ESTIMATE, r.source)
         assertTrue(r.levelL > 30.0)
@@ -154,15 +154,16 @@ class FuelTankTest {
     }
 
     @Test
-    fun fullTankWithDefaultAssumptionGivesAbout690Km() {
+    fun fullTankWithDefaultAssumptionGivesAbout660Km() {
         val r = FuelTank().filledUp(0.0, now = 1).reading(0.0)!!
-        assertEquals(693.0, r.rangeKm, 1.0)
+        assertEquals(661.5, r.rangeKm, 1.0)
     }
 
     @Test
     fun savedOldDefaultMovesToTheNewOne() {
         val old = FuelTank(assumedKmPerL = 12.0).toJson()
         assertEquals(FuelTank.DEFAULT_KM_PER_L, FuelTank.fromJson(old).assumedKmPerL, 1e-9)
+        assertEquals(FuelTank.DEFAULT_KM_PER_L, FuelTank.fromJson(FuelTank(assumedKmPerL = 15.4).toJson()).assumedKmPerL, 1e-9)
         val own = FuelTank(assumedKmPerL = 9.5).toJson()
         assertEquals(9.5, FuelTank.fromJson(own).assumedKmPerL, 1e-9)
     }
