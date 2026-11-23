@@ -65,6 +65,7 @@ class PhoneLocationService : Service() {
                     val packet = DatagramPacket(buffer, buffer.size)
                     s.receive(packet)
                     parsePhoneFix(String(packet.data, 0, packet.length))?.let {
+                        phoneAddress = packet.address
                         lastReceivedAt = android.os.SystemClock.elapsedRealtime()
                         feed.push(it)
                         lastPushAt = feed.lastPushAt
@@ -96,6 +97,20 @@ class PhoneLocationService : Service() {
         /** El servicio ya escucha el puerto, y cuándo llegó el último punto del teléfono (reloj de arranque; 0 = ninguno). */
         @Volatile var running = false
         @Volatile var lastReceivedAt = 0L
+
+        /** De dónde llegó el último punto: el teléfono, al que se le mandan las rutas. */
+        @Volatile var phoneAddress: java.net.InetAddress? = null
+
+        /** Le manda al teléfono ir a ([lat], [lon]) con [app] (Waze o Maps): Android Auto la muestra en el auto. false = no se sabe dónde está el teléfono. */
+        fun sendRoute(lat: Double, lon: Double, name: String, app: String): Boolean {
+            val to = phoneAddress ?: return false
+            if (android.os.SystemClock.elapsedRealtime() - lastReceivedAt > 15_000L) return false
+            val data = "LDNAV1;$lat;$lon;${name.replace(';', ',')};$app".toByteArray()
+            thread(name = "phone-route") {
+                runCatching { DatagramSocket().use { it.send(DatagramPacket(data, data.size, to, PHONE_NAV_PORT)) } }
+            }
+            return true
+        }
 
         fun start(context: Context) {
             val intent = Intent(context, PhoneLocationService::class.java)

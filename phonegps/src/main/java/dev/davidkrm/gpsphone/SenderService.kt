@@ -24,6 +24,9 @@ import kotlin.concurrent.thread
 /** Puerto donde escucha LiteDash en la tableta. */
 const val PORT = 8765
 
+/** Puerto donde escucha este teléfono las rutas que le manda la tableta. */
+const val NAV_PORT = 8766
+
 /**
  * Lee el GPS del teléfono cada segundo y lo manda por UDP a la dirección de difusión de cada red activa (el hotspot
  * incluido): la tableta no necesita saber ninguna IP.
@@ -48,6 +51,7 @@ class SenderService : Service() {
         }
         startForegroundNotice()
         if (socket == null) socket = DatagramSocket().apply { broadcast = true }
+        if (navSocket == null) listenForRoutes()
         manager = getSystemService(LocationManager::class.java)
         try {
             manager.removeUpdates(listener)
@@ -62,6 +66,52 @@ class SenderService : Service() {
             stopSelf()
         }
         return START_STICKY
+    }
+
+    private var navSocket: DatagramSocket? = null
+    private val ui = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /** La tableta manda "LDNAV1;lat;lon;nombre;paquete": se abre la navegación aquí y Android Auto la muestra en la pantalla del carro. */
+    private fun listenForRoutes() {
+        thread(name = "nav-listen") {
+            val s = try {
+                DatagramSocket(null).apply { reuseAddress = true; bind(java.net.InetSocketAddress(NAV_PORT)) }
+            } catch (_: Exception) {
+                return@thread
+            }
+            navSocket = s
+            val buffer = ByteArray(512)
+            while (!s.isClosed) {
+                try {
+                    val packet = DatagramPacket(buffer, buffer.size)
+                    s.receive(packet)
+                    val parts = String(packet.data, 0, packet.length).split(';')
+                    if (parts.size >= 5 && parts[0] == "LDNAV1") {
+                        val lat = parts[1].toDoubleOrNull() ?: continue
+                        val lon = parts[2].toDoubleOrNull() ?: continue
+                        ui.post { navigate(lat, lon, parts[3], parts[4]) }
+                    }
+                } catch (_: Exception) {
+                    if (s.isClosed) break
+                }
+            }
+        }
+    }
+
+    private fun navigate(lat: Double, lon: Double, name: String, app: String) {
+        val uri = if (app == "com.waze") "https://waze.com/ul?ll=$lat,$lon&navigate=yes" else "google.navigation:q=$lat,$lon"
+        val base = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(uri)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            startActivity(Intent(base).setPackage(app))
+            State.message = "Ruta a $name abierta"
+        } catch (_: Exception) {
+            try {
+                startActivity(base)
+                State.message = "Ruta a $name abierta"
+            } catch (e: Exception) {
+                State.message = "No pude abrir la ruta: ${e.javaClass.simpleName}"
+            }
+        }
     }
 
     private fun send(l: Location) {
@@ -109,6 +159,8 @@ class SenderService : Service() {
         if (::manager.isInitialized) manager.removeUpdates(listener)
         socket?.close()
         socket = null
+        navSocket?.close()
+        navSocket = null
         State.running = false
         State.message = "Detenido"
         super.onDestroy()

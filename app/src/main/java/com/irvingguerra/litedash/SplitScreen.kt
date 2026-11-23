@@ -106,7 +106,7 @@ object SplitScreen {
         if (!launch(context, intent)) return false
         // Después de que la app ya está al frente: si no, el panel nace antes y queda tapado.
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
-            { SidePanel.show(context, d.prefs.autoPanelWidth, left = false) }, 900L,
+            { SidePanel.show(context, d.prefs.autoPanelWidth, left = false, projection = true) }, 900L,
         )
         return true
     }

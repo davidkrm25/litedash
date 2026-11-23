@@ -36,7 +36,7 @@ class MainActivity : Activity() {
         status = TextView(this).apply { textSize = 18f; setTextColor(Color.WHITE); gravity = Gravity.CENTER }
         button = Button(this).apply { textSize = 18f; setOnClickListener { toggle() } }
         val help = TextView(this).apply {
-            text = "1. Prende el hotspot de este teléfono.\n2. Conecta la tableta a ese hotspot.\n3. Toca el botón. LiteDash en la tableta recibe la ubicación solo."
+            text = "1. Prende el hotspot de este teléfono.\n2. Conecta la tableta a ese hotspot.\n3. Toca el botón. LiteDash en la tableta recibe la ubicación solo.\n4. Activa «Mostrar sobre otras apps» para esta app: así las gasolineras de la tableta abren su ruta aquí y Android Auto la muestra."
             textSize = 14f
             setTextColor(Color.LTGRAY)
         }
@@ -83,6 +83,13 @@ class MainActivity : Activity() {
         if (Build.VERSION.SDK_INT >= 23 && !pm.isIgnoringBatteryOptimizations(packageName)) {
             try {
                 startActivity(Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName")))
+            } catch (_: Exception) {
+            }
+        }
+        // Para abrir en segundo plano la ruta que manda la tableta, Android pide «mostrar sobre otras apps».
+        if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
+            try {
+                startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
             } catch (_: Exception) {
             }
         }

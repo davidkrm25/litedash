@@ -67,6 +67,9 @@ import com.irvingguerra.litedash.feature.music.MusicTile
 object SidePanel {
     private var view: ComposeView? = null
 
+    /** El panel está sobre Android Auto (no sobre Mapas): las rutas se mandan al teléfono. */
+    var overProjection = false
+
     /** ¿Ya se puede dibujar sobre otras apps? (Antes de Android 6 siempre.) */
     fun allowed(context: Context) = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context)
 
@@ -78,7 +81,8 @@ object SidePanel {
     }
 
     /** Muestra el panel con [widthPx] de ancho, del lado izquierdo si [left]. */
-    fun show(context: Context, widthPx: Int, left: Boolean): Boolean {
+    fun show(context: Context, widthPx: Int, left: Boolean, projection: Boolean = false): Boolean {
+        overProjection = projection
         val app = context.applicationContext
         if (!allowed(app)) return false
         hide(app)
@@ -266,7 +270,11 @@ private fun StationsView(d: Dependencies, apps: List<com.irvingguerra.litedash.f
             com.irvingguerra.litedash.core.ui.Label(stringResource(R.string.fuel_stations), com.irvingguerra.litedash.core.ui.Typography.title, c.text, 1)
         }
         StationsCard(d, granted, askGps, Modifier.weight(1f).fillMaxSize()) { s ->
-            goToStation(context, mapApp(d, apps), s)
+            val app = mapApp(d, apps)
+            // Sobre Android Auto la ruta se abre en el teléfono (ahí corre Android Auto); si no se sabe dónde está, en la tableta.
+            val sent = SidePanel.overProjection &&
+                PhoneLocationService.sendRoute(s.lat, s.lon, s.name, if (app?.pkg == "com.waze") "com.waze" else "com.google.android.apps.maps")
+            if (!sent) goToStation(context, app, s)
             onPick()
         }
     }

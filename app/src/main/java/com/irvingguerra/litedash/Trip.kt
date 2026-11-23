@@ -122,6 +122,7 @@ internal fun parsePhoneFix(text: String): Location? {
 }
 
 internal const val PHONE_GPS_PORT = 8765
+internal const val PHONE_NAV_PORT = 8766
 
 /**
  * Le da a TODA la tableta la ubicación del teléfono: la pone como proveedores de prueba (GPS y red). Solo funciona si
