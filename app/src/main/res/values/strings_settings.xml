@@ -28,4 +28,6 @@
     <string name="freeform_width">Ancho de la ventana</string>
     <string name="freeform_dock">Dividida (fija)</string>
     <string name="freeform_float">Flotante</string>
+    <string name="speed_adjust">Ajuste de velocidad</string>
+    <string name="speed_adjust_help">El GPS marca la velocidad real; el tablero del auto marca de más. Con 7 %, 100 km/h reales se muestran como 107, igual que tu auto.</string>
 </resources>

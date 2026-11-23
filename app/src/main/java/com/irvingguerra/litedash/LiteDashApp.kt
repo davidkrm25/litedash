@@ -79,6 +79,7 @@ class LiteDashApp : Application() {
         // de velocidad (ningún widget usa el GPS ni hay OBD) no se sabe: se toma como en movimiento.
         music.moving = { (bus.value(Signal.SPEED) ?: Float.MAX_VALUE) > MOVING_KMH }
         val cars = CarRepository(this, BuildConfig.CATALOG_URL)
+        bus.speedScale = { 1f + prefs.speedAdjust.coerceIn(0, 15) / 100f }
         val trip = TripRepository(this, bus)
         Dependencies(
             apps = AppRepository(this).apply { opener = SplitScreen::open },

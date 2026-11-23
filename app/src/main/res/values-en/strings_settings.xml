@@ -27,4 +27,6 @@
     <string name="freeform_width">Window width</string>
     <string name="freeform_dock">Split (fixed)</string>
     <string name="freeform_float">Floating</string>
+    <string name="speed_adjust">Speed adjustment</string>
+    <string name="speed_adjust_help">GPS shows the real speed; a car dashboard reads high. With 7 %, 100 km/h real shows as 107, like your car.</string>
 </resources>

@@ -270,6 +270,13 @@ private fun UnitsSettings(d: Dependencies) {
         prefs.speedUnits,
         { prefs.speedUnits = it },
     )
+    Label(stringResource(R.string.speed_adjust), Typography.label, c.textMuted)
+    Segmented(
+        listOf(0 to "0 %", 3 to "3 %", 5 to "5 %", 7 to "7 %", 10 to "10 %"),
+        prefs.speedAdjust,
+        { prefs.speedAdjust = it },
+    )
+    Label(stringResource(R.string.speed_adjust_help), Typography.small, c.textMuted)
     Label(stringResource(R.string.units_temp), Typography.label, c.textMuted)
     Segmented(
         listOf(

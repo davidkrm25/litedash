@@ -49,6 +49,9 @@ class VehicleBus {
     private val sources = mutableMapOf<String, MutableMap<Source, Float>>()
     private val wantedCounts = mutableStateMapOf<String, Int>()
 
+    /** Cuánto se multiplica la velocidad que llega (los tableros de los autos marcan de más); 1 = sin ajuste. */
+    var speedScale: () -> Float = { 1f }
+
     /** Lo que alguna pieza o pantalla está mostrando ahora mismo. */
     val wanted: Set<String> get() = wantedCounts.keys.toSet()
 
@@ -58,7 +61,9 @@ class VehicleBus {
     fun source(signal: String): Source? = values[signal]?.source
 
     /** [value] null = esa fuente ya no lo sabe (se desconectó o perdió señal). */
-    fun publish(signal: String, value: Float?, source: Source) {
+    fun publish(signal: String, raw: Float?, source: Source) {
+        // La velocidad se ajusta aquí, una sola vez, para que todo lo que la muestre coincida con el tablero del auto.
+        val value = if (signal == Signal.SPEED && raw != null) raw * speedScale() else raw
         val bySource = sources.getOrPut(signal) { mutableMapOf() }
         if (value == null) bySource.remove(source) else bySource[source] = value
         val best = bySource.maxByOrNull { it.key.priority }
