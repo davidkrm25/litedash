@@ -178,6 +178,7 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
     val musicApp = appOf(d.music.preferred) ?: d.apps.firstOf(apps, *MUSIC_PACKAGES)
     val radioApp = appOf(d.music.radioApp) ?: musicApp
     fun open(app: com.irvingguerra.litedash.feature.apps.App?) { app?.let { d.apps.open(context, it) } }
+    var stations by remember { mutableStateOf(false) }
     var radio by remember { mutableStateOf(d.music.radio.song?.playing == true && d.music.song?.playing != true) }
     Box(Modifier.fillMaxSize().background(c.background).padding(10.dp)) {
         Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -192,7 +193,7 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
                 Box(Modifier.weight(1f)) { MiniStat(stringResource(R.string.panel_battery), volts?.let { String.format(java.util.Locale.ROOT, "%.1f V", it) } ?: "--") }
                 Box(Modifier.weight(1.15f)) { MiniStat(stringResource(R.string.dashito_trip_now), trip.distance + " " + trip.unit, String.format(java.util.Locale.ROOT, "%d:%02d h", ms / 3600, ms / 60 % 60)) }
             }
-            Box(Modifier.weight(0.75f)) { FuelTile(d) {} }
+            Box(Modifier.weight(0.75f)) { FuelTile(d) { stations = true } }
             Column(Modifier.weight(2.6f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Segmented(listOf(false to stringResource(R.string.music), true to stringResource(R.string.tile_radio)), radio, { radio = it })
                 Box(Modifier.weight(1f)) {
@@ -200,6 +201,7 @@ private fun PanelContent(d: Dependencies, onBack: () -> Unit) {
                 }
             }
         }
+        if (stations) StationsView(d, apps, onBack = { stations = false }, onPick = { stations = false })
         IconButton(Icons.close, onBack, Modifier.align(Alignment.TopEnd).padding(4.dp), background = c.surfaceHigh)
     }
 }
@@ -246,6 +248,26 @@ private fun MiniStat(name: String, value: String, sub: String? = null) {
             com.irvingguerra.litedash.core.ui.Label(name, com.irvingguerra.litedash.core.ui.Typography.small, c.textMuted, 1)
             com.irvingguerra.litedash.core.ui.Label(value, com.irvingguerra.litedash.core.ui.Typography.title.copy(fontSize = 20.sp), c.text, 1)
             if (sub != null) com.irvingguerra.litedash.core.ui.Label(sub, com.irvingguerra.litedash.core.ui.Typography.small, c.textMuted, 1)
+        }
+    }
+}
+
+/** Las gasolineras cercanas (las mismas de Autonomía) sobre el panel; al tocar una se traza la ruta en la app de mapas. */
+@androidx.compose.runtime.Composable
+private fun StationsView(d: Dependencies, apps: List<com.irvingguerra.litedash.feature.apps.App>, onBack: () -> Unit, onPick: () -> Unit) {
+    val c = LocalColors.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val (granted, askGps) = rememberGpsPermission(d)
+    if (granted) KeepTripRunning(d.trip)
+    androidx.compose.runtime.LaunchedEffect(Unit) { d.fuel.refreshStations() }
+    Column(Modifier.fillMaxSize().background(c.background).padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.padding(end = 54.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            IconButton(Icons.back, onBack, background = c.surfaceHigh, label = stringResource(R.string.fuel_title))
+            com.irvingguerra.litedash.core.ui.Label(stringResource(R.string.fuel_stations), com.irvingguerra.litedash.core.ui.Typography.title, c.text, 1)
+        }
+        StationsCard(d, granted, askGps, Modifier.weight(1f).fillMaxSize()) { s ->
+            goToStation(context, mapApp(d, apps), s)
+            onPick()
         }
     }
 }
