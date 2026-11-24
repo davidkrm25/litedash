@@ -60,7 +60,8 @@ android {
     defaultConfig {
         applicationId = "com.irvingguerra.litedash"
         minSdk = 23
-        ndk { abiFilters += setOf("arm64-v8a") }
+        // -PkalelAbi=armeabi-v7a arma la versión para la caja AutoBox (32 bits); sin él, la de la tableta (64 bits).
+        ndk { abiFilters += setOf(providers.gradleProperty("kalelAbi").getOrElse("arm64-v8a")) }
         targetSdk = 37
         // KalEl Auto: cada APK que entrego sube este número (kalel-build.txt, <99) para que Android lo instale encima del anterior.
         versionCode = versionCodeFrom(appVersionName) + kalelBuild
